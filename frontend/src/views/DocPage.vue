@@ -5,6 +5,7 @@ import Breadcrumb from '../components/Breadcrumb.vue'
 import TiptapRenderer from '../components/TiptapRenderer.vue'
 import TableOfContents from '../components/TableOfContents.vue'
 import { icons } from '../icons'
+import EditPageLink from '../components/EditPageLink.vue'
 
 const props = defineProps({
   category: { type: String, required: true },
@@ -102,6 +103,8 @@ async function copyPage() {
           </button>
         </div>
         <TiptapRenderer :content="page.content" />
+
+        <EditPageLink :href="`https://admin.toms-docs.local/edit/${category}/${slug}`" />
 
         <nav class="pager">
           <router-link v-if="prevPage" :to="`/docs/${prevPage.categorySlug}/${prevPage.slug}`" class="pager-card prev">

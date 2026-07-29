@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useDocsStore } from '../stores/docs'
+import EditPageLink from '../components/EditPageLink.vue'
 
 const props = defineProps({
   category: { type: String, required: true }
@@ -89,6 +90,7 @@ function slugify(text) {
             <span> — {{ page.description }}</span>
           </li>
         </ul>
+        <EditPageLink :href="`https://admin.toms-docs.local/edit-category/${cat.slug}`" />
       </div>
 
       <aside class="toc">
