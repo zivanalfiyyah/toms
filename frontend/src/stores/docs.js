@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { categories, pageContents } from '../data/mockDocs'
+
+const API_URL = import.meta.env.VITE_API_BASE_URL
 
 export const useDocsStore = defineStore('docs', {
   state: () => ({
@@ -11,12 +12,10 @@ export const useDocsStore = defineStore('docs', {
   }),
 
   getters: {
-    // Cari data kategori (termasuk daftar pages-nya) berdasarkan slug
     categoryBySlug: (state) => (slug) => {
       return state.categories.find((c) => c.slug === slug) || null
     },
 
-    // Daftar semua halaman berurutan lintas kategori, dipakai untuk prev/next
     flatPages: (state) => {
       const result = []
       for (const cat of state.categories) {
@@ -29,47 +28,42 @@ export const useDocsStore = defineStore('docs', {
   },
 
   actions: {
-    fetchCategories() {
+    async fetchCategories() {
       this.loading = true
-      this.categories = categories
+      try {
+        const res = await fetch(`${API_URL}/categories`)
+        this.categories = await res.json()
+      } catch (e) {
+        console.error('Gagal mengambil kategori:', e)
+      }
       this.loading = false
     },
 
-    fetchPage(categorySlug, pageSlug) {
+    async fetchPage(categorySlug, pageSlug) {
       this.loading = true
-      const key = `${categorySlug}/${pageSlug}`
-      this.currentPage = pageContents[key] || null
+      try {
+        const res = await fetch(`${API_URL}/docs/${categorySlug}/${pageSlug}`)
+        this.currentPage = res.ok ? await res.json() : null
+      } catch (e) {
+        console.error('Gagal mengambil halaman:', e)
+        this.currentPage = null
+      }
       this.loading = false
     },
 
-    search(query) {
+    async search(query) {
       this.searchQuery = query
       if (!query.trim()) {
         this.searchResults = []
         return
       }
-      const q = query.toLowerCase()
-      const results = []
-      for (const [path, page] of Object.entries(pageContents)) {
-        const plainText = extractText(page.content).toLowerCase()
-        if (page.title.toLowerCase().includes(q) || plainText.includes(q)) {
-          results.push({ path, title: page.title, snippet: makeSnippet(plainText, q) })
-        }
+      try {
+        const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}`)
+        this.searchResults = await res.json()
+      } catch (e) {
+        console.error('Gagal mencari:', e)
+        this.searchResults = []
       }
-      this.searchResults = results
     }
   }
 })
-
-function extractText(node) {
-    if (!node) return ''
-    let text = node.text || ''
-    if (node.content) for (const child of node.content) text += ' ' + extractText(child)
-    return text
-}
-
-function makeSnippet(text, query) {
-    const idx = text.indexOf(query)
-    if (idx === -1) return text.substring(0, 80)
-    return text.substring(Math.max(0, idx - 30), idx + 60)
-}
