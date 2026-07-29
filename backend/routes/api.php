@@ -12,17 +12,17 @@ use App\Http\Controllers\Api\UserController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/search', [SearchController::class, 'index']);
+
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+Route::get('/pages', [PageController::class, 'index']);
+Route::get('/pages/{page}', [PageController::class, 'show']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::get('/search', [SearchController::class, 'index']);
-
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/categories/{category}', [CategoryController::class, 'show']);
-
-    Route::get('/pages', [PageController::class, 'index']);
-    Route::get('/pages/{page}', [PageController::class, 'show']);
 
     Route::middleware('permission:manage-categories')->group(function () {
         Route::post('/categories', [CategoryController::class, 'store']);

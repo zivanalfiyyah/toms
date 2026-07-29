@@ -20,7 +20,7 @@ class PageController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        if (! $request->user()->can('manage-pages')) {
+        if (! $request->user() || ! $request->user()->can('manage-pages')) {
             $query->where('status', 'published');
         }
 

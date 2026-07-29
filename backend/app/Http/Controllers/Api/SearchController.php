@@ -17,7 +17,7 @@ class SearchController extends Controller
         $query = Page::query()
             ->whereFullText(['title', 'content_text'], $validated['q']);
 
-            if (! $request->user()->can('manage-pages')) {
+            if (! $request->user() || ! $request->user()->can('manage-pages')) {
                 $query->where('status', 'published');
             }
 
