@@ -79,7 +79,7 @@ function slugify(text) {
           <span class="sep">/</span>
           <span class="current">{{ cat.slug }}</span>
         </p>
-        <h1>{{ cat.title }}</h1>
+        <h1>{{ cat.name }}</h1>
         <p class="lead">{{ cat.description }}</p>
 
         <h2 class="subbab-title">Subbab</h2>

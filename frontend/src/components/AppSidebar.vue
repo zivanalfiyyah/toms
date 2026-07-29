@@ -79,7 +79,7 @@ const activeCategory = computed(() => {
           @click="$emit('navigate')"
         >
           <span v-html="icons[cat.icon]" class="category-icon"></span>
-          {{ cat.title }}
+          {{ cat.name }}
         </router-link>
       </li>
     </ul>

@@ -41,13 +41,11 @@ export const useDocsStore = defineStore('docs', {
 
     async fetchPage(categorySlug, pageSlug) {
       this.loading = true
-      try {
-        const res = await fetch(`${API_URL}/docs/${categorySlug}/${pageSlug}`)
-        this.currentPage = res.ok ? await res.json() : null
-      } catch (e) {
-        console.error('Gagal mengambil halaman:', e)
-        this.currentPage = null
+      if (!this.categories.length) {
+        await this.fetchCategories()
       }
+      const cat = this.categoryBySlug(categorySlug)
+      this.currentPage = cat?.pages?.find(p => p.slug === pageSlug) || null
       this.loading = false
     },
 
