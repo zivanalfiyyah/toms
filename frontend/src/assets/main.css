@@ -1,0 +1,61 @@
+:root {
+  /* Mode terang (default) */
+  --color-bg: #F4F6FA;
+  --color-surface: #FFFFFF;
+  --color-ink: #11141C;
+  --color-ink-soft: #565E6D;
+  --color-border: #E1E5EC;
+  --color-accent: #2F4FE0;
+  --color-accent-soft: #E8ECFC;
+  --color-code-bg: #12141C;
+  --color-code-text: #D7DCE2;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 10px;
+}
+
+[data-theme='dark'] {
+  --color-bg: #0B0D12;
+  --color-surface: #151822;
+  --color-ink: #E9EBF2;
+  --color-ink-soft: #9AA1B2;
+  --color-border: #262B38;
+  --color-accent: #7C93FF;
+  --color-accent-soft: #1C2440;
+  --color-code-bg: #0A0C12;
+  --color-code-text: #C6CCDA;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+a { color: var(--color-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button { font-family: inherit; }
+
+html, body {
+  overflow-x: clip;
+}
+
+h1, h2, h3, p {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
