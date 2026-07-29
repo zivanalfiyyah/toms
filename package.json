@@ -1,0 +1,16 @@
+{
+    "name": "laravel-vue-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "workspace": [
+        "frontend",
+        "backend"
+    ],
+    "scripts": {
+    "install:all": "npm install && npm install --prefix frontend && composer install --working-dir=backend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "php backend/artisan serve",
+    "dev": "start npm run dev:frontend && npm run dev:backend"
+  }
+
+}
