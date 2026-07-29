@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -16,7 +17,7 @@ class UserController extends Controller
     {
         $users = User::with('roles')->get();
 
-        return response()->json($users);
+        return UserResource::collection($users);
     }
 
     /**
@@ -39,7 +40,7 @@ class UserController extends Controller
 
         $user->assignRole($validated['role']);
 
-        return response()->json($user->load('roles'), 201);
+        return new UserResource($user->load('roles'), 201);
     }
 
     /**
@@ -47,7 +48,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return response()->json($user->load('roles'));
+        return new UserResource($user->load('roles'));
     }
 
     /**
@@ -68,7 +69,7 @@ class UserController extends Controller
 
         $user->syncRoles([$validated['role']]);
 
-        return response()->json($user->load('roles'));
+        return new UserResource($user->load('roles'));
     }
 
     /**

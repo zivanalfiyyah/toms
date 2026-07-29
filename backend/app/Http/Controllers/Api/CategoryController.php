@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Str;
+use App\Http\Resources\CategoryResource;
 
 class CategoryController extends Controller
 {
@@ -19,7 +20,7 @@ class CategoryController extends Controller
             ->orderBy('order')
             ->get();
 
-        return response()->json($categories);
+        return CategoryResource::collection($categories);
     }
 
     /**
@@ -38,7 +39,7 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
-        return response()->json($category, 201);
+        return new CategoryResource($category, 201);
     }
 
     /**
@@ -46,7 +47,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return response()->json($category->load('children', 'pages'));
+        return new CategoryResource($category->load('children', 'pages'));
     }
 
     /**
@@ -64,7 +65,7 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return response()->json($category);
+        return new CategoryResource($category);
     }
 
     /**

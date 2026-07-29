@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Page;
 use Illuminate\Support\Str;
+use App\Http\Resources\PageResource;
 
 class PageController extends Controller
 {
@@ -26,7 +27,7 @@ class PageController extends Controller
 
         $pages = $query->orderBy('order')->get();
 
-        return response()->json($pages);
+        return PageResource::collection($pages);
     }
 
     /**
@@ -49,7 +50,7 @@ class PageController extends Controller
 
         $page = Page::create($validated);
 
-        return response()->json($page, 201);
+        return new PageResource($page, 201);
     }
 
     /**
@@ -57,7 +58,7 @@ class PageController extends Controller
      */
     public function show(Page $page)
     {
-        return response()->json($page->load('category', 'creator', 'updater'));
+        return new PageResource($page->load('category', 'creator', 'updater'));
     }
 
     /**
@@ -85,7 +86,7 @@ class PageController extends Controller
 
         $page->update($validated);
 
-        return response()->json($page);
+        return new PageResource($page->load('category', 'creator', 'updater'));
     }
 
     /**
