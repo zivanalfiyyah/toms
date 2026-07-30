@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Writer\HTML;
+use Illuminate\Support\Facades\Storage;
 
 class ImportController extends Controller
 {
@@ -54,6 +55,7 @@ class ImportController extends Controller
 
             preg_match('/<body[^>]*>(.*?)<\/body>/is', $rawHtml, $matches);
             $bodyHtml = $matches[1] ?? $rawHtml;
+            $bodyHtml = $this->extractAndSaveImages($bodyhtml, $documentImport->id);
 
             $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
 
@@ -129,8 +131,73 @@ class ImportController extends Controller
             ],
             $tag === 'ul' => ['type' => 'bulletList', 'content' => $this->convertListItems($node)],
             $tag === 'ol' => ['type' => 'orderedList', 'content' => $this->convertListItems($node)],
+            $tag === 'table' => $this->convertTable($node),
+            $tag === 'img' => $this->convertImage($node),
             default => null,
         };
+    }
+
+    private function convertTable(\DOMNode $tableNode): array
+    {
+        $rows = [];
+
+        $trNodes = $this->findDescendants($tableNode, 'tr');
+
+        foreach ($trNodes as $tr) {
+            $cells = [];
+            foreach ($tr->childNodes as $cell) {
+                $cellTag = strtolower($cell->nodeName);
+                if (! in_array($cellTag, ['td', 'th'])) {
+                    continue;
+                }
+
+                $cellContent = [];
+                foreach ($cell->childNodes as $child) {
+                    $converted = $this->convertNode($child);
+                    if ($converted) {
+                        $cellContent[] = $converted;
+                    }
+                }
+
+                if (empty($cellContent)) {
+                    $cellContent[] = ['type' => 'paragraph', 'content' => $this->convertInline($cell)];
+                }
+
+                $cells[] = [
+                    'type' => $cellTag === 'th' ? 'tableHeader' : 'tableCell',
+                    'content' => $cellContent,
+                ];
+            }
+
+            if (! empty($cells)) {
+                $rows[] = ['type' => 'tableRow', 'content' => $cells];
+            }
+        }
+
+        return ['type' => 'table', 'content' => $rows];
+    }
+
+    private function convertImage(\DOMNode $imgNode): array
+    {
+        $src = $imgNode->attributes->getNamedItem('src')?->nodeValue ?? '';
+        $alt = $imgNode->attributes->getNamedItem('alt')?->nodeValue ?? '';
+
+        return [
+            'type' => 'image',
+            'attrs' => ['src' => $src, 'alt' => $alt],
+        ];
+    }
+
+    private function findDescendants(\DOMNode $node, string $tagName): array
+    {
+        $results = [];
+        foreach ($node->childNodes as $child) {
+            if (strtolower($child->nodeName) === $tagName) {
+                $results[] = $child;
+            }
+            $results = array_merge($results, $this->findDescendants($child, $tagName));
+        }
+        return $results;
     }
 
     private function convertListItems(\DOMNode $listnode): array
@@ -178,6 +245,28 @@ class ImportController extends Controller
         }
 
         return $result;
+    }
+
+    private function extractAndSaveImages(string $html, int $importId): string
+    {
+        return preg_replace_callback(
+            '/<img[^>]+src="data:(image\/[a-zA-Z]+);base64,([^"]+)"[^>]*>/i',
+            function ($matches) use ($importId) {
+                $mimeType = $macthes[1];
+                $base64Data = $matches[2];
+                $extension = str_replace('image/', '', $mimeType);
+                $extension = $extension === 'jpeg' ? 'jpg' : $extension;
+
+                $filename = 'import/' . $importId . '/' . uniqid('img') . '.' . $extension;
+                Storage::disk('public')->put($filename, base_decode($base64Data));
+
+                $url = Storage::url($filename);
+
+                return '<img src="' . $url . '">';
+
+            },
+            $html
+        );
     }
 
 }

@@ -104,7 +104,7 @@ async function copyPage() {
         </div>
         <TiptapRenderer :content="page.content" />
 
-        <EditPageLink :href="`https://admin.toms-docs.local/edit/${category}/${slug}`" />
+        <EditPageLink :to="`/docs/${category}/${slug}/edit`" />
 
         <nav class="pager">
           <router-link v-if="prevPage" :to="`/docs/${prevPage.categorySlug}/${prevPage.slug}`" class="pager-card prev">
