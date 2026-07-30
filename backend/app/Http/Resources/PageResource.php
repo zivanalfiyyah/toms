@@ -27,6 +27,8 @@ class PageResource extends JsonResource
             'created_by' => $this->creator?->name,
             'updated_by' => $this->updater?->name,
             'category' => new CategoryResource($this->whenLoaded('category')),
+            'parent_id' => $this->parent_id,
+            'children' => PageResource::collection($this->whenLoaded('children')),
         ];
     }
 }

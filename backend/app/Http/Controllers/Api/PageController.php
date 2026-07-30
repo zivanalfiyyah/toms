@@ -15,7 +15,7 @@ class PageController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Page::with('category');
+        $query = Page::with('category', 'children');
 
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
@@ -37,6 +37,7 @@ class PageController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'parent_id' => 'nullable|exists:pages,id',
             'title' => 'required|string|max:255',
             'content' => 'required|array',
             'status' => 'in:draft,published',
@@ -58,7 +59,7 @@ class PageController extends Controller
      */
     public function show(Page $page)
     {
-        return new PageResource($page->load('category', 'creator', 'updater'));
+        return new PageResource($page->load('category', 'creator', 'updater', 'children'));
     }
 
     /**
@@ -68,6 +69,7 @@ class PageController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'sometimes|exists:categories,id',
+            'parent_id' => 'nullable|exists:pages,id',
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|array',
             'status' => 'in:draft,published',
@@ -86,7 +88,7 @@ class PageController extends Controller
 
         $page->update($validated);
 
-        return new PageResource($page->load('category', 'creator', 'updater'));
+        return new PageResource($page->load('category', 'creator', 'updater', 'children'));
     }
 
     /**
