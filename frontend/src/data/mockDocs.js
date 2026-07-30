@@ -3,7 +3,7 @@ export const categories = [
     id: 1,
     title: 'Pengenalan TOMS',
     slug: 'pengenalan-toms',
-    icon: 'rocket',
+    icon: 'book',
     description: 'Fondasi, filosofi, visi, misi, dan ruang lingkup penyelenggaraan TOMS.',
     order: 0,
     pages: [
@@ -15,7 +15,7 @@ export const categories = [
     id: 2,
     title: 'Operasional',
     slug: 'operasional',
-    icon: 'folder',
+    icon: 'settings',
     description: 'Standar kerja operasional harian untuk pramudi dan alur perjalanan.',
     order: 1,
     pages: [
@@ -28,7 +28,7 @@ export const categories = [
     id: 3,
     title: 'Keselamatan',
     slug: 'keselamatan',
-    icon: 'folder',
+    icon: 'shield',
     description: 'Prosedur keselamatan kerja, mitigasi risiko kecelakaan, dan tanggap darurat.',
     order: 2,
     pages: [
@@ -40,7 +40,7 @@ export const categories = [
     id: 4,
     title: 'Pelayanan',
     slug: 'pelayanan',
-    icon: 'folder',
+    icon: 'headphones',
     description: 'Standar kualitas pelayanan, komunikasi pelanggan, dan keramahan pramudi.',
     order: 3,
     pages: [
@@ -51,7 +51,7 @@ export const categories = [
     id: 5,
     title: 'Armada',
     slug: 'armada',
-    icon: 'folder',
+    icon: 'bus',
     description: 'Pemeliharaan, inspeksi kelayakan jalan (KIR), dan manajemen unit.',
     order: 4,
     pages: [
@@ -62,7 +62,7 @@ export const categories = [
     id: 6,
     title: 'Risiko & KPI',
     slug: 'risiko-dan-kpi',
-    icon: 'folder',
+    icon: 'chart',
     description: 'Indikator kinerja utama, evaluasi pengemudi, dan analisis risiko.',
     order: 5,
     pages: [
@@ -73,7 +73,7 @@ export const categories = [
     id: 7,
     title: 'Digital & Evaluasi',
     slug: 'digital-dan-evaluasi',
-    icon: 'folder',
+    icon: 'monitor',
     description: 'Pemanfaatan aplikasi telematika, GPS tracking, dan audit berkala.',
     order: 6,
     pages: [
@@ -84,7 +84,7 @@ export const categories = [
     id: 8,
     title: 'Penutup',
     slug: 'penutup',
-    icon: 'folder',
+    icon: 'checkCircle',
     description: 'Rangkuman akhir dan lembar komitmen implementasi SOP.',
     order: 7,
     pages: [
