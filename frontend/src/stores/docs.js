@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-
-const API_URL = import.meta.env.VITE_API_BASE_URL
+import api from '../api'
 
 export const useDocsStore = defineStore('docs', {
   state: () => ({
@@ -31,8 +30,8 @@ export const useDocsStore = defineStore('docs', {
     async fetchCategories() {
       this.loading = true
       try {
-        const res = await fetch(`${API_URL}/categories`)
-        this.categories = await res.json()
+        const res = await api.get('/categories')
+        this.categories = res.data
       } catch (e) {
         console.error('Gagal mengambil kategori:', e)
       }
@@ -41,11 +40,13 @@ export const useDocsStore = defineStore('docs', {
 
     async fetchPage(categorySlug, pageSlug) {
       this.loading = true
-      if (!this.categories.length) {
-        await this.fetchCategories()
+      try {
+        const res = await api.get(`/docs/${categorySlug}/${pageSlug}`)
+        this.currentPage = res.data
+      } catch (e) {
+        console.error('Gagal mengambil halaman:', e)
+        this.currentPage = null
       }
-      const cat = this.categoryBySlug(categorySlug)
-      this.currentPage = cat?.pages?.find(p => p.slug === pageSlug) || null
       this.loading = false
     },
 
@@ -56,8 +57,8 @@ export const useDocsStore = defineStore('docs', {
         return
       }
       try {
-        const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}`)
-        this.searchResults = await res.json()
+        const res = await api.get('/search', { params: { q: query } })
+        this.searchResults = res.data
       } catch (e) {
         console.error('Gagal mencari:', e)
         this.searchResults = []
