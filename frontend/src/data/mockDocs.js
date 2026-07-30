@@ -1,7 +1,7 @@
 export const categories = [
   {
     id: 1,
-    title: 'Pengenalan TOMS',
+    name: 'Pengenalan TOMS',
     slug: 'pengenalan-toms',
     icon: 'book',
     description: 'Fondasi, filosofi, visi, misi, dan ruang lingkup penyelenggaraan TOMS.',

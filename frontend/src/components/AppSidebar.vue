@@ -86,7 +86,7 @@ const activeCategory = computed(() => {
 
     <template v-if="activeCategory">
       <hr class="divider" />
-      <p class="pages-block-title">{{ activeCategory.title }}</p>
+      <p class="pages-block-title">{{ activeCategory.name }}</p>
       <ul class="page-list">
         <li v-for="page in activeCategory.pages" :key="page.id">
           <router-link

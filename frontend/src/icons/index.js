@@ -19,5 +19,3 @@ export const icons = {
     checkCircle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5"/></svg>`,
 }
 
-// Kumpulan ikon SVG sederhana (outline, stroke-based), dipakai di sidebar & kartu kategori.
-// Tiap fungsi mengembalikan string SVG mentah, dipakai lewat v-html di komponen.
