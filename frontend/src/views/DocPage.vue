@@ -6,26 +6,36 @@ import TiptapRenderer from '../components/TiptapRenderer.vue'
 import TableOfContents from '../components/TableOfContents.vue'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
+import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({
   category: { type: String, required: true },
-  slug: { type: String, required: true }
+  page: { type: [String, Object], required: true }, // PERBAIKAN 1: object -> Object
+  child: { type: String, required: true }
 })
 
 const docsStore = useDocsStore()
-const page = computed(() => docsStore.currentPage)
+const auth = useAuthStore()
+
+// PERBAIKAN 2: Mengambil string slug page secara aman
+const pageSlug = computed(() => {
+  return typeof props.page === 'object' ? props.page.slug : props.page
+})
+
+// Mengubah nama computed artikel agar tidak bentrok dengan prop 'page'
+const docData = computed(() => docsStore.currentPage)
 const copied = ref(false)
 
 function load() {
-  docsStore.fetchPage(props.category, props.slug)
+  docsStore.fetchPage(props.category, pageSlug.value, props.child)
 }
 onMounted(load)
-watch(() => [props.category, props.slug], load)
+watch(() => [props.category, pageSlug.value, props.child], load)
 
-// Cari posisi halaman saat ini di daftar datar semua halaman, lalu ambil tetangga kiri/kanannya.
+// PERBAIKAN 3: Mencari posisi berdasarkan child slug di 3-level flatPages
 const currentIndex = computed(() => {
   return docsStore.flatPages.findIndex(
-    (p) => p.categorySlug === props.category && p.slug === props.slug
+    (p) => p.categorySlug === props.category && p.pageSlug === pageSlug.value && p.slug === props.child
   )
 })
 const prevPage = computed(() => {
@@ -46,13 +56,64 @@ function extractText(node) {
 }
 
 async function copyPage() {
-  if (!page.value) return
-  const text = `${page.value.title}\n\n${extractText(page.value.content)}`
+  if (!docData.value) return
+  const text = `${docData.value.title}\n\n${extractText(docData.value.content)}`
   await navigator.clipboard.writeText(text)
   copied.value = true
   setTimeout(() => (copied.value = false), 1500)
 }
 </script>
+
+<template>
+  <div class="doc-page">
+    <div class="doc-content">
+      <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
+      <div v-else-if="docsStore.loading">Memuat...</div>
+      <template v-else-if="docData">
+        <!-- PERBAIKAN 5: Kirim string slug bersih ke Breadcrumb -->
+        <Breadcrumb :segments="[category, pageSlug, child]" />
+        
+        <div class="title-row">
+          <h1>{{ docData.title }}</h1>
+          <button class="copy-btn" @click="copyPage">
+            <span v-html="copied ? icons.check : icons.copy"></span>
+            {{ copied ? 'Tersalin' : 'Salin Halaman' }}
+          </button>
+        </div>
+        
+        <TiptapRenderer :content="docData.content" />
+
+        <!-- EditPageLink dengan URL 3-level, hanya untuk yang punya hak edit -->
+        <EditPageLink v-if="auth.canEdit" :to="`/docs/${category}/${pageSlug}/${child}/edit`" />
+
+        <!-- PERBAIKAN 4: Pager Navigasi dengan URL 3-level -->
+        <nav class="pager">
+          <router-link 
+            v-if="prevPage" 
+            :to="`/docs/${prevPage.categorySlug}/${prevPage.pageSlug}/${prevPage.slug}`" 
+            class="pager-card prev"
+          >
+            <span class="pager-label">&larr; Sebelumnya</span>
+            <span class="pager-title">{{ prevPage.title }}</span>
+          </router-link>
+          <span v-else></span>
+
+          <router-link 
+            v-if="nextPage" 
+            :to="`/docs/${nextPage.categorySlug}/${nextPage.pageSlug}/${nextPage.slug}`" 
+            class="pager-card next"
+          >
+            <span class="pager-label">Selanjutnya &rarr;</span>
+            <span class="pager-title">{{ nextPage.title }}</span>
+          </router-link>
+        </nav>
+      </template>
+      <p v-else>Halaman tidak ditemukan.</p>
+    </div>
+
+    <TableOfContents v-if="docData" :content="docData.content" />
+  </div>
+</template>
 
 <style scoped>
 .doc-page { display: flex; gap: 2rem; }
@@ -87,41 +148,12 @@ async function copyPage() {
 .pager-card.next { text-align: right; align-items: flex-end; }
 .pager-label { font-size: 0.75rem; color: var(--color-ink-soft); }
 .pager-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
+
+.fetch-error {
+  padding: 1rem 1.2rem;
+  border: 1px solid #d33;
+  border-radius: var(--radius);
+  color: #d33;
+  background: rgba(211, 51, 51, 0.06);
+}
 </style>
-
-<template>
-  <div class="doc-page">
-    <div class="doc-content">
-      <div v-if="docsStore.loading">Memuat...</div>
-      <template v-else-if="page">
-        <Breadcrumb :segments="[category, slug]" />
-        <div class="title-row">
-          <h1>{{ page.title }}</h1>
-          <button class="copy-btn" @click="copyPage">
-            <span v-html="copied ? icons.check : icons.copy"></span>
-            {{ copied ? 'Tersalin' : 'Salin Halaman' }}
-          </button>
-        </div>
-        <TiptapRenderer :content="page.content" />
-
-        <EditPageLink :to="`/docs/${category}/${slug}/edit`" />
-
-        <nav class="pager">
-          <router-link v-if="prevPage" :to="`/docs/${prevPage.categorySlug}/${prevPage.slug}`" class="pager-card prev">
-            <span class="pager-label">&larr; Sebelumnya</span>
-            <span class="pager-title">{{ prevPage.title }}</span>
-          </router-link>
-          <span v-else></span>
-
-          <router-link v-if="nextPage" :to="`/docs/${nextPage.categorySlug}/${nextPage.slug}`" class="pager-card next">
-            <span class="pager-label">Selanjutnya &rarr;</span>
-            <span class="pager-title">{{ nextPage.title }}</span>
-          </router-link>
-        </nav>
-      </template>
-      <p v-else>Halaman tidak ditemukan.</p>
-    </div>
-
-    <TableOfContents v-if="page" :content="page.content" />
-  </div>
-</template>

@@ -65,6 +65,16 @@ function goToFirstPage() {
 .card-icon :deep(svg) { width: 100%; height: 100%; }
 .card-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
 .card-desc { font-size: 0.85rem; color: var(--color-ink-soft); }
+
+.fetch-error {
+  max-width: 620px;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid #d33;
+  border-radius: var(--radius);
+  color: #d33;
+  background: rgba(211, 51, 51, 0.06);
+}
 </style>
 
 <template>
@@ -77,6 +87,8 @@ function goToFirstPage() {
       </p>
       <button class="cta" @click="goToFirstPage">Mulai Membaca</button>
     </section>
+
+    <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
 
     <div class="grid">
       <router-link

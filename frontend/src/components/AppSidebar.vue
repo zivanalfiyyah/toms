@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
 import { icons } from '../icons'
@@ -17,7 +17,97 @@ const activeCategory = computed(() => {
   const slug = route.params.category
   return docsStore.categories.find((c) => c.slug === slug) || null
 })
+
+// Halaman (page) yang sedang aktif, dipakai untuk auto-expand subbab-nya.
+const activePage = computed(() => {
+  const pageSlug = route.params.page
+  return activeCategory.value?.pages?.find((p) => p.slug === pageSlug) || null
+})
+
+// Menyimpan id page mana saja yang dropdown-nya sedang terbuka.
+const expandedPages = reactive(new Set())
+
+function isExpanded(page) {
+  return expandedPages.has(page.id)
+}
+function toggleExpand(page) {
+  if (expandedPages.has(page.id)) expandedPages.delete(page.id)
+  else expandedPages.add(page.id)
+}
+
+// Otomatis buka dropdown untuk page yang sedang dibuka lewat URL.
+watch(
+  activePage,
+  (page) => {
+    if (page) expandedPages.add(page.id)
+  },
+  { immediate: true }
+)
 </script>
+
+<template>
+  <aside class="sidebar">
+    <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
+    <ul class="category-nav">
+      <li v-for="cat in docsStore.categories" :key="cat.id">
+        <router-link
+          :to="`/docs/${cat.slug}`"
+          class="category-link"
+          :class="{ 'is-active': activeCategory?.id === cat.id }"
+          @click="$emit('navigate')"
+        >
+          <!-- Menggunakan safe check agar icon tidak bikin crash kalau key missing -->
+          <span v-if="icons[cat.icon]" v-html="icons[cat.icon]" class="category-icon"></span>
+          <!-- FIXED: cat.title (sebelumnya cat.name) -->
+          {{ cat.title }}
+        </router-link>
+      </li>
+    </ul>
+
+    <template v-if="activeCategory">
+      <hr class="divider" />
+      <!-- FIXED: activeCategory.title (sebelumnya activeCategory.name) -->
+      <p class="pages-block-title">{{ activeCategory.title }}</p>
+      <ul class="page-list">
+        <li v-for="page in activeCategory.pages" :key="page.id" class="page-item">
+          <div class="page-row">
+            <router-link
+              :to="`/docs/${activeCategory.slug}/${page.slug}`"
+              class="link"
+              active-class="is-active"
+              @click="$emit('navigate')"
+            >
+              {{ page.title }}
+            </router-link>
+            <button
+              v-if="page.children?.length"
+              type="button"
+              class="toggle-btn"
+              :class="{ 'is-expanded': isExpanded(page) }"
+              :aria-expanded="isExpanded(page)"
+              :aria-label="isExpanded(page) ? 'Tutup subbab' : 'Buka subbab'"
+              @click="toggleExpand(page)"
+            >
+              <span v-html="icons.chevron"></span>
+            </button>
+          </div>
+          <ul v-if="page.children?.length && isExpanded(page)" class="child-list">
+            <li v-for="child in page.children" :key="child.id">
+              <router-link
+                :to="`/docs/${activeCategory.slug}/${page.slug}/${child.slug}`"
+                class="child-link"
+                active-class="is-active"
+                @click="$emit('navigate')"
+              >
+                {{ child.title }}
+              </router-link>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </template>
+  </aside>
+</template>
 
 <style scoped>
 .sidebar {
@@ -52,11 +142,35 @@ const activeCategory = computed(() => {
   padding: 0 0.5rem;
 }
 .page-list { list-style: none; margin: 0; padding: 0; }
-.link { display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: var(--radius); color: var(--color-ink); font-size: 0.83rem; }
+.page-item { margin-bottom: 0.1rem; }
+.page-row { display: flex; align-items: center; }
+.link { display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: var(--radius); color: var(--color-ink); font-size: 0.83rem; flex: 1; min-width: 0; }
 .link:hover { background: var(--color-accent-soft); text-decoration: none; }
 .link.is-active {
   background: var(--color-accent-soft); color: var(--color-accent); font-weight: 600;
   border-left: 3px solid var(--color-accent); padding-left: calc(1.2rem - 3px);
+}
+
+.toggle-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex-shrink: 0;
+  background: none; border: none; cursor: pointer;
+  color: var(--color-ink-soft); border-radius: var(--radius);
+}
+.toggle-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); }
+.toggle-btn span { width: 12px; height: 12px; display: block; transition: transform 0.15s ease; }
+.toggle-btn :deep(svg) { width: 100%; height: 100%; }
+.toggle-btn.is-expanded span { transform: rotate(90deg); }
+
+.child-list { list-style: none; margin: 0.1rem 0 0.3rem; padding: 0; }
+.child-link {
+  display: block; padding: 0.32rem 0.6rem 0.32rem 2.1rem;
+  border-radius: var(--radius); color: var(--color-ink-soft); font-size: 0.78rem;
+}
+.child-link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
+.child-link.is-active {
+  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 600;
+  border-left: 3px solid var(--color-accent); padding-left: calc(2.1rem - 3px);
 }
 
 @media (max-width: 860px) {
@@ -66,39 +180,14 @@ const activeCategory = computed(() => {
   }
   .sidebar.is-open { transform: translateX(0); }
 }
+
+.fetch-error {
+  margin: 0.5rem 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #d33;
+  border-radius: var(--radius);
+  color: #d33;
+  font-size: 0.8rem;
+  background: rgba(211, 51, 51, 0.06);
+}
 </style>
-
-<template>
-  <aside class="sidebar">
-    <ul class="category-nav">
-      <li v-for="cat in docsStore.categories" :key="cat.id">
-        <router-link
-          :to="`/docs/${cat.slug}`"
-          class="category-link"
-          :class="{ 'is-active': activeCategory?.id === cat.id }"
-          @click="$emit('navigate')"
-        >
-          <span v-html="icons[cat.icon]" class="category-icon"></span>
-          {{ cat.name }}
-        </router-link>
-      </li>
-    </ul>
-
-    <template v-if="activeCategory">
-      <hr class="divider" />
-      <p class="pages-block-title">{{ activeCategory.name }}</p>
-      <ul class="page-list">
-        <li v-for="page in activeCategory.pages" :key="page.id">
-          <router-link
-            :to="`/docs/${activeCategory.slug}/${page.slug}`"
-            class="link"
-            active-class="is-active"
-            @click="$emit('navigate')"
-          >
-            {{ page.title }}
-          </router-link>
-        </li>
-      </ul>
-    </template>
-  </aside>
-</template>

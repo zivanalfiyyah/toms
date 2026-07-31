@@ -1,491 +1,397 @@
 export const categories = [
   {
     id: 1,
-    name: 'Pengenalan TOMS',
+    title: 'Pengenalan TOMS',
     slug: 'pengenalan-toms',
     icon: 'book',
-    description: 'Fondasi, filosofi, visi, misi, dan ruang lingkup penyelenggaraan TOMS.',
+    description: 'Fondasi, filosofi, visi, misi...',
     order: 0,
     pages: [
-      { id: 101, title: 'Filosofi TOMS', slug: 'filosofi-toms', description: 'Prinsip dasar Transport Operational Management System sebagai pedoman operasional terpadu.' },
-      { id: 102, title: 'Visi, Misi, dan Ruang Lingkup', slug: 'visi-misi-dan-ruang-lingkup', description: 'Tujuan penyelenggaraan, ruang lingkup, dan keluaran utama dokumen TOMS.' }
+      {
+        id: 101,
+        title: 'Filosofi TOMS',
+        slug: 'filosofi-toms',
+        description: 'Prinsip dasar TOMS...',
+        children: [
+          { id: 1011, title: 'Prinsip Dasar', slug: 'prinsip-dasar', description: 'Prinsip dasar operasional TOMS' },
+          { id: 1012, title: 'Nilai-Nilai TOMS', slug: 'nilai-nilai-toms', description: 'Nilai utama yang diusung TOMS' }
+        ]
+      },
+      {
+        id: 102,
+        title: 'Visi & Misi',
+        slug: 'visi-misi',
+        description: 'Arah dan tujuan jangka panjang TOMS',
+        children: [
+          { id: 1021, title: 'Visi TOMS', slug: 'visi-toms', description: 'Gambaran besar tujuan TOMS' },
+          { id: 1022, title: 'Misi TOMS', slug: 'misi-toms', description: 'Langkah-langkah mencapai visi' }
+        ]
+      },
+      {
+        id: 103,
+        title: 'Struktur Organisasi',
+        slug: 'struktur-organisasi',
+        description: 'Susunan tim dan tanggung jawab di TOMS',
+        children: [
+          { id: 1031, title: 'Manajemen Puncak', slug: 'manajemen-puncak', description: 'Peran dan tanggung jawab level manajemen' },
+          { id: 1032, title: 'Tim Operasional', slug: 'tim-operasional', description: 'Peran tim yang menjalankan operasional harian' }
+        ]
+      }
     ]
   },
   {
     id: 2,
-    title: 'Operasional',
-    slug: 'operasional',
-    icon: 'settings',
-    description: 'Standar kerja operasional harian untuk pramudi dan alur perjalanan.',
+    title: 'Panduan Operasional',
+    slug: 'panduan-operasional',
+    icon: 'compass',
+    description: 'Panduan penggunaan fitur dasar dan alur sistem',
     order: 1,
     pages: [
-      { id: 201, title: 'Standar Operasional Pramudi', slug: 'standar-operasional-pramudi', description: 'Alur kerja pramudi dari persiapan, keberangkatan, perjalanan, darurat, sampai penutupan operasi.' },
-      { id: 202, title: 'Alur Pelayanan Operasional', slug: 'alur-pelayanan-operasional', description: 'Tahapan pelayanan pelanggan dan koordinasi perjalanan dari outlet sampai post-service.' },
-      { id: 203, title: 'Panduan Pengoperasian Kendaraan', slug: 'panduan-pengoperasian-kendaraan', description: 'Ketentuan pengoperasian kendaraan, larangan, dan output yang diharapkan.' }
+      {
+        id: 201,
+        title: 'Manajemen Pengiriman',
+        slug: 'manajemen-pengiriman',
+        description: 'Pengelolaan resi dan data kurir',
+        children: [
+          { id: 2011, title: 'Input Resi', slug: 'input-resi', description: 'Cara membuat resi baru' },
+          { id: 2012, title: 'Lacak Pengiriman', slug: 'lacak-pengiriman', description: 'Status lacak posisi barang' },
+          { id: 2013, title: 'Update Status Pengiriman', slug: 'update-status-pengiriman', description: 'Mengubah status resi secara manual' }
+        ]
+      },
+      {
+        id: 202,
+        title: 'Manajemen Gudang',
+        slug: 'manajemen-gudang',
+        description: 'Pengelolaan stok dan mutasi barang di gudang',
+        children: [
+          { id: 2021, title: 'Input Stok Barang', slug: 'input-stok-barang', description: 'Cara mencatat stok barang masuk' },
+          { id: 2022, title: 'Mutasi Gudang', slug: 'mutasi-gudang', description: 'Memindahkan stok antar gudang' }
+        ]
+      },
+      {
+        id: 203,
+        title: 'Manajemen Pengguna',
+        slug: 'manajemen-pengguna',
+        description: 'Pengelolaan akun dan hak akses pengguna',
+        children: [
+          { id: 2031, title: 'Tambah Pengguna', slug: 'tambah-pengguna', description: 'Cara menambahkan akun pengguna baru' },
+          { id: 2032, title: 'Atur Hak Akses', slug: 'atur-hak-akses', description: 'Mengatur peran dan izin pengguna' }
+        ]
+      }
     ]
   },
   {
     id: 3,
-    title: 'Keselamatan',
-    slug: 'keselamatan',
-    icon: 'shield',
-    description: 'Prosedur keselamatan kerja, mitigasi risiko kecelakaan, dan tanggap darurat.',
+    title: 'Integrasi API',
+    slug: 'integrasi-api',
+    icon: 'code',
+    description: 'Dokumentasi teknis API dan Payment Gateway',
     order: 2,
     pages: [
-      { id: 301, title: 'Standar Keselamatan Kerja', slug: 'standar-keselamatan-kerja', description: 'Pedoman norma K3 dan proteksi pengemudi serta penumpang.' },
-      { id: 302, title: 'Prosedur Tanggap Darurat', slug: 'prosedur-tanggap-darurat', description: 'Penanganan insiden, kecelakaan jalan, dan insiden teknis darurat.' }
-    ]
-  },
-  {
-    id: 4,
-    title: 'Pelayanan',
-    slug: 'pelayanan',
-    icon: 'headphones',
-    description: 'Standar kualitas pelayanan, komunikasi pelanggan, dan keramahan pramudi.',
-    order: 3,
-    pages: [
-      { id: 401, title: 'Standar Service Excellence', slug: 'standar-service-excellence', description: 'Sikap, penampilan, dan etika komunikasi dengan penumpang.' }
-    ]
-  },
-  {
-    id: 5,
-    title: 'Armada',
-    slug: 'armada',
-    icon: 'bus',
-    description: 'Pemeliharaan, inspeksi kelayakan jalan (KIR), dan manajemen unit.',
-    order: 4,
-    pages: [
-      { id: 501, title: 'Inspeksi Kesiapan Armada', slug: 'inspeksi-kesiapan-armada', description: 'Pemeriksaan harian P2K sebelum kendaraan diizinkan keluar pool.' }
-    ]
-  },
-  {
-    id: 6,
-    title: 'Risiko & KPI',
-    slug: 'risiko-dan-kpi',
-    icon: 'chart',
-    description: 'Indikator kinerja utama, evaluasi pengemudi, dan analisis risiko.',
-    order: 5,
-    pages: [
-      { id: 601, title: 'Matriks KPI Pramudi', slug: 'matriks-kpi-pramudi', description: 'Penilaian kinerja harian dan bulanan berbasis indikator keselamatan.' }
-    ]
-  },
-  {
-    id: 7,
-    title: 'Digital & Evaluasi',
-    slug: 'digital-dan-evaluasi',
-    icon: 'monitor',
-    description: 'Pemanfaatan aplikasi telematika, GPS tracking, dan audit berkala.',
-    order: 6,
-    pages: [
-      { id: 701, title: 'Integrasi Telematika GPS', slug: 'integrasi-telematika-gps', description: 'Monitoring kecerdasan buatan untuk mengawasi perilaku berkendara.' }
-    ]
-  },
-  {
-    id: 8,
-    title: 'Penutup',
-    slug: 'penutup',
-    icon: 'checkCircle',
-    description: 'Rangkuman akhir dan lembar komitmen implementasi SOP.',
-    order: 7,
-    pages: [
-      { id: 801, title: 'Komitmen & Penutup', slug: 'komitmen-dan-penutup', description: 'Pernyataan komitmen bersama seluruh jajaran manajemen dan pramudi.' }
+      {
+        id: 301,
+        title: 'Payment Gateway',
+        slug: 'payment-gateway',
+        description: 'Konfigurasi transaksi dan webhook',
+        children: [
+          { id: 3011, title: 'Metode Pembayaran', slug: 'metode-pembayaran', description: 'Setup integrasi pembayaran' },
+          { id: 3012, title: 'Webhook Notifikasi', slug: 'webhook-notifikasi', description: 'Menerima notifikasi status transaksi' }
+        ]
+      },
+      {
+        id: 302,
+        title: 'API Autentikasi',
+        slug: 'api-autentikasi',
+        description: 'Pengelolaan akses dan keamanan API',
+        children: [
+          { id: 3021, title: 'Generate API Key', slug: 'generate-api-key', description: 'Cara membuat API key baru' },
+          { id: 3022, title: 'Refresh Token', slug: 'refresh-token', description: 'Memperbarui token akses yang kedaluwarsa' }
+        ]
+      },
+      {
+        id: 303,
+        title: 'Webhook Umum',
+        slug: 'webhook-umum',
+        description: 'Standar format dan keamanan webhook',
+        children: [
+          { id: 3031, title: 'Format Payload', slug: 'format-payload', description: 'Struktur data yang dikirim webhook' },
+          { id: 3032, title: 'Verifikasi Signature', slug: 'verifikasi-signature', description: 'Cara memvalidasi keaslian webhook' }
+        ]
+      }
     ]
   }
-]
+];
 
 export const pageContents = {
-  // ── BAB 1: PENGENALAN TOMS ──
-  'pengenalan-toms/filosofi-toms': {
-    title: 'Filosofi TOMS',
-    description: 'Prinsip dasar Transport Operational Management System sebagai pedoman operasional terpadu.',
+  'pengenalan-toms/filosofi-toms/prinsip-dasar': {
+    title: 'Prinsip Dasar',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'THE PHILOSOPHY OF TOMS' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'BUILDING TRUST THROUGH SAFE, SMART, AND SUSTAINABLE MOBILITY' }]
-        },
-        {
-          type: 'paragraph',
-          content: [
-            { type: 'text', text: 'TOMS (' },
-            { type: 'text', marks: [{ type: 'bold' }], text: 'Transportation Operational Management System' },
-            { type: 'text', text: ') dibangun atas keyakinan bahwa bisnis transportasi bukan sekadar memindahkan penumpang dari satu tempat ke tempat lain. Transportasi adalah ' },
-            { type: 'text', marks: [{ type: 'bold' }], text: 'bisnis kepercayaan (Transport is Trust)' },
-            { type: 'text', text: '). Setiap perjalanan adalah amanah, sehingga Safety is Our Promise menjadi komitmen utama dalam setiap keputusan, proses, dan tindakan.' }
-          ]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'VISI TOMS' }]
-        },
-        {
-          type: 'blockquote',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  marks: [{ type: 'bold' }],
-                  text: 'Menjadi kerangka kerja (framework) manajemen transportasi yang terpercaya, adaptif, dan berstandar internasional dalam membangun organisasi transportasi yang aman, profesional, serta berorientasi pada pelanggan.'
-                }
-              ]
-            }
-          ]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'TOMS (Tracking & Operations Management System) dibangun di atas beberapa prinsip dasar yang menjadi acuan dalam setiap pengambilan keputusan operasional, mulai dari pengelolaan pengiriman hingga integrasi pembayaran.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Transparansi Proses' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap perubahan status—baik pengiriman, stok, maupun transaksi—harus dapat ditelusuri kembali (' }, { type: 'text', text: 'traceable', marks: [{ type: 'italic' }] }, { type: 'text', text: ') oleh tim terkait maupun pelanggan.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Efisiensi Operasional' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Alur kerja dirancang agar setiap tim dapat menyelesaikan tugas dengan langkah seminimal mungkin. Beberapa penerapannya:' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Otomatisasi notifikasi status pengiriman' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Sinkronisasi stok real-time antar gudang' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Rekonsiliasi pembayaran otomatis lewat webhook' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Prinsip ini berlaku untuk seluruh modul TOMS, termasuk saat menambahkan fitur baru di masa depan.' }] }] }
       ]
     }
   },
-
-  'pengenalan-toms/visi-misi-dan-ruang-lingkup': {
-    title: 'Visi, Misi, dan Ruang Lingkup',
-    description: 'Tujuan penyelenggaraan, ruang lingkup, dan keluaran utama dokumen TOMS.',
+  'pengenalan-toms/filosofi-toms/nilai-nilai-toms': {
+    title: 'Nilai-Nilai TOMS',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'MAKSUD DAN TUJUAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Menetapkan acuan baku penyelenggaraan operasional transportasi yang terstandarisasi untuk menjamin keselamatan penumpang, pengemudi, dan pengguna jalan lainnya.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'MISI UTAMA' }]
-        },
-        {
-          type: 'orderedList',
-          content: [
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Membangun standar operasional yang konsisten di seluruh unit armada.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menjamin keselamatan penumpang dan pengemudi sebagai prioritas tak tergantikan.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Mendorong adopsi teknologi telematika untuk efisiensi dan transparansi operasional.' }] }]}
-          ]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'RUANG LINGKUP SISTEM' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Dokumen TOMS mencakup seluruh aspek operasional: kesiapan armada, prosedur keselamatan, standar pelayanan pramudi, pemantauan GPS, hingga evaluasi risiko dan KPI operasional.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Nilai-nilai berikut menjadi budaya kerja tim yang membangun dan mengoperasikan TOMS sehari-hari.' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Akurasi Data', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — data pengiriman dan stok harus selalu mencerminkan kondisi aktual di lapangan.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kecepatan Respons', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — kendala operasional ditangani secepat mungkin agar tidak berdampak ke pelanggan.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kolaborasi Lintas Tim', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — tim gudang, kurir, dan teknis bekerja dari satu sumber data yang sama.' }] }] }
+        ]},
+        { type: 'paragraph', content: [{ type: 'text', text: 'Nilai-nilai ini yang mendasari desain fitur seperti pelacakan pengiriman real-time dan manajemen hak akses berjenjang.' }] }
       ]
     }
   },
-
-  // ── BAB 2: OPERASIONAL ──
-  'operasional/standar-operasional-pramudi': {
-    title: 'Standar Operasional Pramudi',
-    description: 'Alur kerja pramudi dari persiapan, keberangkatan, perjalanan, darurat, sampai penutupan operasi.',
+  'pengenalan-toms/visi-misi/visi-toms': {
+    title: 'Visi TOMS',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'MAKSUD DAN TUJUAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Menetapkan standar operasional bagi pramudi dalam menjalankan tugasnya guna memastikan keselamatan, kenyamanan, serta kualitas layanan transportasi yang konsisten dan profesional.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'RUANG LINGKUP' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Pedoman ini mencakup seluruh tahapan aktivitas pramudi mulai dari persiapan sebelum bertugas hingga penutupan jam operasional.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'PERAN PRAMUDI' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Pramudi bertanggung jawab atas aspek teknis kendaraan, keselamatan penumpang, serta representasi citra positif perusahaan di jalan raya.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'STANDAR OPERASIONAL KERJA' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'PERSIAPAN SEBELUM KEBERANGKATAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Pramudi wajib melakukan pemeriksaan kondisi fisik mandiri, memastikan kelengkapan seragam dan atribut resmi, serta melakukan inspeksi P2K kendaraan.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'PROSES KEBERANGKATAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Memastikan manifes penumpang sesuai, menyapa penumpang dengan ramah, dan memastikan seluruh sabuk pengaman telah terpasang.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'PELAKSANAAN PERJALANAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Mengemudikan armada dengan prinsip Defensive Driving, mematuhi rambu lalu lintas, dan menjaga jarak aman antar kendaraan.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'PENANGANAN KONDISI DARURAT' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Jika terjadi kendala teknis atau kecelakaan, prioritaskan keselamatan penumpang, pasang segitiga pengaman, dan hubungi OCC.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'PROSES TIBA & SERAH TERIMA' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Memeriksa barang penumpang yang tertinggal dan memarkirkan armada di area yang telah ditentukan.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 3 },
-          content: [{ type: 'text', text: 'SETELAH OPERASIONAL SELESAI' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Mengisi buku laporan harian, mengunci kendaraan, dan menyerahkan kunci ke pengelola pool.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'STANDAR PERILAKU DAN ETIKA' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Menjaga tutur kata yang sopan, tidak mudah terpancing emosi oleh pengguna jalan lain, dan mengutamakan pelayanan prima.' }]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'LARANGAN' }]
-        },
-        {
-          type: 'orderedList',
-          content: [
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dilarang menggunakan ponsel saat menyetir.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dilarang merokok di dalam kabin kendaraan.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dilarang berkendara dalam kondisi mengantuk atau di bawah pengaruh obat.' }] }]}
-          ]
-        },
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'PENGAWASAN & EVALUASI' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Pramudi akan dievaluasi secara periodik berdasarkan pencatatan telematika GPS dan umpan balik penumpang.' }]
-        }
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Visi' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Menjadi sistem manajemen operasional dan pengiriman yang menjadi tulang punggung bisnis logistik skala kecil hingga menengah di Indonesia.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Visi ini diterjemahkan menjadi fokus pengembangan pada tiga area utama: kemudahan integrasi, keandalan sistem, dan kejelasan data bagi pengguna akhir.' }] }
       ]
     }
   },
-
-  'operasional/alur-pelayanan-operasional': {
-    title: 'Alur Pelayanan Operasional',
-    description: 'Tahapan pelayanan pelanggan dan koordinasi perjalanan dari outlet sampai post-service.',
+  'pengenalan-toms/visi-misi/misi-toms': {
+    title: 'Misi TOMS',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'TAHAPAN PELAYANAN' }]
-        },
-        {
-          type: 'orderedList',
-          content: [
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pre-Service: Kesiapan armada dan verifikasi tiket/manifes.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'In-Service: Penanganan bagasi, pengondisian kabin, dan pengantaran.' }] }] },
-            { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Post-Service: Pemeriksaan barang tertinggal dan pemberian feedback.' }] }]}
-          ]
-        }
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Misi' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyederhanakan proses input dan pelacakan pengiriman bagi tim operasional.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyediakan integrasi API yang mudah dipasang oleh tim teknis internal maupun mitra.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menjaga akurasi data stok dan transaksi lintas gudang dan kanal pembayaran.' }] }] }
+        ]}
       ]
     }
   },
-
-  'operasional/panduan-pengoperasian-kendaraan': {
-    title: 'Panduan Pengoperasian Kendaraan',
-    description: 'Ketentuan pengoperasian kendaraan, larangan, dan output yang diharapkan.',
+  'pengenalan-toms/struktur-organisasi/manajemen-puncak': {
+    title: 'Manajemen Puncak',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'PEDOMAN UMUM KENDARAAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Setiap pengemudi wajib memahami karakteristik kendaraan yang dioperasikan, termasuk batas muatan maksimum dan sistem keselamatan elektronik.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Manajemen puncak bertanggung jawab menetapkan arah strategis penggunaan TOMS di seluruh unit bisnis.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Tanggung Jawab Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyetujui kebijakan hak akses lintas divisi' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Meninjau laporan performa operasional bulanan' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menentukan prioritas pengembangan fitur baru' }] }] }
+        ]}
       ]
     }
   },
-
-  'keselamatan/standar-keselamatan-kerja': {
-    title: 'Standar Keselamatan Kerja',
-    description: 'Pedoman norma K3 dan proteksi pengemudi serta penumpang.',
+  'pengenalan-toms/struktur-organisasi/tim-operasional': {
+    title: 'Tim Operasional',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'PRINSIP UTAMA K3' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Menerapkan budaya keselamatan kerja dengan menyediakan APD baku dan lingkungan kerja yang ergonomis bagi pramudi.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Tim operasional adalah pengguna harian TOMS yang berinteraksi langsung dengan modul pengiriman, gudang, dan pengguna.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Pembagian Peran' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Gudang — mengelola stok dan mutasi barang.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Pengiriman — menginput resi dan memantau status kurir.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Support — menindaklanjuti kendala pelanggan terkait pesanan.' }] }] }
+        ]}
       ]
     }
   },
-
-  'keselamatan/prosedur-tanggap-darurat': {
-    title: 'Prosedur Tanggap Darurat',
-    description: 'Penanganan insiden, kecelakaan jalan, dan insiden teknis darurat.',
+  'panduan-operasional/manajemen-pengiriman/input-resi': {
+    title: 'Input Resi',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'ALUR ESKALASI DARURAT' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Langkah taktis yang wajib diambil ketika terjadi kecelakaan lalu lintas atau keadaaan darurat medis di perjalanan.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Halaman ini menjelaskan langkah membuat resi pengiriman baru di TOMS.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Manajemen Pengiriman, lalu klik tombol Buat Resi Baru.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Isi data penerima, alamat, dan pilih jasa kurir.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Klik Simpan — sistem akan otomatis membuat nomor resi.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Nomor resi yang sudah dibuat tidak dapat diubah, hanya dapat dibatalkan lalu dibuat ulang.' }] }] }
       ]
     }
   },
-
-  'pelayanan/standar-service-excellence': {
-    title: 'Standar Service Excellence',
-    description: 'Sikap, penampilan, dan etika komunikasi dengan penumpang.',
+  'panduan-operasional/manajemen-pengiriman/lacak-pengiriman': {
+    title: 'Lacak Pengiriman',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: '5 PILLAR SERVICE EXCELLENCE' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Senyum, Salam, Sapa, Sopan, dan Sigap dalam melayani seluruh penumpang TOMS.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Fitur pelacakan menampilkan posisi dan status terkini dari setiap resi yang aktif.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Status Pengiriman' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diproses — resi baru dibuat, menunggu diambil kurir.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dalam Perjalanan — paket sedang menuju alamat tujuan.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Terkirim — paket telah diterima penerima.' }] }] }
+        ]}
       ]
     }
   },
-
-  'armada/inspeksi-kesiapan-armada': {
-    title: 'Inspeksi Kesiapan Armada',
-    description: 'Pemeriksaan harian P2K sebelum kendaraan diizinkan keluar pool.',
+  'panduan-operasional/manajemen-pengiriman/update-status-pengiriman': {
+    title: 'Update Status Pengiriman',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'CHECKLIST INSPEKSI HARIAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Pemeriksaan mesin, tekanan angin ban, sistem rem, APAR, dan kebersihan kabin kendaraan.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Status pengiriman umumnya diperbarui otomatis lewat integrasi kurir, namun admin juga dapat mengubahnya secara manual bila diperlukan.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Kapan Update Manual Dibutuhkan' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Integrasi kurir sedang mengalami gangguan.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ada koreksi status yang dilaporkan pelanggan.' }] }] }
+        ]}
       ]
     }
   },
-
-  'risiko-dan-kpi/matriks-kpi-pramudi': {
-    title: 'Matriks KPI Pramudi',
-    description: 'Penilaian kinerja harian dan bulanan berbasis indikator keselamatan.',
+  'panduan-operasional/manajemen-gudang/input-stok-barang': {
+    title: 'Input Stok Barang',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'INDIKATOR PENILAIAN' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Poin kedisiplinan rute, kebersihan armada, rating kepuasan penumpang, serta skor mengemudi aman.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap barang masuk ke gudang wajib dicatat agar jumlah stok di sistem selalu akurat.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Manajemen Gudang > Input Stok.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pilih gudang tujuan dan jenis barang.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Masukkan jumlah dan simpan — stok akan terupdate secara real-time.' }] }] }
+        ]}
       ]
     }
   },
-
-  'digital-dan-evaluasi/integrasi-telematika-gps': {
-    title: 'Integrasi Telematika GPS',
-    description: 'Monitoring kecerdasan buatan untuk mengawasi perilaku berkendara.',
+  'panduan-operasional/manajemen-gudang/mutasi-gudang': {
+    title: 'Mutasi Gudang',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'MONITORING REAL-TIME' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Penggunaan sensor IoT untuk mendeteksi overspeeding, pengereman mendadak, dan penyimpangan rute.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Mutasi gudang digunakan saat memindahkan stok barang dari satu gudang ke gudang lain.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Alur Persetujuan' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Permintaan mutasi harus disetujui oleh admin gudang tujuan sebelum stok berpindah secara resmi di sistem.' }] }
       ]
     }
   },
-
-  'penutup/komitmen-dan-penutup': {
-    title: 'Komitmen & Penutup',
-    description: 'Pernyataan komitmen bersama seluruh jajaran manajemen dan pramudi.',
+  'panduan-operasional/manajemen-pengguna/tambah-pengguna': {
+    title: 'Tambah Pengguna',
     content: {
       type: 'doc',
       content: [
-        {
-          type: 'heading',
-          attrs: { level: 2 },
-          content: [{ type: 'text', text: 'LEMBAR KOMITMEN IMPLEMENTASI' }]
-        },
-        {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Seluruh insan TOMS berkomitmen menjalankan pedoman ini secara konsisten demi terciptanya moda transportasi yang aman dan terpercaya.' }]
-        }
+        { type: 'paragraph', content: [{ type: 'text', text: 'Admin dapat menambahkan akun baru untuk anggota tim yang akan menggunakan TOMS.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Masuk ke menu Manajemen Pengguna > Tambah Pengguna.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Isi nama, email, dan peran (role) pengguna.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pengguna baru akan menerima email undangan untuk mengatur kata sandi.' }] }] }
+        ]}
+      ]
+    }
+  },
+  'panduan-operasional/manajemen-pengguna/atur-hak-akses': {
+    title: 'Atur Hak Akses',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Hak akses menentukan modul apa saja yang bisa dilihat dan diubah oleh seorang pengguna.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Peran' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Super Admin', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — akses penuh ke seluruh modul.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Gudang', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — hanya akses modul gudang dan stok.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Staf Pengiriman', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — hanya akses modul resi dan pelacakan.' }] }] }
+        ]}
+      ]
+    }
+  },
+  'integrasi-api/payment-gateway/metode-pembayaran': {
+    title: 'Metode Pembayaran',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'TOMS mendukung beberapa metode pembayaran yang dapat diaktifkan sesuai kebutuhan bisnis.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Metode yang Didukung' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Transfer Bank & Virtual Account' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'E-Wallet (QRIS)' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kartu Kredit/Debit' }] }] }
+        ]},
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Konfigurasi' }] },
+        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "payment_method": "qris",\n  "amount": 150000,\n  "currency": "IDR"\n}' }] }
+      ]
+    }
+  },
+  'integrasi-api/payment-gateway/webhook-notifikasi': {
+    title: 'Webhook Notifikasi',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Webhook digunakan agar sistem eksternal menerima notifikasi otomatis saat status transaksi berubah.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Payload' }] },
+        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "event": "payment.success",\n  "transaction_id": "TRX12345",\n  "status": "paid"\n}' }] },
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pastikan endpoint webhook Anda merespons dengan status 200 agar tidak dikirim ulang berkali-kali.' }] }] }
+      ]
+    }
+  },
+  'integrasi-api/api-autentikasi/generate-api-key': {
+    title: 'Generate API Key',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'API key diperlukan untuk mengautentikasi setiap permintaan ke API TOMS.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
+        { type: 'orderedList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Integrasi API > API Key.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Klik Buat Key Baru dan beri nama sesuai penggunaannya.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Simpan key tersebut, karena hanya ditampilkan satu kali.' }] }] }
+        ]},
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Request' }] },
+        { type: 'codeBlock', attrs: { language: 'bash' }, content: [{ type: 'text', text: 'curl -H "Authorization: Bearer <API_KEY>" \\\n  https://api.toms.id/v1/shipments' }] }
+      ]
+    }
+  },
+  'integrasi-api/api-autentikasi/refresh-token': {
+    title: 'Refresh Token',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Token akses memiliki masa berlaku terbatas. Gunakan refresh token untuk mendapatkan token akses baru tanpa perlu login ulang.' }] },
+        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "grant_type": "refresh_token",\n  "refresh_token": "eyJhbGciOi..."\n}' }] }
+      ]
+    }
+  },
+  'integrasi-api/webhook-umum/format-payload': {
+    title: 'Format Payload',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Seluruh webhook TOMS menggunakan format payload JSON yang konsisten agar mudah diproses sistem penerima.' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'event', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — jenis kejadian yang memicu webhook.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'data', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — detail objek terkait (transaksi, resi, dsb).' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'timestamp', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — waktu kejadian dalam format ISO 8601.' }] }] }
+        ]}
+      ]
+    }
+  },
+  'integrasi-api/webhook-umum/verifikasi-signature': {
+    title: 'Verifikasi Signature',
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap webhook disertai signature pada header untuk memastikan permintaan benar-benar berasal dari TOMS.' }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Cara Verifikasi' }] },
+        { type: 'codeBlock', attrs: { language: 'javascript' }, content: [{ type: 'text', text: 'const crypto = require("crypto")\n\nconst expected = crypto\n  .createHmac("sha256", secretKey)\n  .update(rawBody)\n  .digest("hex")\n\nif (expected !== signatureHeader) {\n  throw new Error("Signature tidak valid")\n}' }] }
       ]
     }
   }
-}
+};

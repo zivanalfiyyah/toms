@@ -10,6 +10,19 @@ const props = defineProps({
 const docsStore = useDocsStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
 
+const currentCategoryIndex = computed(() => {
+  return docsStore.categories.findIndex((c) => c.slug === props.category)
+})
+const prevCategory = computed(() => {
+  const i = currentCategoryIndex.value
+  return i > 0 ? docsStore.categories[i - 1] : null
+})
+const nextCategory = computed(() => {
+  const i = currentCategoryIndex.value
+  const list = docsStore.categories
+  return i >= 0 && i < list.length - 1 ? list[i + 1] : null
+})
+
 onMounted(() => {
   if (!docsStore.categories.length) docsStore.fetchCategories()
 })
@@ -68,11 +81,54 @@ function slugify(text) {
 .toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
 
 @media (max-width: 1100px) { .toc { display: none; } }
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+.pager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.pager-card:hover {
+  border-color: var(--color-accent);
+  text-decoration: none;
+}
+.pager-card.next {
+  text-align: right;
+  align-items: flex-end;
+}
+.pager-label {
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+}
+.pager-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.fetch-error {
+  padding: 1rem 1.2rem;
+  border: 1px solid #d33;
+  border-radius: var(--radius);
+  color: #d33;
+  background: rgba(211, 51, 51, 0.06);
+}
 </style>
 
 <template>
   <div class="category-page">
-    <div v-if="!cat">Kategori tidak ditemukan.</div>
+    <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
+    <div v-else-if="!cat">Kategori tidak ditemukan.</div>
     <template v-else>
       <div class="category-content">
         <p class="breadcrumb">
@@ -90,7 +146,28 @@ function slugify(text) {
             <span> — {{ page.description }}</span>
           </li>
         </ul>
-        <EditPageLink :href="`https://admin.toms-docs.local/edit-category/${cat.slug}`" />
+        <EditPageLink href="#" />
+
+        <nav class="pager">
+          <router-link
+            v-if="prevCategory"
+            :to="`/docs/${prevCategory.slug}`"
+            class="pager-card prev"
+          >
+            <span class="pager-label">&larr; Sebelumnya</span>
+            <span class="pager-title">{{ prevCategory.title }}</span>
+          </router-link>
+          <span v-else></span>
+
+          <router-link
+            v-if="nextCategory"
+            :to="`/docs/${nextCategory.slug}`"
+            class="pager-card next"
+          >
+            <span class="pager-label">Selanjutnya &rarr;</span>
+            <span class="pager-title">{{ nextCategory.title }}</span>
+          </router-link>
+        </nav>
       </div>
 
       <aside class="toc">

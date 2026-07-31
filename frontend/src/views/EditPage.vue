@@ -2,15 +2,19 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Editor } from '@tiptap/core'
-import { StarterKit } from '@tiptap/starter-kit'
-import { TableKit } from '@tiptap/extension-table'
-import { Image } from '@tiptap/extension-image'
+import StarterKit from '@tiptap/starter-kit'
+import { Table } from '@tiptap/extension-table'
+import TableRow from '@tiptap/extension-table-row'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import Image from '@tiptap/extension-image'
 import api from '../api'
 import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({
   category: { type: String, required: true },
-  slug: { type: String, required: true },
+  page: { type: String, required: true },
+  child: { type: String, required: true }
 })
 
 const router = useRouter()
@@ -29,40 +33,48 @@ let editor = null
 
 onMounted(async () => {
   if (!auth.canEdit) {
-    router.push(`/docs/${props.category}/${props.slug}`)
+    router.push(`/docs/${props.category}/${props.page}/${props.child}`)
     return
   }
 
   try {
+    // Cari id halaman dari struktur kategori (category > page > child).
     const catRes = await api.get('/categories')
     const cat = catRes.data.find((c) => c.slug === props.category)
-    const pagesRes = await api.get(`/pages?category_id=${cat.id}`)
-    const page = pagesRes.data.find((p) => p.slug === props.slug)
+    const parentPage = cat?.pages?.find((p) => p.slug === props.page)
+    const childRef = parentPage?.children?.find((c) => c.slug === props.child)
 
-    if (!page) {
+    if (!childRef) {
       errorMessage.value = 'Halaman tidak ditemukan.'
       loading.value = false
       return
     }
 
-    pageId.value = page.id
-    title.value = page.title
-    status.value = page.status
+    // Ambil isi lengkap (termasuk konten Tiptap JSON) lewat id halaman.
+    const detailRes = await api.get(`/pages/${childRef.id}`)
+    const detail = detailRes.data
+
+    pageId.value = detail.id
+    title.value = detail.title
+    status.value = detail.status
 
     editor = new Editor({
       element: editorEl.value,
       extensions: [
         StarterKit,
-        TableKit.configure({ table: { resizable: true } }),
+        Table.configure({ resizable: true }),
+        TableRow,
+        TableCell,
+        TableHeader,
         Image,
       ],
-      content: page.content,
+      content: detail.content,
       onTransaction: () => {
         editorVersion.value++
       },
     })
   } catch (err) {
-    errorMessage.value = 'Gagal memuat halaman.'
+    errorMessage.value = err.response?.data?.message || 'Gagal memuat halaman.'
   } finally {
     loading.value = false
   }
@@ -82,7 +94,7 @@ async function handleSave() {
       status: status.value,
       content: editor.getJSON(),
     })
-    router.push(`/docs/${props.category}/${props.slug}`)
+    router.push(`/docs/${props.category}/${props.page}/${props.child}`)
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
   } finally {
@@ -91,7 +103,7 @@ async function handleSave() {
 }
 
 function handleCancel() {
-  router.push(`/docs/${props.category}/${props.slug}`)
+  router.push(`/docs/${props.category}/${props.page}/${props.child}`)
 }
 </script>
 

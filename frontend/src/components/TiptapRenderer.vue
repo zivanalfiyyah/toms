@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { generateHTML } from '@tiptap/core'
-import StarterKit from '@tiptap/Starter-kit'
+import StarterKit from '@tiptap/starter-kit'
 
 const props = defineProps({
     content: { type: Object, required: true }

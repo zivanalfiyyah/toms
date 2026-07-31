@@ -2,7 +2,7 @@
 import { icons } from '../icons'
 
 defineProps({
-  href: { type: String, required: true }
+  to: { type: [String, Object], required: true }
 })
 </script>
 
@@ -36,9 +36,9 @@ defineProps({
 
 <template>
   <div class="edit-page">
-    <a :href="href" target="_blank" rel="noopener">
+    <router-link :to="to">
       <span v-html="icons.edit" class="edit-icon"></span>
       Ubah halaman ini
-    </a>
+    </router-link>
   </div>
 </template>
