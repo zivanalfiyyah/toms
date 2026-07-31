@@ -1,0 +1,755 @@
+[
+  {
+    "name": "Dasar Hukum",
+    "pages": [
+      {
+        "title": "Dasar Hukum",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Executive Summary",
+    "pages": [
+      {
+        "title": "Executive Summary",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Tujuan",
+    "pages": [
+      {
+        "title": "Tujuan",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Ruang Lingkup",
+    "pages": [
+      {
+        "title": "Ruang Lingkup",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Kerangka Penyeleanggaraan",
+    "pages": [
+      {
+        "title": "Feasibility Study",
+        "children": []
+      },
+      {
+        "title": "Legalitas & Perizinan",
+        "children": []
+      },
+      {
+        "title": "Perencanaan Keuangan",
+        "children": []
+      },
+      {
+        "title": "Manajemen SDM & Setup Operasional",
+        "children": [
+          {
+            "title": "AD/RT (Anggaran Dasar Rumah Tangga)",
+            "children": []
+          },
+          {
+            "title": "Peraturan Perusahaan",
+            "children": []
+          },
+          {
+            "title": "Struktur Organisasi",
+            "children": []
+          },
+          {
+            "title": "Penyusunan Job Description",
+            "children": []
+          },
+          {
+            "title": "Standar Rekrutmen CSO",
+            "children": []
+          },
+          {
+            "title": "Standar Rekrutmen Pramudi",
+            "children": []
+          },
+          {
+            "title": "Standar Operasional CSO",
+            "children": []
+          },
+          {
+            "title": "Standar Operasional Pramudi",
+            "children": []
+          },
+          {
+            "title": "Milestone & PIC Implementasi Penyeleanggaraan Shuttle",
+            "children": []
+          },
+          {
+            "title": "HUMAN CAPITAL ACQUISITION & TALENT DEVELOPMENT FRAMEWORK (HCATDF)",
+            "children": []
+          },
+          {
+            "title": "Strategi Membangun Ekosistem SDM Berkelanjutan bagi Operator Shuttle",
+            "children": []
+          },
+          {
+            "title": "PERFORMANCE MANAGEMENT & PRAMUDI INCENTIVE SYSTEM (PMPIS)",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "BAB VI – STANDAR PELAYANAN & KESELAMATAN",
+    "pages": [
+      {
+        "title": "Standar Service Excellent",
+        "children": [
+          {
+            "title": "Standart Kualifikasi Kandidat CSO",
+            "children": []
+          },
+          {
+            "title": "Fakta Integritas CSO",
+            "children": []
+          },
+          {
+            "title": "Gambar Standar Grooming Cso Pria dan Wanita",
+            "children": []
+          },
+          {
+            "title": "Gambar Standar Grooming Pramudi Pria dan Wanita",
+            "children": []
+          },
+          {
+            "title": "Alur Pelayanan  ke Pelanggan & RACI Matrik",
+            "children": []
+          },
+          {
+            "title": "Layanan Pramudi  ke Pelanggan",
+            "children": []
+          }
+        ]
+      },
+      {
+        "title": "Standar Keselamatan Operasional Perjalanan",
+        "children": [
+          {
+            "title": "Panduan Pengoperasian Kendaraan",
+            "children": []
+          },
+          {
+            "title": "Panduan Lalulintas Mengemudi",
+            "children": []
+          },
+          {
+            "title": "Panduan STOP & GO Menaikkan Penumpang di Virtual Point",
+            "children": []
+          },
+          {
+            "title": "Panduan STOP & GO di Rest Area",
+            "children": []
+          },
+          {
+            "title": "Panduan STOP and GO Menurunkan Penumpang",
+            "children": []
+          },
+          {
+            "title": "Panduan Barang Ketinggalan (Lost & Found)",
+            "children": []
+          },
+          {
+            "title": "Panduan Stiker Larangan Layanan didalam Kabin",
+            "children": []
+          },
+          {
+            "title": "Kartu Panduan Doa Penumpang didalam Kabin",
+            "children": []
+          },
+          {
+            "title": "Prosedur darurat Penanganan Darurat",
+            "children": []
+          },
+          {
+            "title": "Panduan Penanganan Laka Ringan",
+            "children": []
+          },
+          {
+            "title": "Panduan Penanganan Laka Berat",
+            "children": []
+          }
+        ]
+      },
+      {
+        "title": "Sistem Manajemen Keselamatan (SMK",
+        "children": [
+          {
+            "title": "Pendahuluan",
+            "children": []
+          },
+          {
+            "title": "Dasar Hukum",
+            "children": []
+          },
+          {
+            "title": "Profil Perusahaan",
+            "children": []
+          },
+          {
+            "title": "Penerapan Sistem Manajemen Keselamatan",
+            "children": []
+          },
+          {
+            "title": "KOMITMEN DAN KEBIJAKAN",
+            "children": [
+              {
+                "title": "KOMITMEN PENERAPAN & IMPLEMENTASI",
+                "children": []
+              },
+              {
+                "title": "Fakta Integritas Pramudi Implementasi dan Penerapan SMK",
+                "children": []
+              },
+              {
+                "title": "Safety Campaign ( Kampanye Keselamatan Transportasi)",
+                "children": []
+              },
+              {
+                "title": "Penetapan Target Keselamatan",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "PENGORGANISASIAN (Susunan Organisasi dan Kewenangan)",
+            "children": []
+          },
+          {
+            "title": "MANAJEMEN BAHAYA DAN RISIKO",
+            "children": [
+              {
+                "title": "Gambar Penjelasan Risiko LikeLihood (LL) Severity (S) dan Risk Risiko (RR)",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Jakarta - Bandung PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Bandung-Jakarta dan Jakarta-Bandung",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Bandung-Cirebon PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Bandung-Cirebon dan Cirebon-Bandung",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Jakarta-Cilegon PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Jakarta-Cilegon",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Cirebon-Semarang PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Cirebon-Semarang dan Semarang-Cirebon",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Jakarta-Solo PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Jakarta – Solo dan Solo-Jakarta",
+                "children": []
+              },
+              {
+                "title": "Skooring Risiko Tol Pekan Baru-Dumai PP",
+                "children": []
+              },
+              {
+                "title": "Mitigasi Risiko Koridol Tol Pekan Baru-Dumai dan Dumai Pekan Baru",
+                "children": []
+              },
+              {
+                "title": "Pengendalian Risiko Lingkungan Kantor",
+                "children": []
+              },
+              {
+                "title": "Pengendalian Risiko Bahaya Pada Manusia",
+                "children": []
+              },
+              {
+                "title": "Pengendalian Risiko Pada Kendaraan",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "Standar Pool Tempat Fasilitas Penyimpanan dan Pemeliharaan Kendaraan",
+            "children": [
+              {
+                "title": "SOP PEMERIKSAAN KENDARAAN OPERASIONAL (Fre Trip Inspection)",
+                "children": []
+              },
+              {
+                "title": "Gambar Contoh Form Cheklist Pemeriksaan Kendaraan (PTI)",
+                "children": []
+              },
+              {
+                "title": "Standar Outlet Tempat Keberangkatan",
+                "children": []
+              },
+              {
+                "title": "SOP PROSEDUR PEMERIKSAAN FASILITAS KESELAMATAN KENDARAAN",
+                "children": []
+              },
+              {
+                "title": "Form Pemeriksaan Fasilitas Keselamatan",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "DOKUMENTASI DAN DATA",
+            "children": []
+          },
+          {
+            "title": "PENINGKATAN DAN KOMPETENSI PELATIHAN",
+            "children": [
+              {
+                "title": "Standar Rekrutment Kandidat Pramudi",
+                "children": []
+              },
+              {
+                "title": "Safety Induction",
+                "children": []
+              },
+              {
+                "title": "Training Professional Pramudi",
+                "children": []
+              },
+              {
+                "title": "Training Coaching Clinic Pramudi",
+                "children": []
+              },
+              {
+                "title": "Training Safety Driving",
+                "children": []
+              },
+              {
+                "title": "Training Program Keselamatan Berkendara",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "Managemen Tanggap Darurat",
+            "children": [
+              {
+                "title": "Gambar Struktur Tim Tanggap Darurat",
+                "children": []
+              },
+              {
+                "title": "SOP Tanggap Darurat",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "Pelaporan & Investigasi Kecelakaan",
+            "children": [
+              {
+                "title": "Contoh Form Kecelakaan",
+                "children": []
+              }
+            ]
+          },
+          {
+            "title": "Monitoring dan Evaluasi",
+            "children": []
+          },
+          {
+            "title": "Pengukuran dan Pemantauan Kinerja",
+            "children": []
+          }
+        ]
+      },
+      {
+        "title": "Standar Kendaraan (Sop Kebersihan dan Kesiapan Kendaraan)",
+        "children": [
+          {
+            "title": "Standart Kelayakan Operasional (Kendaraan, Pramudi,Fasilitas & Operasional)",
+            "children": []
+          },
+          {
+            "title": "Standar Perlengkapan Kendaraan",
+            "children": []
+          }
+        ]
+      },
+      {
+        "title": "Handling Complaint,Recovery & Verbatim Script",
+        "children": []
+      },
+      {
+        "title": "KPI dan SLA",
+        "children": [
+          {
+            "title": "KPI – SLA Operasional Pramudi Shuttle",
+            "children": []
+          },
+          {
+            "title": "KPI – SLA Operasional Customer Service Officer & Reservation Officer (CSO)",
+            "children": []
+          },
+          {
+            "title": "KPI Safety Driving & Safety Awareness Pramudi",
+            "children": []
+          },
+          {
+            "title": "SOP KPI & SLA Manajemen Risiko Kelelahan (Fatigue Risk Management System – FRMS)",
+            "children": []
+          },
+          {
+            "title": "SOP KPI & SLA Risiko Fraud Tiket dan Audit Mysteri Pasenger",
+            "children": []
+          },
+          {
+            "title": "SOP KPI & SLA Risiko Fraud Penggunaan Bahan Bakar (BBM)",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Marketing and Demand Creation (Strategi pemasaran & Penciptaan Permintaan Penumpang",
+    "pages": [
+      {
+        "title": "Mobility Experience Strategi (Strategi Menciptakan Demand Tanpa Terjebak Perang Harga)",
+        "children": []
+      },
+      {
+        "title": "Net Promotor Score (Mengukur Loyalitas Pelanggan dan Efektivitas Customer Experience)",
+        "children": []
+      },
+      {
+        "title": "Brand Promise & Brand Experience Framework (Mengubah Janji Menjadi Pengalaman Pelanggan)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Manajemen Risiko Operasional",
+    "pages": [
+      {
+        "title": "Manajemen Musim (Pengelolaan Risiko Fluktuasi Permintaan dan Kapasitas Operasional)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Go Live dan Monitoring Operasional",
+    "pages": [
+      {
+        "title": "Business Chek Ratio (BCR)",
+        "children": []
+      },
+      {
+        "title": "SOP Delay Management System (Manajemen Keterlambatan Operasional)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Evaluasi dan Pengembangan (Evaluasi & Perbaikan Berkelanjutan)",
+    "pages": [
+      {
+        "title": "Evaluasi dan Pengembangan (Evaluasi & Perbaikan Berkelanjutan)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Lampiran (Appendix / Supporting Documents)",
+    "pages": [
+      {
+        "title": "SOP Keberangkatan Armada",
+        "children": []
+      },
+      {
+        "title": "SOP Kedatangan Armada",
+        "children": []
+      },
+      {
+        "title": "SOP Dispatcher",
+        "children": []
+      },
+      {
+        "title": "SOP Loading Penumpang",
+        "children": []
+      },
+      {
+        "title": "SOP Boarding",
+        "children": []
+      },
+      {
+        "title": "SOP Chek-In Digital",
+        "children": []
+      },
+      {
+        "title": "SOP Monitoring Armada",
+        "children": []
+      },
+      {
+        "title": "SOP Pengisian BBM",
+        "children": []
+      },
+      {
+        "title": "SOP Kebersihan Armada",
+        "children": []
+      },
+      {
+        "title": "SOP Pergantian Shift Pramudi",
+        "children": []
+      },
+      {
+        "title": "SOP Handling Delay",
+        "children": []
+      },
+      {
+        "title": "SOP Lost and Found",
+        "children": []
+      },
+      {
+        "title": "SOP Maintenance Armada",
+        "children": []
+      },
+      {
+        "title": "SOP Perpanjangan Legalitas (KEUR,PKB,STNK, IZIN TRAYEK dan IZIN PRINSIP)",
+        "children": []
+      },
+      {
+        "title": "SOP Keselamatan",
+        "children": []
+      },
+      {
+        "title": "SOP Keselamatan Berkendara",
+        "children": []
+      },
+      {
+        "title": "SOP Manajemen Kelelahan ( Fatigue Management)",
+        "children": []
+      },
+      {
+        "title": "SOP Pemeriksaan Kendaraan",
+        "children": []
+      },
+      {
+        "title": "SOP Penanganan Kecelakaan",
+        "children": []
+      },
+      {
+        "title": "SOP Evakuasi Darurat (Kecelakaan Ringan dan Berat)",
+        "children": []
+      },
+      {
+        "title": "SOP Penggunaan APAR",
+        "children": []
+      },
+      {
+        "title": "SOP Investigasi Kecelakaan",
+        "children": []
+      },
+      {
+        "title": "SOP Monitoring Kecepatan (Monitoring Speed SOP)",
+        "children": []
+      },
+      {
+        "title": "SOP Mitigasi Risiko",
+        "children": []
+      },
+      {
+        "title": "SOP Defensive Driving",
+        "children": []
+      },
+      {
+        "title": "SOP Pelayanan pada Pelanggan (Tamu)",
+        "children": []
+      },
+      {
+        "title": "SOP Pelayanan Pelanggan",
+        "children": []
+      },
+      {
+        "title": "SOP Standar Greeting ke Pelanggan",
+        "children": []
+      },
+      {
+        "title": "SOP Handling Komplain dari Pelanggan",
+        "children": []
+      },
+      {
+        "title": "SOP Customer Recovery",
+        "children": []
+      },
+      {
+        "title": "SOP Grooming Pramudi",
+        "children": []
+      },
+      {
+        "title": "SOP Hospitality",
+        "children": []
+      },
+      {
+        "title": "SOP Service Excellent (Layanan Prima )",
+        "children": []
+      },
+      {
+        "title": "SOP Premium Service",
+        "children": []
+      },
+      {
+        "title": "SOP Penaganan Keadaan Darurat",
+        "children": []
+      },
+      {
+        "title": "From PTI  (Prosedur Pemeriksaan Kendaraan Sebelum Operasi)",
+        "children": []
+      },
+      {
+        "title": "From PTO  (Prosedur Pemeriksaan Kendaraan Setelah Operasi)",
+        "children": []
+      },
+      {
+        "title": "Contoh Draft Legal & Administrasi SDM",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Kerja CSO",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Kerja Kemitraan untuk Pramudi",
+        "children": []
+      },
+      {
+        "title": "Draft Komitmen Pakta Integritas Penerapan SMK (Sistem Manajemen Keselamatan)",
+        "children": []
+      },
+      {
+        "title": "Draft Komitmen Pakta Integritas Anti Fraud Tiket ( Cso/Pramudi)",
+        "children": []
+      },
+      {
+        "title": "Draft Komitmen Pakta Integritas Anti Fraud BBM ( Cso/Pramudi)",
+        "children": []
+      },
+      {
+        "title": "Draft Kebijakan Perusahaan dalam Penerapan  SMK (Sistem Manajemen Keselamatan)",
+        "children": []
+      },
+      {
+        "title": "Draft Kebijakan Perusahaan dalam Pencegahan Fraud Penggunaan BBM",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian dan Pengadaan Fleet Managemen System (IOT)",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Kerahasiaan NDA (Non Disclosure Agreement)",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Kerahasiaan NDA-3partit (Non Disclosure Agreement Tripartit)",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Sewa dan Digitalisasi Perangkat",
+        "children": []
+      },
+      {
+        "title": "Draft Perjanjian Pemeliharaan dan Perbaikan Kendaraan",
+        "children": []
+      },
+      {
+        "title": "Fleet Maintenance & Inventory Management System (FMIMS)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Human Behavior Implementation Framework (HBIF) Mengelola Perubahan Perilaku Manusia",
+    "pages": [
+      {
+        "title": "Human Behavior Maturity Level (HBML) Parameter Tingkat Kematangan Perilaku",
+        "children": []
+      },
+      {
+        "title": "Collaborative Organization Management (COM) Mengelola kolaborasi antar individu dan divisi",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Change Management Implementation Framework (CMIF) Mengelola perubahan organisasi",
+    "pages": [
+      {
+        "title": "Customer Experience (Membangun Pengalaman Pelanggan yang Menciptakan Loyalitas)",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Sustainability & Esg Implementation Framework",
+    "pages": [
+      {
+        "title": "Membangun Transportasi yang Berkelanjutan, Bertanggung Jawab, dan Bernilai Jangka Panjang",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Operational Disruption Management (ODM)",
+    "pages": [
+      {
+        "title": "Membangun Ketahanan Operasional dan Kontinuitas Layanan Transportasi Shuttle",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "TOMS Framework Dictionary",
+    "pages": [
+      {
+        "title": "Standar Istilah dan Fungsi Framework TOMS",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Penutup",
+    "pages": [
+      {
+        "title": "Penutup",
+        "children": []
+      }
+    ]
+  }
+]

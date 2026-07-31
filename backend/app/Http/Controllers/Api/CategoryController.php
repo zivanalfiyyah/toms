@@ -15,7 +15,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::with('children', 'pages')
+        $categories = Category::with('children', 'pages.children')
             ->whereNull('parent_id')
             ->orderBy('order')
             ->get();
@@ -48,7 +48,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return new CategoryResource($category->load('children', 'pages'));
+        return new CategoryResource($category->load('children', 'pages.children'));
     }
 
     /**

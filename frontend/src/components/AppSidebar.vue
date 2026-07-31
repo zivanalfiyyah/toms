@@ -59,7 +59,7 @@ watch(
           <!-- Menggunakan safe check agar icon tidak bikin crash kalau key missing -->
           <span v-if="icons[cat.icon]" v-html="icons[cat.icon]" class="category-icon"></span>
           <!-- FIXED: cat.title (sebelumnya cat.name) -->
-          {{ cat.title }}
+          {{ cat.name }}
         </router-link>
       </li>
     </ul>
@@ -67,7 +67,7 @@ watch(
     <template v-if="activeCategory">
       <hr class="divider" />
       <!-- FIXED: activeCategory.title (sebelumnya activeCategory.name) -->
-      <p class="pages-block-title">{{ activeCategory.title }}</p>
+      <p class="pages-block-title">{{ activeCategory.name }}</p>
       <ul class="page-list">
         <li v-for="page in activeCategory.pages" :key="page.id" class="page-item">
           <div class="page-row">
