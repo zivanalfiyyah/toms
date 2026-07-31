@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useDocsStore } from '../stores/docs'
+import { useAuthStore } from '../stores/auth'
+import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
 
 const props = defineProps({
@@ -8,6 +10,7 @@ const props = defineProps({
 })
 
 const docsStore = useDocsStore()
+const auth = useAuthStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
 
 const currentCategoryIndex = computed(() => {
@@ -41,6 +44,16 @@ function slugify(text) {
 .subbab-list { list-style: none; padding: 0; margin: 0; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
 .subbab-list a { font-weight: 600; }
+.edit-item-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  width: 13px; height: 13px;
+  color: var(--color-ink-soft);
+  vertical-align: middle;
+}
+.edit-item-link:hover { color: var(--color-accent); }
+.edit-item-link :deep(svg) { width: 100%; height: 100%; }
 .subbab-sublist { list-style: none; padding-left: 1.5rem; margin: 0.4rem 0 0; border-left: 2px solid var(--color-border); }
 .subbab-sublist li { margin-bottom: 0.4rem; font-size: 0.9rem; }
 .single-page-content { line-height: 1.7; }
@@ -147,6 +160,7 @@ function slugify(text) {
 
         <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
           <div class="single-page-content" v-html="cat.pages[0].content_html"></div>
+          <EditPageLink v-if="auth.canEdit" :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" />
         </template>
 
         <template v-else>
@@ -155,11 +169,17 @@ function slugify(text) {
             <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">
               <router-link :to="`/docs/${cat.slug}/${page.slug}`">{{ page.title }}</router-link>
               <span v-if="page.description"> — {{ page.description }}</span>
+              <router-link
+                v-if="auth.canEdit"
+                :to="`/docs/${cat.slug}/${page.slug}/edit`"
+                class="edit-item-link"
+                title="Ubah halaman ini"
+              >
+                <span v-html="icons.edit"></span>
+              </router-link>
             </li>
           </ul>
         </template>
-
-        <EditPageLink v-if="cat.pages?.length === 1" :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" />
 
         <nav class="pager">
           <router-link
