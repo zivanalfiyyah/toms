@@ -1,121 +1,340 @@
 export const categories = [
-  {
-    id: 1,
-    title: 'Pengenalan TOMS',
-    slug: 'pengenalan-toms',
-    icon: 'book',
-    description: 'Fondasi, filosofi, visi, misi...',
+{
+    id: 4,
+    title: "Dasar Hukum",
+    slug: "dasar-hukum",
+    icon: "dasarHukum",
+    description: "Landasan regulasi dan standar acuan penyelenggaraan TOMS",
     order: 0,
     pages: [
       {
-        id: 101,
-        title: 'Filosofi TOMS',
-        slug: 'filosofi-toms',
-        description: 'Prinsip dasar TOMS...',
+        id: 401,
+        title: "Landasan Regulasi",
+        slug: "landasan-regulasi",
+        description: "Dasar hukum dan regulasi yang menjadi acuan",
         children: [
-          { id: 1011, title: 'Prinsip Dasar', slug: 'prinsip-dasar', description: 'Prinsip dasar operasional TOMS' },
-          { id: 1012, title: 'Nilai-Nilai TOMS', slug: 'nilai-nilai-toms', description: 'Nilai utama yang diusung TOMS' }
-        ]
-      },
-      {
-        id: 102,
-        title: 'Visi & Misi',
-        slug: 'visi-misi',
-        description: 'Arah dan tujuan jangka panjang TOMS',
-        children: [
-          { id: 1021, title: 'Visi TOMS', slug: 'visi-toms', description: 'Gambaran besar tujuan TOMS' },
-          { id: 1022, title: 'Misi TOMS', slug: 'misi-toms', description: 'Langkah-langkah mencapai visi' }
-        ]
-      },
-      {
-        id: 103,
-        title: 'Struktur Organisasi',
-        slug: 'struktur-organisasi',
-        description: 'Susunan tim dan tanggung jawab di TOMS',
-        children: [
-          { id: 1031, title: 'Manajemen Puncak', slug: 'manajemen-puncak', description: 'Peran dan tanggung jawab level manajemen' },
-          { id: 1032, title: 'Tim Operasional', slug: 'tim-operasional', description: 'Peran tim yang menjalankan operasional harian' }
+          { id: 4011, title: "Peraturan Perundangan", slug: "peraturan-perundangan", description: "Peraturan dan perundangan terkait" },
+          { id: 4012, title: "Standar Acuan Industri", slug: "standar-acuan-industri", description: "Standar industri yang dijadikan referensi" }
         ]
       }
     ]
   },
-  {
-    id: 2,
-    title: 'Panduan Operasional',
-    slug: 'panduan-operasional',
-    icon: 'compass',
-    description: 'Panduan penggunaan fitur dasar dan alur sistem',
+{
+    id: 5,
+    title: "Executive Summary",
+    slug: "executive-summary",
+    icon: "executiveSummary",
+    description: "Ringkasan eksekutif program dan capaian utama",
     order: 1,
     pages: [
       {
-        id: 201,
-        title: 'Manajemen Pengiriman',
-        slug: 'manajemen-pengiriman',
-        description: 'Pengelolaan resi dan data kurir',
+        id: 501,
+        title: "Ringkasan Program",
+        slug: "ringkasan-program",
+        description: "Ringkasan menyeluruh program secara eksekutif",
         children: [
-          { id: 2011, title: 'Input Resi', slug: 'input-resi', description: 'Cara membuat resi baru' },
-          { id: 2012, title: 'Lacak Pengiriman', slug: 'lacak-pengiriman', description: 'Status lacak posisi barang' },
-          { id: 2013, title: 'Update Status Pengiriman', slug: 'update-status-pengiriman', description: 'Mengubah status resi secara manual' }
-        ]
-      },
-      {
-        id: 202,
-        title: 'Manajemen Gudang',
-        slug: 'manajemen-gudang',
-        description: 'Pengelolaan stok dan mutasi barang di gudang',
-        children: [
-          { id: 2021, title: 'Input Stok Barang', slug: 'input-stok-barang', description: 'Cara mencatat stok barang masuk' },
-          { id: 2022, title: 'Mutasi Gudang', slug: 'mutasi-gudang', description: 'Memindahkan stok antar gudang' }
-        ]
-      },
-      {
-        id: 203,
-        title: 'Manajemen Pengguna',
-        slug: 'manajemen-pengguna',
-        description: 'Pengelolaan akun dan hak akses pengguna',
-        children: [
-          { id: 2031, title: 'Tambah Pengguna', slug: 'tambah-pengguna', description: 'Cara menambahkan akun pengguna baru' },
-          { id: 2032, title: 'Atur Hak Akses', slug: 'atur-hak-akses', description: 'Mengatur peran dan izin pengguna' }
+          { id: 5011, title: "Latar Belakang", slug: "latar-belakang", description: "Latar belakang dibentuknya program" },
+          { id: 5012, title: "Highlight Capaian", slug: "highlight-capaian", description: "Capaian-capaian utama program" }
         ]
       }
     ]
   },
-  {
-    id: 3,
-    title: 'Integrasi API',
-    slug: 'integrasi-api',
-    icon: 'code',
-    description: 'Dokumentasi teknis API dan Payment Gateway',
+{
+    id: 6,
+    title: "Tujuan",
+    slug: "tujuan",
+    icon: "tujuan",
+    description: "Tujuan umum dan khusus penyelenggaraan sistem",
     order: 2,
     pages: [
       {
-        id: 301,
-        title: 'Payment Gateway',
-        slug: 'payment-gateway',
-        description: 'Konfigurasi transaksi dan webhook',
+        id: 601,
+        title: "Tujuan Umum & Khusus",
+        slug: "tujuan-umum-khusus",
+        description: "Uraian tujuan program secara umum dan khusus",
         children: [
-          { id: 3011, title: 'Metode Pembayaran', slug: 'metode-pembayaran', description: 'Setup integrasi pembayaran' },
-          { id: 3012, title: 'Webhook Notifikasi', slug: 'webhook-notifikasi', description: 'Menerima notifikasi status transaksi' }
+          { id: 6011, title: "Tujuan Umum", slug: "tujuan-umum", description: "Tujuan besar yang ingin dicapai" },
+          { id: 6012, title: "Tujuan Khusus", slug: "tujuan-khusus", description: "Tujuan spesifik dan terukur" }
         ]
-      },
+      }
+    ]
+  },
+{
+    id: 7,
+    title: "Ruang Lingkup",
+    slug: "ruang-lingkup",
+    icon: "ruangLingkup",
+    description: "Batasan dan cakupan implementasi TOMS",
+    order: 3,
+    pages: [
       {
-        id: 302,
-        title: 'API Autentikasi',
-        slug: 'api-autentikasi',
-        description: 'Pengelolaan akses dan keamanan API',
+        id: 701,
+        title: "Batasan Implementasi",
+        slug: "batasan-implementasi",
+        description: "Cakupan dan batasan implementasi program",
         children: [
-          { id: 3021, title: 'Generate API Key', slug: 'generate-api-key', description: 'Cara membuat API key baru' },
-          { id: 3022, title: 'Refresh Token', slug: 'refresh-token', description: 'Memperbarui token akses yang kedaluwarsa' }
+          { id: 7011, title: "Ruang Lingkup Layanan", slug: "ruang-lingkup-layanan", description: "Layanan yang tercakup dalam program" },
+          { id: 7012, title: "Batasan & Pengecualian", slug: "batasan-pengecualian", description: "Hal-hal yang tidak tercakup dalam program" }
         ]
-      },
+      }
+    ]
+  },
+{
+    id: 8,
+    title: "Kerangka Penyelenggaraan",
+    slug: "kerangka-penyelenggaraan",
+    icon: "kerangkaPenyelenggaraan",
+    description: "Struktur dan tahapan penyelenggaraan program",
+    order: 4,
+    pages: [
       {
-        id: 303,
-        title: 'Webhook Umum',
-        slug: 'webhook-umum',
-        description: 'Standar format dan keamanan webhook',
+        id: 801,
+        title: "Struktur Kerangka Kerja",
+        slug: "struktur-kerangka-kerja",
+        description: "Struktur dan tahapan penyelenggaraan",
         children: [
-          { id: 3031, title: 'Format Payload', slug: 'format-payload', description: 'Struktur data yang dikirim webhook' },
-          { id: 3032, title: 'Verifikasi Signature', slug: 'verifikasi-signature', description: 'Cara memvalidasi keaslian webhook' }
+          { id: 8011, title: "Tahapan Penyelenggaraan", slug: "tahapan-penyelenggaraan", description: "Tahapan pelaksanaan program" },
+          { id: 8012, title: "Pihak Terlibat", slug: "pihak-terlibat", description: "Pemangku kepentingan yang terlibat" }
+        ]
+      }
+    ]
+  },
+{
+    id: 9,
+    title: "Standar Pelayanan & Keselamatan",
+    slug: "standar-pelayanan-keselamatan",
+    icon: "standarKeselamatan",
+    description: "Standar pelayanan minimal dan prosedur keselamatan penumpang",
+    order: 5,
+    pages: [
+      {
+        id: 901,
+        title: "Standar Layanan Penumpang",
+        slug: "standar-layanan-penumpang",
+        description: "Standar layanan dan keselamatan bagi penumpang",
+        children: [
+          { id: 9011, title: "Standar Pelayanan Minimal", slug: "standar-pelayanan-minimal", description: "Indikator layanan minimal yang wajib dipenuhi" },
+          { id: 9012, title: "Prosedur Keselamatan", slug: "prosedur-keselamatan", description: "Prosedur menjaga keselamatan penumpang" }
+        ]
+      }
+    ]
+  },
+{
+    id: 10,
+    title: "Marketing and Demand Creation",
+    slug: "marketing-demand-creation",
+    icon: "marketing",
+    description: "Strategi pemasaran & penciptaan permintaan penumpang",
+    order: 6,
+    pages: [
+      {
+        id: 1001,
+        title: "Strategi Pemasaran",
+        slug: "strategi-pemasaran",
+        description: "Strategi pemasaran dan penciptaan permintaan",
+        children: [
+          { id: 10011, title: "Segmentasi Penumpang", slug: "segmentasi-penumpang", description: "Pembagian segmen target penumpang" },
+          { id: 10012, title: "Kampanye Penciptaan Permintaan", slug: "kampanye-penciptaan-permintaan", description: "Program kampanye untuk mendorong permintaan" }
+        ]
+      }
+    ]
+  },
+{
+    id: 11,
+    title: "Manajemen Resiko Operasional",
+    slug: "manajemen-resiko-operasional",
+    icon: "manajemenResiko",
+    description: "Identifikasi dan mitigasi risiko operasional",
+    order: 7,
+    pages: [
+      {
+        id: 1101,
+        title: "Identifikasi & Mitigasi Risiko",
+        slug: "identifikasi-mitigasi-risiko",
+        description: "Proses identifikasi dan mitigasi risiko operasional",
+        children: [
+          { id: 11011, title: "Identifikasi Risiko", slug: "identifikasi-risiko", description: "Cara mengidentifikasi potensi risiko" },
+          { id: 11012, title: "Rencana Mitigasi", slug: "rencana-mitigasi", description: "Rencana tindak lanjut mitigasi risiko" }
+        ]
+      }
+    ]
+  },
+{
+    id: 12,
+    title: "Go Live dan Monitoring Operasional",
+    slug: "go-live-monitoring-operasional",
+    icon: "goLiveMonitoring",
+    description: "Persiapan peluncuran dan pemantauan operasional",
+    order: 8,
+    pages: [
+      {
+        id: 1201,
+        title: "Persiapan & Pemantauan Go Live",
+        slug: "persiapan-pemantauan-go-live",
+        description: "Persiapan peluncuran dan pemantauan operasional",
+        children: [
+          { id: 12011, title: "Checklist Go Live", slug: "checklist-go-live", description: "Daftar periksa sebelum peluncuran" },
+          { id: 12012, title: "Monitoring Pasca Go Live", slug: "monitoring-pasca-go-live", description: "Pemantauan kinerja setelah peluncuran" }
+        ]
+      }
+    ]
+  },
+{
+    id: 13,
+    title: "Evaluasi dan Pengembangan",
+    slug: "evaluasi-pengembangan",
+    icon: "evaluasiPengembangan",
+    description: "Evaluasi & perbaikan berkelanjutan program",
+    order: 9,
+    pages: [
+      {
+        id: 1301,
+        title: "Evaluasi & Perbaikan Berkelanjutan",
+        slug: "evaluasi-perbaikan-berkelanjutan",
+        description: "Proses evaluasi dan perbaikan berkelanjutan",
+        children: [
+          { id: 13011, title: "Metode Evaluasi", slug: "metode-evaluasi", description: "Metode yang digunakan dalam evaluasi program" },
+          { id: 13012, title: "Rencana Perbaikan", slug: "rencana-perbaikan", description: "Rencana tindak lanjut hasil evaluasi" }
+        ]
+      }
+    ]
+  },
+{
+    id: 14,
+    title: "Lampiran",
+    slug: "lampiran",
+    icon: "lampiran",
+    description: "Appendix / dokumen pendukung",
+    order: 10,
+    pages: [
+      {
+        id: 1401,
+        title: "Dokumen Pendukung",
+        slug: "dokumen-pendukung",
+        description: "Dokumen dan formulir pendukung program",
+        children: [
+          { id: 14011, title: "Daftar Lampiran", slug: "daftar-lampiran", description: "Daftar seluruh dokumen lampiran" },
+          { id: 14012, title: "Template & Formulir", slug: "template-formulir", description: "Template dan formulir yang dapat digunakan" }
+        ]
+      }
+    ]
+  },
+{
+    id: 15,
+    title: "Human Behavior Implementation Framework (HBIF)",
+    slug: "hbif",
+    icon: "hbif",
+    description: "Mengelola perubahan perilaku manusia",
+    order: 11,
+    pages: [
+      {
+        id: 1501,
+        title: "Mengelola Perubahan Perilaku Manusia",
+        slug: "mengelola-perubahan-perilaku-manusia",
+        description: "Kerangka kerja pengelolaan perubahan perilaku manusia",
+        children: [
+          { id: 15011, title: "Prinsip Perubahan Perilaku", slug: "prinsip-perubahan-perilaku", description: "Prinsip dasar dalam mengubah perilaku" },
+          { id: 15012, title: "Strategi Intervensi", slug: "strategi-intervensi", description: "Strategi intervensi untuk mendorong perubahan" }
+        ]
+      }
+    ]
+  },
+{
+    id: 16,
+    title: "Change Management Implementation Framework (CMIF)",
+    slug: "cmif",
+    icon: "cmif",
+    description: "Mengelola perubahan organisasi",
+    order: 12,
+    pages: [
+      {
+        id: 1601,
+        title: "Mengelola Perubahan Organisasi",
+        slug: "mengelola-perubahan-organisasi",
+        description: "Kerangka kerja pengelolaan perubahan organisasi",
+        children: [
+          { id: 16011, title: "Tahapan Change Management", slug: "tahapan-change-management", description: "Tahapan dalam proses change management" },
+          { id: 16012, title: "Peran Change Agent", slug: "peran-change-agent", description: "Peran agen perubahan dalam organisasi" }
+        ]
+      }
+    ]
+  },
+{
+    id: 17,
+    title: "Sustainability & ESG Implementation Framework",
+    slug: "sustainability-esg",
+    icon: "sustainabilityEsg",
+    description: "Kerangka kerja keberlanjutan dan ESG",
+    order: 13,
+    pages: [
+      {
+        id: 1701,
+        title: "Kerangka Kerja ESG",
+        slug: "kerangka-kerja-esg",
+        description: "Kerangka kerja keberlanjutan dan ESG",
+        children: [
+          { id: 17011, title: "Pilar Sustainability", slug: "pilar-sustainability", description: "Pilar-pilar utama keberlanjutan" },
+          { id: 17012, title: "Indikator ESG", slug: "indikator-esg", description: "Indikator pengukuran capaian ESG" }
+        ]
+      }
+    ]
+  },
+{
+    id: 18,
+    title: "Operasional Disruption Management (ODM)",
+    slug: "odm",
+    icon: "odm",
+    description: "Penanganan gangguan operasional",
+    order: 14,
+    pages: [
+      {
+        id: 1801,
+        title: "Penanganan Gangguan Operasional",
+        slug: "penanganan-gangguan-operasional",
+        description: "Prosedur penanganan gangguan operasional",
+        children: [
+          { id: 18011, title: "Klasifikasi Gangguan", slug: "klasifikasi-gangguan", description: "Kategori tingkat keparahan gangguan" },
+          { id: 18012, title: "Prosedur Tanggap Darurat", slug: "prosedur-tanggap-darurat", description: "Langkah tanggap darurat saat terjadi gangguan" }
+        ]
+      }
+    ]
+  },
+{
+    id: 19,
+    title: "TOMS Framework Dictionary",
+    slug: "toms-framework-dictionary",
+    icon: "dictionary",
+    description: "Daftar istilah dan definisi dalam kerangka kerja TOMS",
+    order: 15,
+    pages: [
+      {
+        id: 1901,
+        title: "Daftar Istilah",
+        slug: "daftar-istilah",
+        description: "Daftar istilah dan definisi dalam kerangka kerja TOMS",
+        children: [
+          { id: 19011, title: "Istilah Umum", slug: "istilah-umum", description: "Definisi istilah umum yang sering digunakan" },
+          { id: 19012, title: "Singkatan & Akronim", slug: "singkatan-akronim", description: "Daftar singkatan dan akronim" }
+        ]
+      }
+    ]
+  },
+{
+    id: 20,
+    title: "Penutupan",
+    slug: "penutupan",
+    icon: "penutupan",
+    description: "Penutup dokumen dan informasi kontak",
+    order: 16,
+    pages: [
+      {
+        id: 2001,
+        title: "Kata Penutup",
+        slug: "kata-penutup",
+        description: "Penutup dokumen",
+        children: [
+          { id: 20011, title: "Ucapan Terima Kasih", slug: "ucapan-terima-kasih", description: "Apresiasi kepada seluruh pihak terkait" },
+          { id: 20012, title: "Kontak & Dukungan", slug: "kontak-dukungan", description: "Informasi kontak untuk pertanyaan lebih lanjut" }
         ]
       }
     ]
@@ -123,274 +342,547 @@ export const categories = [
 ];
 
 export const pageContents = {
-  'pengenalan-toms/filosofi-toms/prinsip-dasar': {
-    title: 'Prinsip Dasar',
+"dasar-hukum/landasan-regulasi/peraturan-perundangan": {
+    title: "Peraturan Perundangan",
     content: {
       type: 'doc',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'TOMS (Tracking & Operations Management System) dibangun di atas beberapa prinsip dasar yang menjadi acuan dalam setiap pengambilan keputusan operasional, mulai dari pengelolaan pengiriman hingga integrasi pembayaran.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Transparansi Proses' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap perubahan status—baik pengiriman, stok, maupun transaksi—harus dapat ditelusuri kembali (' }, { type: 'text', text: 'traceable', marks: [{ type: 'italic' }] }, { type: 'text', text: ') oleh tim terkait maupun pelanggan.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Efisiensi Operasional' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Alur kerja dirancang agar setiap tim dapat menyelesaikan tugas dengan langkah seminimal mungkin. Beberapa penerapannya:' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: "Peraturan Perundangan membahas bagian penting dari Dasar Hukum dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
         { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Otomatisasi notifikasi status pengiriman' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Sinkronisasi stok real-time antar gudang' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Rekonsiliasi pembayaran otomatis lewat webhook' }] }] }
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Peraturan dan perundangan terkait" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
         ]},
-        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Prinsip ini berlaku untuk seluruh modul TOMS, termasuk saat menambahkan fitur baru di masa depan.' }] }] }
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Dasar Hukum." }] }] }
       ]
     }
   },
-  'pengenalan-toms/filosofi-toms/nilai-nilai-toms': {
-    title: 'Nilai-Nilai TOMS',
+  "dasar-hukum/landasan-regulasi/standar-acuan-industri": {
+    title: "Standar Acuan Industri",
     content: {
       type: 'doc',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Nilai-nilai berikut menjadi budaya kerja tim yang membangun dan mengoperasikan TOMS sehari-hari.' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Akurasi Data', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — data pengiriman dan stok harus selalu mencerminkan kondisi aktual di lapangan.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kecepatan Respons', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — kendala operasional ditangani secepat mungkin agar tidak berdampak ke pelanggan.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kolaborasi Lintas Tim', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — tim gudang, kurir, dan teknis bekerja dari satu sumber data yang sama.' }] }] }
+        { type: 'paragraph', content: [{ type: 'text', text: "Standar Acuan Industri membahas bagian penting dari Dasar Hukum dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Standar industri yang dijadikan referensi" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
         ]},
-        { type: 'paragraph', content: [{ type: 'text', text: 'Nilai-nilai ini yang mendasari desain fitur seperti pelacakan pengiriman real-time dan manajemen hak akses berjenjang.' }] }
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Dasar Hukum." }] }] }
       ]
     }
   },
-  'pengenalan-toms/visi-misi/visi-toms': {
-    title: 'Visi TOMS',
+  "executive-summary/ringkasan-program/latar-belakang": {
+    title: "Latar Belakang",
     content: {
       type: 'doc',
       content: [
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Visi' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Menjadi sistem manajemen operasional dan pengiriman yang menjadi tulang punggung bisnis logistik skala kecil hingga menengah di Indonesia.' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Visi ini diterjemahkan menjadi fokus pengembangan pada tiga area utama: kemudahan integrasi, keandalan sistem, dan kejelasan data bagi pengguna akhir.' }] }
-      ]
-    }
-  },
-  'pengenalan-toms/visi-misi/misi-toms': {
-    title: 'Misi TOMS',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Misi' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: "Latar Belakang membahas bagian penting dari Executive Summary dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
         { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyederhanakan proses input dan pelacakan pengiriman bagi tim operasional.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyediakan integrasi API yang mudah dipasang oleh tim teknis internal maupun mitra.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menjaga akurasi data stok dan transaksi lintas gudang dan kanal pembayaran.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'pengenalan-toms/struktur-organisasi/manajemen-puncak': {
-    title: 'Manajemen Puncak',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Manajemen puncak bertanggung jawab menetapkan arah strategis penggunaan TOMS di seluruh unit bisnis.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Tanggung Jawab Utama' }] },
-        { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menyetujui kebijakan hak akses lintas divisi' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Meninjau laporan performa operasional bulanan' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Menentukan prioritas pengembangan fitur baru' }] }] }
-        ]}
-      ]
-    }
-  },
-  'pengenalan-toms/struktur-organisasi/tim-operasional': {
-    title: 'Tim Operasional',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Tim operasional adalah pengguna harian TOMS yang berinteraksi langsung dengan modul pengiriman, gudang, dan pengguna.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Pembagian Peran' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Gudang — mengelola stok dan mutasi barang.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Pengiriman — menginput resi dan memantau status kurir.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Support — menindaklanjuti kendala pelanggan terkait pesanan.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-pengiriman/input-resi': {
-    title: 'Input Resi',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Halaman ini menjelaskan langkah membuat resi pengiriman baru di TOMS.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Manajemen Pengiriman, lalu klik tombol Buat Resi Baru.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Isi data penerima, alamat, dan pilih jasa kurir.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Klik Simpan — sistem akan otomatis membuat nomor resi.' }] }] }
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Latar belakang dibentuknya program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
         ]},
-        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Nomor resi yang sudah dibuat tidak dapat diubah, hanya dapat dibatalkan lalu dibuat ulang.' }] }] }
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Executive Summary." }] }] }
       ]
     }
   },
-  'panduan-operasional/manajemen-pengiriman/lacak-pengiriman': {
-    title: 'Lacak Pengiriman',
+  "executive-summary/ringkasan-program/highlight-capaian": {
+    title: "Highlight Capaian",
     content: {
       type: 'doc',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Fitur pelacakan menampilkan posisi dan status terkini dari setiap resi yang aktif.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Status Pengiriman' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: "Highlight Capaian membahas bagian penting dari Executive Summary dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
         { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diproses — resi baru dibuat, menunggu diambil kurir.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dalam Perjalanan — paket sedang menuju alamat tujuan.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Terkirim — paket telah diterima penerima.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-pengiriman/update-status-pengiriman': {
-    title: 'Update Status Pengiriman',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Status pengiriman umumnya diperbarui otomatis lewat integrasi kurir, namun admin juga dapat mengubahnya secara manual bila diperlukan.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Kapan Update Manual Dibutuhkan' }] },
-        { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Integrasi kurir sedang mengalami gangguan.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ada koreksi status yang dilaporkan pelanggan.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-gudang/input-stok-barang': {
-    title: 'Input Stok Barang',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap barang masuk ke gudang wajib dicatat agar jumlah stok di sistem selalu akurat.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Manajemen Gudang > Input Stok.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pilih gudang tujuan dan jenis barang.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Masukkan jumlah dan simpan — stok akan terupdate secara real-time.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-gudang/mutasi-gudang': {
-    title: 'Mutasi Gudang',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Mutasi gudang digunakan saat memindahkan stok barang dari satu gudang ke gudang lain.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Alur Persetujuan' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Permintaan mutasi harus disetujui oleh admin gudang tujuan sebelum stok berpindah secara resmi di sistem.' }] }
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-pengguna/tambah-pengguna': {
-    title: 'Tambah Pengguna',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Admin dapat menambahkan akun baru untuk anggota tim yang akan menggunakan TOMS.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Masuk ke menu Manajemen Pengguna > Tambah Pengguna.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Isi nama, email, dan peran (role) pengguna.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pengguna baru akan menerima email undangan untuk mengatur kata sandi.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'panduan-operasional/manajemen-pengguna/atur-hak-akses': {
-    title: 'Atur Hak Akses',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Hak akses menentukan modul apa saja yang bisa dilihat dan diubah oleh seorang pengguna.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Peran' }] },
-        { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Super Admin', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — akses penuh ke seluruh modul.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Admin Gudang', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — hanya akses modul gudang dan stok.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Staf Pengiriman', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — hanya akses modul resi dan pelacakan.' }] }] }
-        ]}
-      ]
-    }
-  },
-  'integrasi-api/payment-gateway/metode-pembayaran': {
-    title: 'Metode Pembayaran',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'TOMS mendukung beberapa metode pembayaran yang dapat diaktifkan sesuai kebutuhan bisnis.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Metode yang Didukung' }] },
-        { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Transfer Bank & Virtual Account' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'E-Wallet (QRIS)' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Kartu Kredit/Debit' }] }] }
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Capaian-capaian utama program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
         ]},
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Konfigurasi' }] },
-        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "payment_method": "qris",\n  "amount": 150000,\n  "currency": "IDR"\n}' }] }
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Executive Summary." }] }] }
       ]
     }
   },
-  'integrasi-api/payment-gateway/webhook-notifikasi': {
-    title: 'Webhook Notifikasi',
+  "tujuan/tujuan-umum-khusus/tujuan-umum": {
+    title: "Tujuan Umum",
     content: {
       type: 'doc',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Webhook digunakan agar sistem eksternal menerima notifikasi otomatis saat status transaksi berubah.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Payload' }] },
-        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "event": "payment.success",\n  "transaction_id": "TRX12345",\n  "status": "paid"\n}' }] },
-        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Pastikan endpoint webhook Anda merespons dengan status 200 agar tidak dikirim ulang berkali-kali.' }] }] }
-      ]
-    }
-  },
-  'integrasi-api/api-autentikasi/generate-api-key': {
-    title: 'Generate API Key',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'API key diperlukan untuk mengautentikasi setiap permintaan ke API TOMS.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Langkah-Langkah' }] },
-        { type: 'orderedList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Buka menu Integrasi API > API Key.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Klik Buat Key Baru dan beri nama sesuai penggunaannya.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Simpan key tersebut, karena hanya ditampilkan satu kali.' }] }] }
-        ]},
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Contoh Request' }] },
-        { type: 'codeBlock', attrs: { language: 'bash' }, content: [{ type: 'text', text: 'curl -H "Authorization: Bearer <API_KEY>" \\\n  https://api.toms.id/v1/shipments' }] }
-      ]
-    }
-  },
-  'integrasi-api/api-autentikasi/refresh-token': {
-    title: 'Refresh Token',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Token akses memiliki masa berlaku terbatas. Gunakan refresh token untuk mendapatkan token akses baru tanpa perlu login ulang.' }] },
-        { type: 'codeBlock', attrs: { language: 'json' }, content: [{ type: 'text', text: '{\n  "grant_type": "refresh_token",\n  "refresh_token": "eyJhbGciOi..."\n}' }] }
-      ]
-    }
-  },
-  'integrasi-api/webhook-umum/format-payload': {
-    title: 'Format Payload',
-    content: {
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Seluruh webhook TOMS menggunakan format payload JSON yang konsisten agar mudah diproses sistem penerima.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: "Tujuan Umum membahas bagian penting dari Tujuan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
         { type: 'bulletList', content: [
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'event', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — jenis kejadian yang memicu webhook.' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'data', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — detail objek terkait (transaksi, resi, dsb).' }] }] },
-          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'timestamp', marks: [{ type: 'bold' }] }, { type: 'text', text: ' — waktu kejadian dalam format ISO 8601.' }] }] }
-        ]}
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Tujuan besar yang ingin dicapai" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Tujuan." }] }] }
       ]
     }
   },
-  'integrasi-api/webhook-umum/verifikasi-signature': {
-    title: 'Verifikasi Signature',
+  "tujuan/tujuan-umum-khusus/tujuan-khusus": {
+    title: "Tujuan Khusus",
     content: {
       type: 'doc',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'Setiap webhook disertai signature pada header untuk memastikan permintaan benar-benar berasal dari TOMS.' }] },
-        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Cara Verifikasi' }] },
-        { type: 'codeBlock', attrs: { language: 'javascript' }, content: [{ type: 'text', text: 'const crypto = require("crypto")\n\nconst expected = crypto\n  .createHmac("sha256", secretKey)\n  .update(rawBody)\n  .digest("hex")\n\nif (expected !== signatureHeader) {\n  throw new Error("Signature tidak valid")\n}' }] }
+        { type: 'paragraph', content: [{ type: 'text', text: "Tujuan Khusus membahas bagian penting dari Tujuan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Tujuan spesifik dan terukur" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Tujuan." }] }] }
+      ]
+    }
+  },
+  "ruang-lingkup/batasan-implementasi/ruang-lingkup-layanan": {
+    title: "Ruang Lingkup Layanan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Ruang Lingkup Layanan membahas bagian penting dari Ruang Lingkup dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Layanan yang tercakup dalam program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Ruang Lingkup." }] }] }
+      ]
+    }
+  },
+  "ruang-lingkup/batasan-implementasi/batasan-pengecualian": {
+    title: "Batasan & Pengecualian",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Batasan & Pengecualian membahas bagian penting dari Ruang Lingkup dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Hal-hal yang tidak tercakup dalam program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Ruang Lingkup." }] }] }
+      ]
+    }
+  },
+  "kerangka-penyelenggaraan/struktur-kerangka-kerja/tahapan-penyelenggaraan": {
+    title: "Tahapan Penyelenggaraan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Tahapan Penyelenggaraan membahas bagian penting dari Kerangka Penyelenggaraan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Tahapan pelaksanaan program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Kerangka Penyelenggaraan." }] }] }
+      ]
+    }
+  },
+  "kerangka-penyelenggaraan/struktur-kerangka-kerja/pihak-terlibat": {
+    title: "Pihak Terlibat",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Pihak Terlibat membahas bagian penting dari Kerangka Penyelenggaraan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Pemangku kepentingan yang terlibat" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Kerangka Penyelenggaraan." }] }] }
+      ]
+    }
+  },
+  "standar-pelayanan-keselamatan/standar-layanan-penumpang/standar-pelayanan-minimal": {
+    title: "Standar Pelayanan Minimal",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Standar Pelayanan Minimal membahas bagian penting dari Standar Pelayanan & Keselamatan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Indikator layanan minimal yang wajib dipenuhi" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Standar Pelayanan & Keselamatan." }] }] }
+      ]
+    }
+  },
+  "standar-pelayanan-keselamatan/standar-layanan-penumpang/prosedur-keselamatan": {
+    title: "Prosedur Keselamatan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Prosedur Keselamatan membahas bagian penting dari Standar Pelayanan & Keselamatan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Prosedur menjaga keselamatan penumpang" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Standar Pelayanan & Keselamatan." }] }] }
+      ]
+    }
+  },
+  "marketing-demand-creation/strategi-pemasaran/segmentasi-penumpang": {
+    title: "Segmentasi Penumpang",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Segmentasi Penumpang membahas bagian penting dari Marketing and Demand Creation dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Pembagian segmen target penumpang" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Marketing and Demand Creation." }] }] }
+      ]
+    }
+  },
+  "marketing-demand-creation/strategi-pemasaran/kampanye-penciptaan-permintaan": {
+    title: "Kampanye Penciptaan Permintaan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Kampanye Penciptaan Permintaan membahas bagian penting dari Marketing and Demand Creation dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Program kampanye untuk mendorong permintaan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Marketing and Demand Creation." }] }] }
+      ]
+    }
+  },
+  "manajemen-resiko-operasional/identifikasi-mitigasi-risiko/identifikasi-risiko": {
+    title: "Identifikasi Risiko",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Identifikasi Risiko membahas bagian penting dari Manajemen Resiko Operasional dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Cara mengidentifikasi potensi risiko" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Manajemen Resiko Operasional." }] }] }
+      ]
+    }
+  },
+  "manajemen-resiko-operasional/identifikasi-mitigasi-risiko/rencana-mitigasi": {
+    title: "Rencana Mitigasi",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Rencana Mitigasi membahas bagian penting dari Manajemen Resiko Operasional dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Rencana tindak lanjut mitigasi risiko" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Manajemen Resiko Operasional." }] }] }
+      ]
+    }
+  },
+  "go-live-monitoring-operasional/persiapan-pemantauan-go-live/checklist-go-live": {
+    title: "Checklist Go Live",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Checklist Go Live membahas bagian penting dari Go Live dan Monitoring Operasional dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Daftar periksa sebelum peluncuran" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Go Live dan Monitoring Operasional." }] }] }
+      ]
+    }
+  },
+  "go-live-monitoring-operasional/persiapan-pemantauan-go-live/monitoring-pasca-go-live": {
+    title: "Monitoring Pasca Go Live",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Monitoring Pasca Go Live membahas bagian penting dari Go Live dan Monitoring Operasional dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Pemantauan kinerja setelah peluncuran" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Go Live dan Monitoring Operasional." }] }] }
+      ]
+    }
+  },
+  "evaluasi-pengembangan/evaluasi-perbaikan-berkelanjutan/metode-evaluasi": {
+    title: "Metode Evaluasi",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Metode Evaluasi membahas bagian penting dari Evaluasi dan Pengembangan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Metode yang digunakan dalam evaluasi program" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Evaluasi dan Pengembangan." }] }] }
+      ]
+    }
+  },
+  "evaluasi-pengembangan/evaluasi-perbaikan-berkelanjutan/rencana-perbaikan": {
+    title: "Rencana Perbaikan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Rencana Perbaikan membahas bagian penting dari Evaluasi dan Pengembangan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Rencana tindak lanjut hasil evaluasi" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Evaluasi dan Pengembangan." }] }] }
+      ]
+    }
+  },
+  "lampiran/dokumen-pendukung/daftar-lampiran": {
+    title: "Daftar Lampiran",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Daftar Lampiran membahas bagian penting dari Lampiran dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Daftar seluruh dokumen lampiran" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Lampiran." }] }] }
+      ]
+    }
+  },
+  "lampiran/dokumen-pendukung/template-formulir": {
+    title: "Template & Formulir",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Template & Formulir membahas bagian penting dari Lampiran dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Template dan formulir yang dapat digunakan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Lampiran." }] }] }
+      ]
+    }
+  },
+  "hbif/mengelola-perubahan-perilaku-manusia/prinsip-perubahan-perilaku": {
+    title: "Prinsip Perubahan Perilaku",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Prinsip Perubahan Perilaku membahas bagian penting dari Human Behavior Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Prinsip dasar dalam mengubah perilaku" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Human Behavior Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "hbif/mengelola-perubahan-perilaku-manusia/strategi-intervensi": {
+    title: "Strategi Intervensi",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Strategi Intervensi membahas bagian penting dari Human Behavior Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Strategi intervensi untuk mendorong perubahan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Human Behavior Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "cmif/mengelola-perubahan-organisasi/tahapan-change-management": {
+    title: "Tahapan Change Management",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Tahapan Change Management membahas bagian penting dari Change Management Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Tahapan dalam proses change management" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Change Management Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "cmif/mengelola-perubahan-organisasi/peran-change-agent": {
+    title: "Peran Change Agent",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Peran Change Agent membahas bagian penting dari Change Management Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Peran agen perubahan dalam organisasi" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Change Management Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "sustainability-esg/kerangka-kerja-esg/pilar-sustainability": {
+    title: "Pilar Sustainability",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Pilar Sustainability membahas bagian penting dari Sustainability & ESG Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Pilar-pilar utama keberlanjutan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Sustainability & ESG Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "sustainability-esg/kerangka-kerja-esg/indikator-esg": {
+    title: "Indikator ESG",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Indikator ESG membahas bagian penting dari Sustainability & ESG Implementation Framework dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Indikator pengukuran capaian ESG" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Sustainability & ESG Implementation Framework." }] }] }
+      ]
+    }
+  },
+  "odm/penanganan-gangguan-operasional/klasifikasi-gangguan": {
+    title: "Klasifikasi Gangguan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Klasifikasi Gangguan membahas bagian penting dari Operasional Disruption Management dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Kategori tingkat keparahan gangguan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Operasional Disruption Management." }] }] }
+      ]
+    }
+  },
+  "odm/penanganan-gangguan-operasional/prosedur-tanggap-darurat": {
+    title: "Prosedur Tanggap Darurat",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Prosedur Tanggap Darurat membahas bagian penting dari Operasional Disruption Management dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Langkah tanggap darurat saat terjadi gangguan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Operasional Disruption Management." }] }] }
+      ]
+    }
+  },
+  "toms-framework-dictionary/daftar-istilah/istilah-umum": {
+    title: "Istilah Umum",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Istilah Umum membahas bagian penting dari TOMS Framework Dictionary dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Definisi istilah umum yang sering digunakan" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori TOMS Framework Dictionary." }] }] }
+      ]
+    }
+  },
+  "toms-framework-dictionary/daftar-istilah/singkatan-akronim": {
+    title: "Singkatan & Akronim",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Singkatan & Akronim membahas bagian penting dari TOMS Framework Dictionary dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Daftar singkatan dan akronim" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori TOMS Framework Dictionary." }] }] }
+      ]
+    }
+  },
+  "penutupan/kata-penutup/ucapan-terima-kasih": {
+    title: "Ucapan Terima Kasih",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Ucapan Terima Kasih membahas bagian penting dari Penutupan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Apresiasi kepada seluruh pihak terkait" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Penutupan." }] }] }
+      ]
+    }
+  },
+  "penutupan/kata-penutup/kontak-dukungan": {
+    title: "Kontak & Dukungan",
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: "Kontak & Dukungan membahas bagian penting dari Penutupan dalam dokumentasi TOMS, sebagai acuan bagi tim dalam menjalankan proses terkait." }] },
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Poin Utama' }] },
+        { type: 'bulletList', content: [
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Informasi kontak untuk pertanyaan lebih lanjut" }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Diselaraskan dengan kebijakan dan standar TOMS secara menyeluruh.' }] }] },
+          { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Ditinjau secara berkala agar tetap relevan dengan kondisi operasional.' }] }] }
+        ]},
+        { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: "Konten ini masih berupa data dummy untuk keperluan simulasi tampilan kategori Penutupan." }] }] }
       ]
     }
   }
