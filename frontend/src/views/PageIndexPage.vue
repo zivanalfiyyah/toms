@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useDocsStore } from '../stores/docs'
+import { useAuthStore } from '../stores/auth'
+import { icons } from '../icons'
 
 const props = defineProps({ 
   category: String, 
@@ -8,6 +10,7 @@ const props = defineProps({
 })
 
 const docsStore = useDocsStore()
+const auth = useAuthStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
 const page = computed(() => docsStore.pageBySlug(props.category, props.page))
 
@@ -109,6 +112,16 @@ const slugify = (text) => {
 .subbab-list { list-style: none; padding: 0; margin: 0; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
 .subbab-list a { font-weight: 600; }
+.edit-item-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  width: 13px; height: 13px;
+  color: var(--color-ink-soft);
+  vertical-align: middle;
+}
+.edit-item-link:hover { color: var(--color-accent); }
+.edit-item-link :deep(svg) { width: 100%; height: 100%; }
 
 .category-page {
   display: flex;

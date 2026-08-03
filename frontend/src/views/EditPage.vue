@@ -11,11 +11,16 @@ import { useAuthStore } from '../stores/auth'
 const props = defineProps({
   category: { type: String, required: true },
   page: { type: String, required: true },
-  child: { type: String, required: true }
+  child: { type: String, default: null }
 })
 
 const router = useRouter()
 const auth = useAuthStore()
+
+// Kalau ada child -> lagi edit konten child. Kalau tidak -> lagi edit halaman "page" itu sendiri.
+const backTo = props.child
+  ? `/docs/${props.category}/${props.page}/${props.child}`
+  : `/docs/${props.category}/${props.page}`
 
 const pageId = ref(null)
 const title = ref('')
@@ -30,7 +35,7 @@ let editor = null
 
 onMounted(async () => {
   if (!auth.canEdit) {
-    router.push(`/docs/${props.category}/${props.page}/${props.child}`)
+    router.push(backTo)
     return
   }
 
@@ -39,21 +44,24 @@ onMounted(async () => {
     const catRes = await api.get('/categories')
     const cat = catRes.data.find((c) => c.slug === props.category)
     const parentPage = cat?.pages?.find((p) => p.slug === props.page)
-    const childRef = parentPage?.children?.find((c) => c.slug === props.child)
+    // Kalau ada child slug, target-nya child. Kalau tidak, target-nya page itu sendiri.
+    const target = props.child
+      ? parentPage?.children?.find((c) => c.slug === props.child)
+      : parentPage
 
-    if (!childRef) {
+    if (!target) {
       errorMessage.value = 'Halaman tidak ditemukan.'
       loading.value = false
       return
     }
 
     // Ambil isi lengkap (termasuk konten Tiptap JSON) lewat id halaman.
-    const detailRes = await api.get(`/pages/${childRef.id}`)
+    const detailRes = await api.get(`/pages/${target.id}`)
     const detail = detailRes.data
 
     pageId.value = detail.id
     title.value = detail.title
-    status.value = detail.status
+    status.value = detail.status ?? 'draft'
 
     editor = new Editor({
       element: editorEl.value,
@@ -62,7 +70,7 @@ onMounted(async () => {
         TableKit.configure({ table: { resizable: true } }),
         Image,
       ],
-      content: detail.content,
+      content: detail.content ?? '',
       onTransaction: () => {
         editorVersion.value++
       },
@@ -88,7 +96,7 @@ async function handleSave() {
       status: status.value,
       content: editor.getJSON(),
     })
-    router.push(`/docs/${props.category}/${props.page}/${props.child}`)
+    router.push(backTo)
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
   } finally {
@@ -97,7 +105,7 @@ async function handleSave() {
 }
 
 function handleCancel() {
-  router.push(`/docs/${props.category}/${props.page}/${props.child}`)
+  router.push(backTo)
 }
 </script>
 
