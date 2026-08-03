@@ -27,6 +27,7 @@ const nextPage = computed(() => {
 })
 
 onMounted(() => { 
+  docsStore.error = null
   if (!docsStore.categories.length) docsStore.fetchCategories()
 })
 
@@ -52,13 +53,18 @@ const slugify = (text) => {
 
         <h1>{{ page.title }}</h1>
         <p class="lead">{{ page.description }}</p>
-        <h2 class="subbab-title">Subbab</h2>
-        <ul class="subbab-list">
-          <li v-for="c in page.children" :key="c.id">
-            <router-link :to="`/docs/${category}/${props.page}/${c.slug}`">{{ c.title }}</router-link>
-            <span> — {{ c.description }}</span>
-          </li>
-        </ul>
+        
+        <div class="single-page-content" v-html="page.content_html"></div>
+
+        <template v-if="page.children && page.children.length > 0">
+          <h2 class="subbab-title">Subbab</h2>
+          <ul class="subbab-list">
+            <li v-for="c in page.children" :key="c.id">
+              <router-link :to="`/docs/${category}/${props.page}/${c.slug}`">{{ c.title }}</router-link>
+              <span> — {{ c.description }}</span>
+            </li>
+          </ul>
+        </template>
 
         <nav class="pager">
           <router-link
@@ -113,6 +119,46 @@ const slugify = (text) => {
   min-width: 0;
 }
 
+.category-content :deep(.single-page-content table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background-color: transparent; 
+}
+
+.category-content :deep(.single-page-content th),
+.category-content :deep(.single-page-content td) {
+  border: 1px solid var(--color-border);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  color: var(--color-ink);
+}
+
+.category-content :deep(.single-page-content th) {
+  background-color: rgba(128, 128, 128, 0.15);
+  font-weight: bold;
+}
+
+.category-content :deep(.single-page-content tr:nth-child(even)) {
+  background-color: rgba(128, 128, 128, 0.04);
+}
+
+.category-content :deep(.single-page-content tr:hover) {
+  background-color: rgba(128, 128, 128, 0.08);
+}
+
+.category-content :deep(.single-page-content img) {
+  max-width: 100%;  
+  max-height: 400px;     
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;  
+  /* border-radius: 8px;   */
+  object-fit: contain;   
+}
+
 .toc {
   width: 200px;
   flex-shrink: 0;
@@ -142,7 +188,7 @@ const slugify = (text) => {
 }
 .toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
 
-/* Styles untuk Navigasi Pager (Sebelumnya / Selanjutnya) */
+
 .pager {
   display: grid;
   grid-template-columns: 1fr 1fr;

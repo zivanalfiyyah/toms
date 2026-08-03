@@ -24,6 +24,7 @@ const nextCategory = computed(() => {
 })
 
 onMounted(() => {
+  docsStore.error = null
   if (!docsStore.categories.length) docsStore.fetchCategories()
 })
 

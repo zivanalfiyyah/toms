@@ -12,19 +12,16 @@ onMounted(() => {
   if (!docsStore.categories.length) docsStore.fetchCategories()
 })
 
-// Kategori yang sedang aktif, ditentukan dari parameter :category di URL saat ini.
 const activeCategory = computed(() => {
   const slug = route.params.category
   return docsStore.categories.find((c) => c.slug === slug) || null
 })
 
-// Halaman (page) yang sedang aktif, dipakai untuk auto-expand subbab-nya.
 const activePage = computed(() => {
   const pageSlug = route.params.page
   return activeCategory.value?.pages?.find((p) => p.slug === pageSlug) || null
 })
 
-// Menyimpan id page mana saja yang dropdown-nya sedang terbuka.
 const expandedPages = reactive(new Set())
 
 function isExpanded(page) {
@@ -35,7 +32,6 @@ function toggleExpand(page) {
   else expandedPages.add(page.id)
 }
 
-// Otomatis buka dropdown untuk page yang sedang dibuka lewat URL.
 watch(
   activePage,
   (page) => {
@@ -56,9 +52,7 @@ watch(
           :class="{ 'is-active': activeCategory?.id === cat.id }"
           @click="$emit('navigate')"
         >
-          <!-- Menggunakan safe check agar icon tidak bikin crash kalau key missing -->
           <span v-if="icons[cat.icon]" v-html="icons[cat.icon]" class="category-icon"></span>
-          <!-- FIXED: cat.title (sebelumnya cat.name) -->
           {{ cat.name }}
         </router-link>
       </li>
@@ -66,7 +60,6 @@ watch(
 
     <template v-if="activeCategory">
       <hr class="divider" />
-      <!-- FIXED: activeCategory.title (sebelumnya activeCategory.name) -->
       <p class="pages-block-title">{{ activeCategory.name }}</p>
       <ul class="page-list">
         <li v-for="page in activeCategory.pages" :key="page.id" class="page-item">
@@ -116,7 +109,6 @@ watch(
   position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto;
 }
 
-/* Blok atas: daftar semua kategori */
 .category-nav { list-style: none; margin: 0 0 1.25rem; padding: 0; }
 .category-link {
   display: flex; align-items: center; gap: 0.6rem;
@@ -134,7 +126,6 @@ watch(
 
 .divider { border: none; border-top: 1px dashed var(--color-border); margin: 0 0 1.25rem; }
 
-/* Blok bawah: daftar halaman dari kategori aktif */
 .pages-block-title {
   font-family: var(--font-display); font-size: 0.8rem; font-weight: 600;
   color: var(--color-accent);

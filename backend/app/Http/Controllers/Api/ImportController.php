@@ -7,9 +7,8 @@ use App\Models\DocumentImport;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\Writer\HTML;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpWord\IOFactory; 
 
 class ImportController extends Controller
 {
@@ -27,36 +26,15 @@ class ImportController extends Controller
         $documentImport = DocumentImport::create([
             'original_filename' => $file->getClientOriginalName(),
             'file_path' => $path,
-            'imported_by' => $request->user()->id,
+            'imported_by' => $request->user()->id ?? null,
             'status' => 'pending',
         ]);
 
         try {
-            $phpWord = IOFactory::load(storage_path('app/private/' . $path));
-        } catch (\Exception $e) {
-            $documentImport->update([
-                'status' => 'failed',
-                'error_message' => 'File tidak bisa dibaca sebagai dokumen Word',
-            ]);
+            $bodyHtml = $this->extractHtmlFromDocx($path);
+            $bodyHtml = $this->cleanWordHtml($bodyHtml);
 
-            return response()->json([
-                'message' => 'gagal membaca file. pastikan file berformat .docx',
-            ], 422);
-        }
-
-        try {
-
-            $htmlWriter = new HTML($phpWord);
-            $tempHtmlPath = storage_path('app/temp' . uniqid() . '.html');
-            $htmlWriter->save($tempHtmlPath);
-
-            $rawHtml = file_get_contents($tempHtmlPath);
-            unlink($tempHtmlPath);
-
-            preg_match('/<body[^>]*>(.*?)<\/body>/is', $rawHtml, $matches);
-            $bodyHtml = $matches[1] ?? $rawHtml;
-            $bodyHtml = $this->extractAndSaveImages($bodyhtml, $documentImport->id);
-
+            $bodyHtml = $this->extractAndSaveImages($bodyHtml, $documentImport->id);
             $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
 
             $page = Page::create([
@@ -67,7 +45,7 @@ class ImportController extends Controller
                 'content_html' => $bodyHtml,
                 'content_text' => strip_tags($bodyHtml),
                 'status' => 'draft',
-                'created_by' => $request->user()->id,
+                'created_by' => $request->user()->id ?? null,
             ]);
 
             $documentImport->update([
@@ -79,88 +57,231 @@ class ImportController extends Controller
                 'message' => 'Import success',
                 'page' => $page,
             ], 201);
+
         } catch (\Exception $e) {
             $documentImport->update([
                 'status' => 'failed',
-                'error_message' => $e->getMessage(),
+                'error_message' => $e->getMessage() . ' on line ' . $e->getLine(),
             ]);
 
             return response()->json([
                 'message' => 'Import Failed',
                 'error' => $e->getMessage(),
+                'line' => $e->getLine()
             ], 422);
         }
     }
 
+    public function update(Request $request, $page)
+    {
+        $pageModel = $page instanceof Page ? $page : Page::findOrFail($page);
+
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:docx|max:10240',
+            'category_id' => 'sometimes|exists:categories,id',
+            'title' => 'sometimes|string|max:255',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store('imports');
+
+        $documentImport = DocumentImport::create([
+            'original_filename' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'imported_by' => $request->user()->id ?? null,
+            'status' => 'pending',
+            'page_id' => $pageModel->id,
+        ]);
+
+        try {
+            $bodyHtml = $this->extractHtmlFromDocx($path);
+            $bodyHtml = $this->cleanWordHtml($bodyHtml);
+            $bodyHtml = $this->extractAndSaveImages($bodyHtml, $documentImport->id);
+            $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
+
+            $pageModel->update([
+                'content' => $tiptapJson,
+                'content_html' => $bodyHtml,
+                'content_text' => strip_tags($bodyHtml),
+                'updated_by' => $request->user()->id ?? null,
+            ]);
+
+            $documentImport->update([
+                'status' => 'success',
+            ]);
+
+            return response()->json([
+                'message' => 'Re-import/Update success',
+                'page' => $pageModel,
+            ], 200);
+
+        } catch (\Exception $e) {
+            $documentImport->update([
+                'status' => 'failed',
+                'error_message' => $e->getMessage() . ' on line ' . $e->getLine(),
+            ]);
+
+            return response()->json([
+                'message' => 'Update Import Failed',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 422);
+        }
+    }
+
+    private function extractHtmlFromDocx(string $filePath): string
+    {
+        $fullPath = storage_path('app/private/' . $filePath);
+        if (!file_exists($fullPath)) {
+            $fullPath = storage_path('app/' . $filePath);
+        }
+
+        $phpWord = IOFactory::load($fullPath);
+
+        $htmlWriter = IOFactory::createWriter($phpWord, 'HTML');
+
+        ob_start();
+        $htmlWriter->save('php://output');
+        $fullHtml = ob_get_clean();
+
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $fullHtml, $matches)) {
+            return $matches[1];
+        }
+
+        return $fullHtml;
+    }
+
+    private function cleanWordHtml(string $html): string
+    {
+        $html = str_replace('&nbsp;', ' ', $html);
+        $html = preg_replace('/(…|â€¦|&hellip;)+/u', '', $html);
+        $html = preg_replace('/\.{2,}/', '', $html);
+        $html = preg_replace('/(\.\s*){2,}/', '', $html);
+        $html = preg_replace('/\s+\d+(?=\s*<\/p>|\s*<br\s*\/?>|\s*$)/i', '', $html);
+
+        $html = preg_replace_callback(
+            '/<span[^>]*style="[^"]*font-weight:\s*(bold|700)[^"]*"[^>]*>(.*?)<\/span>/is',
+            fn($m) => '<strong>' . $m[2] . '</strong>',
+            $html
+        );
+
+        $html = preg_replace_callback(
+            '/<span[^>]*style="[^"]*font-style:\s*italic[^"]*"[^>]*>(.*?)<\/span>/is',
+            fn($m) => '<em>' . $m[2] . '</em>',
+            $html
+        );
+
+        $html = preg_replace_callback(
+            '/<span[^>]*style="[^"]*text-decoration:\s*underline[^"]*"[^>]*>(.*?)<\/span>/is',
+            fn($m) => '<u>' . $m[2] . '</u>',
+            $html
+        );
+
+        $html = preg_replace('/class="[^"]*"/i', '', $html);
+
+        return $html;
+    }
+
     private function htmlToTiptapJson(string $html): array
     {
-        $dom = new \DOMDocument();
-        libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html);
-        libxml_clear_errors();
+        if (empty(trim($html))) {
+            return ['type' => 'doc', 'content' => []];
+        }
 
-        $body = $dom->getElementsByTagName('body')->item(0);
+        $dom = new \DOMDocument();
+    
+        $wrappedHtml = '<html><body>' . mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8') . '</body></html>';
+
+        @$dom->loadHTML(
+            '<?xml encoding="utf-8" ?>' . $wrappedHtml,
+            LIBXML_HTML_NODEFDTD
+        );
+
         $content = [];
 
+        $body = $dom->getElementsByTagName('body')->item(0);
+        
         if ($body) {
             foreach ($body->childNodes as $node) {
-                $converted = $this->convertNode($node);
-                if ($converted) {
-                    $content[] = $converted;
+                if ($node->nodeType === XML_ELEMENT_NODE) {
+                    $converted = $this->convertNode($node);
+                    if (!empty($converted)) {
+                        $content[] = $converted;
+                    }
                 }
             }
         }
 
-        return ['type' => 'doc', 'content' => $content];
+        return [
+            'type' => 'doc',
+            'content' => $content,
+        ];
     }
 
-    private function convertNode(\DOMNode $node): ?array
+    private function convertNode(\DOMNode $node): array
     {
-        if ($node->nodeType !== XML_ELEMENT_NODE) {
-            return null;
-        }
-
         $tag = strtolower($node->nodeName);
 
-        return match (true) {
-            $tag === 'p' => ['type' => 'paragraph', 'content' => $this->convertInline($node)],
-            preg_match('/^h[1-6]$/', $tag) === 1 => [
+        if ($tag === 'p') {
+            $content = $this->convertInline($node);
+            return [
+                'type' => 'paragraph',
+                'content' => $content,
+            ];
+        }
+
+        if (in_array($tag, ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])) {
+            $level = (int) substr($tag, 1);
+            return [
                 'type' => 'heading',
-                'attrs' => ['level' => (int) substr($tag, 1)],
+                'attrs' => ['level' => $level],
                 'content' => $this->convertInline($node),
-            ],
-            $tag === 'ul' => ['type' => 'bulletList', 'content' => $this->convertListItems($node)],
-            $tag === 'ol' => ['type' => 'orderedList', 'content' => $this->convertListItems($node)],
-            $tag === 'table' => $this->convertTable($node),
-            $tag === 'img' => $this->convertImage($node),
-            default => null,
-        };
+            ];
+        }
+
+        if ($tag === 'img') {
+            $src = $node->attributes->getNamedItem('src')?->nodeValue;
+            if ($src) {
+                return [
+                    'type' => 'image',
+                    'attrs' => ['src' => $src],
+                ];
+            }
+        }
+
+        if ($tag === 'table') {
+            return $this->convertTable($node);
+        }
+
+        return [];
     }
 
-    private function convertTable(\DOMNode $tableNode): array
+    private function convertTable(\DOMNode $tableNode): ?array
     {
         $rows = [];
-
         $trNodes = $this->findDescendants($tableNode, 'tr');
 
         foreach ($trNodes as $tr) {
             $cells = [];
             foreach ($tr->childNodes as $cell) {
                 $cellTag = strtolower($cell->nodeName);
-                if (! in_array($cellTag, ['td', 'th'])) {
+                if (!in_array($cellTag, ['td', 'th'])) {
                     continue;
                 }
 
                 $cellContent = [];
                 foreach ($cell->childNodes as $child) {
                     $converted = $this->convertNode($child);
-                    if ($converted) {
+                    if (!empty($converted)) {
                         $cellContent[] = $converted;
                     }
                 }
 
                 if (empty($cellContent)) {
-                    $cellContent[] = ['type' => 'paragraph', 'content' => $this->convertInline($cell)];
+                    $cellContent[] = [
+                        'type' => 'paragraph',
+                        'content' => $this->convertInline($cell)
+                    ];
                 }
 
                 $cells[] = [
@@ -169,23 +290,16 @@ class ImportController extends Controller
                 ];
             }
 
-            if (! empty($cells)) {
+            if (!empty($cells)) {
                 $rows[] = ['type' => 'tableRow', 'content' => $cells];
             }
         }
 
+        if (empty($rows)) {
+            return null;
+        }
+
         return ['type' => 'table', 'content' => $rows];
-    }
-
-    private function convertImage(\DOMNode $imgNode): array
-    {
-        $src = $imgNode->attributes->getNamedItem('src')?->nodeValue ?? '';
-        $alt = $imgNode->attributes->getNamedItem('alt')?->nodeValue ?? '';
-
-        return [
-            'type' => 'image',
-            'attrs' => ['src' => $src, 'alt' => $alt],
-        ];
     }
 
     private function findDescendants(\DOMNode $node, string $tagName): array
@@ -200,32 +314,16 @@ class ImportController extends Controller
         return $results;
     }
 
-    private function convertListItems(\DOMNode $listnode): array
-    {
-        $items = [];
-
-        foreach ($listnode->childNodes as $child) {
-            if (strtolower($child->nodeName) === 'li') {
-                $items[] = [
-                    'type' => 'listItem',
-                    'content' => [['type' => 'paragraph', 'content' => $this->convertInline($child)]],  
-                ];
-            }
-        }
-
-        return $items;
-    }
-
     private function convertInline(\DOMNode $node, array $marks = []): array
     {
         $result = [];
 
         foreach ($node->childNodes as $child) {
             if ($child->nodeType === XML_TEXT_NODE) {
-                $text = trim($child->textContent);
+                $text = $child->nodeValue;
                 if ($text !== '') {
-                    $textNode = ['type' => 'text', 'text' => $child->textContent];
-                    if (! empty($marks)) {
+                    $textNode = ['type' => 'text', 'text' => $text];
+                    if (!empty($marks)) {
                         $textNode['marks'] = $marks;
                     }
                     $result[] = $textNode;
@@ -238,6 +336,8 @@ class ImportController extends Controller
                     $newMarks[] = ['type' => 'bold'];
                 } elseif (in_array($tag, ['em', 'i'])) {
                     $newMarks[] = ['type' => 'italic'];
+                } elseif ($tag === 'u') {
+                    $newMarks[] = ['type' => 'underline'];
                 }
 
                 $result = array_merge($result, $this->convertInline($child, $newMarks));
@@ -252,21 +352,20 @@ class ImportController extends Controller
         return preg_replace_callback(
             '/<img[^>]+src="data:(image\/[a-zA-Z]+);base64,([^"]+)"[^>]*>/i',
             function ($matches) use ($importId) {
-                $mimeType = $macthes[1];
+                $mimeType = $matches[1];
                 $base64Data = $matches[2];
                 $extension = str_replace('image/', '', $mimeType);
                 $extension = $extension === 'jpeg' ? 'jpg' : $extension;
 
                 $filename = 'import/' . $importId . '/' . uniqid('img') . '.' . $extension;
-                Storage::disk('public')->put($filename, base_decode($base64Data));
 
-                $url = Storage::url($filename);
+                Storage::disk('public')->put($filename, base64_decode($base64Data));
+
+                $url = url(Storage::url($filename)); 
 
                 return '<img src="' . $url . '">';
-
             },
             $html
         );
     }
-
 }
