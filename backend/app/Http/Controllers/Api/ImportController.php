@@ -192,8 +192,14 @@ class ImportController extends Controller
 
 private function cleanWordHtml(string $html): string
     {
-        $html = str_replace(['&nbsp;', "\xC2\xA0", "\xE2\x80\x8B"], ' ', $html);
+        // 1. LUCUTI SPASI GHAIB & ENTITY KHUSUS WORD
+        $html = str_replace(
+            ['&nbsp;', "\xC2\xA0", "\xE2\x80\x8B", '&#46;', '&period;', '&#8226;', '&amp;amp;'],
+            [' ', ' ', ' ', '.', '.', '•', '&amp;'],
+            $html
+        );
 
+        // 2. SELAMATKAN FORMAT BOLD, ITALIC, UNDERLINE
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*font-weight:\s*(bold|700)[^"]*"[^>]*>(.*?)<\/span>/is',
             fn($m) => '<strong>' . $m[2] . '</strong>',
@@ -210,25 +216,46 @@ private function cleanWordHtml(string $html): string
             $html
         );
 
+        // 3. LUCUTI SEMUA TAG <span> KOTOR
         $html = preg_replace('/<\/?span[^>]*>/i', '', $html);
 
-        $html = preg_replace('/\?\s*\./u', '?', $html);              
-        $html = preg_replace('/:\s*\./u', ':', $html);              
-        $html = preg_replace('/(\))\s*\./u', '$1', $html);            
-        $html = preg_replace('/(…|â€¦|&hellip;)+/u', '', $html);     
-        $html = preg_replace('/\.{2,}/u', '', $html);                 
-    
-        $html = preg_replace('/\.\s*(?=<\/h[1-6]>)/i', '', $html);
-
-        $html = preg_replace('/\s+\.\s*(?=<\/p>)/iu', '', $html);
-
-        for ($i = 0; $i < 3; $i++) {
-            $html = preg_replace('/<p[^>]*>\s*\.\s*<\/p>/iu', '', $html);
-            $html = preg_replace('/<p[^>]*>\s*<\/p>/iu', '', $html);
+        // 4. SEDOT PARAGRAF POTONGAN DI BAWAH BULLET (SUDAH DIPERBAIKI PRESISI)
+        // Menyambung potongan kalimat bullet tanpa memakan Judul Seksi/Angka
+        for ($i = 0; $i < 5; $i++) {
+            $html = preg_replace(
+                '/(<p[^>]*>\s*•\s*[\s\S]*?)<\/p>\s*<p[^>]*>(?!\s*(?:•|\d+\.|[A-Z]\.\s|<h[1-6]|➡|PROSES|INPUT|OUTPUT|KESIMPULAN|BAB|Tujuan|How To))(.*?)<\/p>/iu',
+                '$1 $2</p>',
+                $html
+            );
         }
 
-        $html = preg_replace('/\s+\d+(?=\s*<\/p>|\s*<br\s*\/?>|\s*$)/i', '', $html);
+        // 5. UBAH PARAGRAF BULLET MENJADI <ul><li>
+        $html = preg_replace('/<p[^>]*>\s*•\s*(.*?)<\/p>/ius', '<ul><li>$1</li></ul>', $html);
+        $html = preg_replace('/<\/ul>\s*<ul>/ius', '', $html);
+
+        // 🚨 6. BANTAI TITIK SILUMAN & DOT LEADERS (................... / … / .. .. .) 🚨
+        
+        // A. Hapus semua bentuk dot leader (titik/ellipsis berulang dengan/tanpa spasi)
+        $html = preg_replace('/(?:\s*(?:\.|\x{2026}|…|â€¦|&hellip;)\s*){2,}/u', '', $html);
+
+        // B. Hapus titik nempel setelah ?, :, )
+        $html = preg_replace('/(\?|:|\))\s*\.\s*/u', '$1', $html);
+
+        // C. BANTAI TITIK GANTUNG DI AKHIR TAG
+        $html = preg_replace('/\s+\.\s*(?=<\/(?:li|p|h[1-6]|strong|b|em|i|td)>)/i', '', $html);
+        $html = preg_replace('/(?<=\w|\))\s*\.\s*(?=<\/(?:li|p|h[1-6]|td)>)/i', '', $html);
+
+        // D. Hapus tag yang isinya CUMA titik atau spasi doang
+        for ($i = 0; $i < 5; $i++) {
+            $html = preg_replace('/<(p|li|h[1-6]|div|strong|em|u)[^>]*>\s*\.?\s*<\/\1>/i', '', $html);
+        }
+
+        // 7. BERSIHKAN TAG KOSONG SISA PEMBANTANIAN & CLASS KOTOR
+        for ($i = 0; $i < 5; $i++) {
+            $html = preg_replace('/<(p|li|h[1-6]|div)[^>]*>\s*<\/\1>/i', '', $html);
+        }
         $html = preg_replace('/class="[^"]*"/i', '', $html);
+        $html = preg_replace('/ {2,}/', ' ', $html);
 
         return trim($html);
     }
