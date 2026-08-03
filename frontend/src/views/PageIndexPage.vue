@@ -172,6 +172,40 @@ const slugify = (text) => {
   object-fit: contain;   
 }
 
+.category-content :deep(.single-page-content ul) {
+  list-style: disc !important;
+  list-style-type: disc !important;
+  padding-left: 2.5rem !important;
+  margin: 1rem 0 !important;
+}
+
+.category-content :deep(.single-page-content ol) {
+  list-style: decimal !important;
+  list-style-type: decimal !important;
+  padding-left: 2.5rem !important;
+  margin: 1rem 0 !important;
+}
+
+.category-content :deep(.single-page-content li) {
+  display: list-item !important; 
+  margin-bottom: 0.4rem !important;
+  line-height: 1.7 !important;
+}
+
+.category-content :deep(.single-page-content p) {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.category-content :deep(.single-page-content p span) {
+  display: inline-block;
+}
+
+.category-content :deep(.single-page-content),
+.category-content :deep(.single-page-content *) {
+  font-family: inherit !important;
+}
+
 .toc {
   width: 200px;
   flex-shrink: 0;

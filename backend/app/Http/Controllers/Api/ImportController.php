@@ -138,6 +138,10 @@ class ImportController extends Controller
 
         $phpWord = IOFactory::load($fullPath);
 
+        foreach ($phpWord->getSections() as $section) {
+            $this->injectBulletsToPhpWord($section);
+        }
+
         $htmlWriter = IOFactory::createWriter($phpWord, 'HTML');
 
         ob_start();
@@ -151,35 +155,82 @@ class ImportController extends Controller
         return $fullHtml;
     }
 
-    private function cleanWordHtml(string $html): string
+    private function injectBulletsToPhpWord($container): void
     {
-        $html = str_replace('&nbsp;', ' ', $html);
-        $html = preg_replace('/(…|â€¦|&hellip;)+/u', '', $html);
-        $html = preg_replace('/\.{2,}/', '', $html);
-        $html = preg_replace('/(\.\s*){2,}/', '', $html);
-        $html = preg_replace('/\s+\d+(?=\s*<\/p>|\s*<br\s*\/?>|\s*$)/i', '', $html);
+        if (!method_exists($container, 'getElements')) {
+            return;
+        }
+
+        foreach ($container->getElements() as $element) {
+            if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+                foreach ($element->getRows() as $row) {
+                    foreach ($row->getCells() as $cell) {
+                        $this->injectBulletsToPhpWord($cell);
+                    }
+                }
+            } elseif ($element instanceof \PhpOffice\PhpWord\Element\ListItem) {
+                $text = $element->getText();
+                if ($text !== '' && !str_starts_with(trim($text), '•')) {
+                    $element->setText('• ' . $text);
+                }
+            } elseif ($element instanceof \PhpOffice\PhpWord\Element\ListItemRun) {
+                $children = $element->getElements();
+                if (!empty($children)) {
+                    foreach ($children as $child) {
+                        if ($child instanceof \PhpOffice\PhpWord\Element\Text) {
+                            $text = $child->getText();
+                            if ($text !== '' && !str_starts_with(trim($text), '•')) {
+                                $child->setText('• ' . $text);
+                                break; 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+private function cleanWordHtml(string $html): string
+    {
+        $html = str_replace(['&nbsp;', "\xC2\xA0", "\xE2\x80\x8B"], ' ', $html);
 
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*font-weight:\s*(bold|700)[^"]*"[^>]*>(.*?)<\/span>/is',
             fn($m) => '<strong>' . $m[2] . '</strong>',
             $html
         );
-
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*font-style:\s*italic[^"]*"[^>]*>(.*?)<\/span>/is',
             fn($m) => '<em>' . $m[2] . '</em>',
             $html
         );
-
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*text-decoration:\s*underline[^"]*"[^>]*>(.*?)<\/span>/is',
             fn($m) => '<u>' . $m[2] . '</u>',
             $html
         );
 
+        $html = preg_replace('/<\/?span[^>]*>/i', '', $html);
+
+        $html = preg_replace('/\?\s*\./u', '?', $html);              
+        $html = preg_replace('/:\s*\./u', ':', $html);              
+        $html = preg_replace('/(\))\s*\./u', '$1', $html);            
+        $html = preg_replace('/(…|â€¦|&hellip;)+/u', '', $html);     
+        $html = preg_replace('/\.{2,}/u', '', $html);                 
+    
+        $html = preg_replace('/\.\s*(?=<\/h[1-6]>)/i', '', $html);
+
+        $html = preg_replace('/\s+\.\s*(?=<\/p>)/iu', '', $html);
+
+        for ($i = 0; $i < 3; $i++) {
+            $html = preg_replace('/<p[^>]*>\s*\.\s*<\/p>/iu', '', $html);
+            $html = preg_replace('/<p[^>]*>\s*<\/p>/iu', '', $html);
+        }
+
+        $html = preg_replace('/\s+\d+(?=\s*<\/p>|\s*<br\s*\/?>|\s*$)/i', '', $html);
         $html = preg_replace('/class="[^"]*"/i', '', $html);
 
-        return $html;
+        return trim($html);
     }
 
     private function htmlToTiptapJson(string $html): array
@@ -218,15 +269,14 @@ class ImportController extends Controller
         ];
     }
 
-    private function convertNode(\DOMNode $node): array
+   private function convertNode(\DOMNode $node): array
     {
         $tag = strtolower($node->nodeName);
 
         if ($tag === 'p') {
-            $content = $this->convertInline($node);
             return [
                 'type' => 'paragraph',
-                'content' => $content,
+                'content' => $this->convertInline($node),
             ];
         }
 
@@ -242,10 +292,7 @@ class ImportController extends Controller
         if ($tag === 'img') {
             $src = $node->attributes->getNamedItem('src')?->nodeValue;
             if ($src) {
-                return [
-                    'type' => 'image',
-                    'attrs' => ['src' => $src],
-                ];
+                return ['type' => 'image', 'attrs' => ['src' => $src]];
             }
         }
 
@@ -253,7 +300,46 @@ class ImportController extends Controller
             return $this->convertTable($node);
         }
 
+        if (in_array($tag, ['ul', 'ol'])) {
+            return $this->convertList($node, $tag);
+        }
+
         return [];
+    }
+
+    private function convertList(\DOMNode $listNode, string $tag): array
+    {
+        $items = [];
+        foreach ($listNode->childNodes as $li) {
+            if (strtolower($li->nodeName) === 'li') {
+                $liContent = [];
+                
+                foreach ($li->childNodes as $child) {
+                    if ($child->nodeType === XML_ELEMENT_NODE) {
+                        $converted = $this->convertNode($child);
+                        if (!empty($converted)) $liContent[] = $converted;
+                    } elseif ($child->nodeType === XML_TEXT_NODE && trim($child->nodeValue) !== '') {
+                        $liContent[] = [
+                            'type' => 'paragraph',
+                            'content' => [['type' => 'text', 'text' => $child->nodeValue]]
+                        ];
+                    }
+                }
+
+                if (empty($liContent)) {
+                    $liContent[] = ['type' => 'paragraph', 'content' => $this->convertInline($li)];
+                }
+
+                $items[] = ['type' => 'listItem', 'content' => $liContent];
+            }
+        }
+
+        if (empty($items)) return [];
+
+        return [
+            'type' => $tag === 'ul' ? 'bulletList' : 'orderedList',
+            'content' => $items,
+        ];
     }
 
     private function convertTable(\DOMNode $tableNode): ?array
