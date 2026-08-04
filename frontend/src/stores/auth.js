@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isLoggedIn: (state) => !!state.token,
+    isLoggedIn: (state) => !!state.token && !!state.user,
 
     roleNames: (state) => (state.user?.roles || []).map((r) => r.name ?? r),
 
