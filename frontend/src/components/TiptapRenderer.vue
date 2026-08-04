@@ -91,4 +91,13 @@ const html = computed(() => {
 .tiptap-content :deep(tbody tr:hover) {
   background-color: #f1f5f9;
 }
+
+.tiptap-content :deep(img) {
+  max-width: 500px !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  margin: 1.5rem auto !important;
+  object-fit: contain !important;
+}
 </style>

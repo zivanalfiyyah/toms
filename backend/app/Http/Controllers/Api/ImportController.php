@@ -192,14 +192,12 @@ class ImportController extends Controller
 
 private function cleanWordHtml(string $html): string
     {
-        // 1. LUCUTI SPASI GHAIB & ENTITY KHUSUS WORD
         $html = str_replace(
             ['&nbsp;', "\xC2\xA0", "\xE2\x80\x8B", '&#46;', '&period;', '&#8226;', '&amp;amp;'],
             [' ', ' ', ' ', '.', '.', '•', '&amp;'],
             $html
         );
 
-        // 2. SELAMATKAN FORMAT BOLD, ITALIC, UNDERLINE
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*font-weight:\s*(bold|700)[^"]*"[^>]*>(.*?)<\/span>/is',
             fn($m) => '<strong>' . $m[2] . '</strong>',
@@ -216,11 +214,8 @@ private function cleanWordHtml(string $html): string
             $html
         );
 
-        // 3. LUCUTI SEMUA TAG <span> KOTOR
         $html = preg_replace('/<\/?span[^>]*>/i', '', $html);
 
-        // 4. SEDOT PARAGRAF POTONGAN DI BAWAH BULLET (SUDAH DIPERBAIKI PRESISI)
-        // Menyambung potongan kalimat bullet tanpa memakan Judul Seksi/Angka
         for ($i = 0; $i < 5; $i++) {
             $html = preg_replace(
                 '/(<p[^>]*>\s*•\s*[\s\S]*?)<\/p>\s*<p[^>]*>(?!\s*(?:•|\d+\.|[A-Z]\.\s|<h[1-6]|➡|PROSES|INPUT|OUTPUT|KESIMPULAN|BAB|Tujuan|How To))(.*?)<\/p>/iu',
@@ -229,33 +224,29 @@ private function cleanWordHtml(string $html): string
             );
         }
 
-        // 5. UBAH PARAGRAF BULLET MENJADI <ul><li>
         $html = preg_replace('/<p[^>]*>\s*•\s*(.*?)<\/p>/ius', '<ul><li>$1</li></ul>', $html);
         $html = preg_replace('/<\/ul>\s*<ul>/ius', '', $html);
 
-        // 🚨 6. BANTAI TITIK SILUMAN & DOT LEADERS (................... / … / .. .. .) 🚨
-        
-        // A. Hapus semua bentuk dot leader (titik/ellipsis berulang dengan/tanpa spasi)
         $html = preg_replace('/(?:\s*(?:\.|\x{2026}|…|â€¦|&hellip;)\s*){2,}/u', '', $html);
 
-        // B. Hapus titik nempel setelah ?, :, )
         $html = preg_replace('/(\?|:|\))\s*\.\s*/u', '$1', $html);
 
-        // C. BANTAI TITIK GANTUNG DI AKHIR TAG
         $html = preg_replace('/\s+\.\s*(?=<\/(?:li|p|h[1-6]|strong|b|em|i|td)>)/i', '', $html);
         $html = preg_replace('/(?<=\w|\))\s*\.\s*(?=<\/(?:li|p|h[1-6]|td)>)/i', '', $html);
 
-        // D. Hapus tag yang isinya CUMA titik atau spasi doang
         for ($i = 0; $i < 5; $i++) {
             $html = preg_replace('/<(p|li|h[1-6]|div|strong|em|u)[^>]*>\s*\.?\s*<\/\1>/i', '', $html);
         }
 
-        // 7. BERSIHKAN TAG KOSONG SISA PEMBANTANIAN & CLASS KOTOR
         for ($i = 0; $i < 5; $i++) {
             $html = preg_replace('/<(p|li|h[1-6]|div)[^>]*>\s*<\/\1>/i', '', $html);
         }
         $html = preg_replace('/class="[^"]*"/i', '', $html);
         $html = preg_replace('/ {2,}/', ' ', $html);
+
+        $html = preg_replace_callback('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', function($m) {
+            return '<img src="' . $m[1] . '" style="max-width: 400px; width: 100%; height: auto; display: block; margin: 1.5rem auto;">';
+        }, $html);
 
         return trim($html);
     }
@@ -443,6 +434,18 @@ private function cleanWordHtml(string $html): string
                 }
             } elseif ($child->nodeType === XML_ELEMENT_NODE) {
                 $tag = strtolower($child->nodeName);
+
+                if ($tag === 'img') {
+                    $src = $child->attributes->getNamedItem('src')?->nodeValue;
+                    if ($src) {
+                        $result[] = [
+                            'type' => 'image',
+                            'attrs' => ['src' => $src],
+                        ];
+                    }
+                    continue; 
+                }
+
                 $newMarks = $marks;
 
                 if (in_array($tag, ['strong', 'b'])) {
@@ -463,14 +466,14 @@ private function cleanWordHtml(string $html): string
     private function extractAndSaveImages(string $html, int $importId): string
     {
         return preg_replace_callback(
-            '/<img[^>]+src="data:(image\/[a-zA-Z]+);base64,([^"]+)"[^>]*>/i',
+            '/<img[^>]+src=["\']data:(image\/[a-zA-Z]+);base64,([^"\']+)["\'][^>]*>/i',
             function ($matches) use ($importId) {
                 $mimeType = $matches[1];
                 $base64Data = $matches[2];
                 $extension = str_replace('image/', '', $mimeType);
                 $extension = $extension === 'jpeg' ? 'jpg' : $extension;
 
-                $filename = 'import/' . $importId . '/' . uniqid('img') . '.' . $extension;
+                $filename = 'import/' . $importId . '/' . uniqid('img_') . '.' . $extension;
 
                 Storage::disk('public')->put($filename, base64_decode($base64Data));
 

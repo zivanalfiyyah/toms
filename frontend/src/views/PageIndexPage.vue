@@ -161,15 +161,12 @@ const slugify = (text) => {
   background-color: rgba(128, 128, 128, 0.08);
 }
 
-.category-content :deep(.single-page-content img) {
-  max-width: 100%;  
-  max-height: 400px;     
-  width: auto;
-  height: auto;
-  display: block;
-  margin: 1.5rem auto;  
-  /* border-radius: 8px;   */
-  object-fit: contain;   
+.single-page-content :deep(img) {
+  max-width: 350px !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
 }
 
 .category-content :deep(.single-page-content ul) {
