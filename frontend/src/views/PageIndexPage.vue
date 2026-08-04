@@ -65,6 +65,14 @@ const slugify = (text) => {
             <li v-for="c in page.children" :key="c.id">
               <router-link :to="`/docs/${category}/${props.page}/${c.slug}`">{{ c.title }}</router-link>
               <span> — {{ c.description }}</span>
+              <router-link
+                v-if="auth.canEdit"
+                :to="`/docs/${category}/${props.page}/${c.slug}/edit`"
+                class="edit-item-link"
+                title="Ubah halaman ini"
+              >
+                <span v-html="icons.edit"></span>
+              </router-link>
             </li>
           </ul>
         </template>

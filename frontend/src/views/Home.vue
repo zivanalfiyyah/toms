@@ -2,7 +2,6 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
-import { icons } from '../icons'
 
 const docsStore = useDocsStore()
 const router = useRouter()
@@ -15,8 +14,11 @@ function goToFirstPage() {
   const first = docsStore.categories[0]
   if (first) router.push(`/docs/${first.slug}`)
 }
-</script>
 
+function formatIndex(i) {
+  return String(i + 1).padStart(2, '0')
+}
+</script>
 
 <style scoped>
 .hero {
@@ -41,30 +43,64 @@ function goToFirstPage() {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.75rem 2rem;
+  margin-top: 3rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .card {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1.4rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  align-items: center;
+  gap: 0.55rem;
+  text-align: center;
+  padding: 1.5rem 1rem;
   border-radius: var(--radius);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
-.card:hover { border-color: var(--color-accent); text-decoration: none; }
-.card-icon {
-  width: 30px; height: 30px;
-  color: var(--color-accent);
+.card:hover {
+  text-decoration: none;
   background: var(--color-accent-soft);
-  border-radius: 8px;
-  padding: 6px;
+  transform: translateY(-2px);
 }
-.card-icon :deep(svg) { width: 100%; height: 100%; }
-.card-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
-.card-desc { font-size: 0.85rem; color: var(--color-ink-soft); }
+.card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+.card-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 28px;
+  height: 2px;
+  background: var(--color-accent);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.2s ease;
+}
+.card:hover .card-title::after { transform: translateX(-50%) scaleX(1); }
+.card-desc {
+  font-size: 0.88rem;
+  color: var(--color-ink-soft);
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .grid { grid-template-columns: 1fr; }
+}
 
 .fetch-error {
   max-width: 620px;
@@ -92,14 +128,14 @@ function goToFirstPage() {
 
     <div class="grid">
       <router-link
-        v-for="cat in docsStore.categories"
+        v-for="(cat, i) in docsStore.categories"
         :key="cat.id"
         :to="`/docs/${cat.slug}`"
         class="card"
       >
-        <span v-html="icons[cat.icon]" class="card-icon"></span>
-        <span class="card-title">{{ cat.title }}</span>
-        <span class="card-desc">{{ cat.description }}</span>
+        <span class="card-eyebrow">BAB {{ formatIndex(i) }}</span>
+        <span class="card-title">{{ cat.name }}</span>
+        <span v-if="cat.description" class="card-desc">{{ cat.description }}</span>
       </router-link>
     </div>
   </div>
