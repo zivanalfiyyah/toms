@@ -25,6 +25,7 @@ class AuthController extends Controller
         ]);
 
         $user->assignRole('viewer');
+        $user->load('roles');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -49,6 +50,7 @@ class AuthController extends Controller
             ]);
         }
 
+        $user->load('roles');
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -68,6 +70,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user()->load('roles'));
     }
 }
