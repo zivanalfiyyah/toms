@@ -5,6 +5,8 @@ import { Editor } from '@tiptap/core'
 import { StarterKit } from '@tiptap/starter-kit'
 import { TableKit } from '@tiptap/extension-table'
 import { Image } from '@tiptap/extension-image'
+import { Underline } from '@tiptap/extension-underline'
+import { Link } from '@tiptap/extension-link'
 import api from '../api'
 import { useAuthStore } from '../stores/auth'
 
@@ -17,7 +19,6 @@ const props = defineProps({
 const router = useRouter()
 const auth = useAuthStore()
 
-// Kalau ada child -> lagi edit konten child. Kalau tidak -> lagi edit halaman "page" itu sendiri.
 const backTo = props.child
   ? `/docs/${props.category}/${props.page}/${props.child}`
   : `/docs/${props.category}/${props.page}`
@@ -40,11 +41,9 @@ onMounted(async () => {
   }
 
   try {
-    // Cari id halaman dari struktur kategori (category > page > child).
-    const catRes = await api.get('/categories')
     const cat = catRes.data.find((c) => c.slug === props.category)
     const parentPage = cat?.pages?.find((p) => p.slug === props.page)
-    // Kalau ada child slug, target-nya child. Kalau tidak, target-nya page itu sendiri.
+
     const target = props.child
       ? parentPage?.children?.find((c) => c.slug === props.child)
       : parentPage
@@ -55,7 +54,6 @@ onMounted(async () => {
       return
     }
 
-    // Ambil isi lengkap (termasuk konten Tiptap JSON) lewat id halaman.
     const detailRes = await api.get(`/pages/${target.id}`)
     const detail = detailRes.data
 
@@ -69,6 +67,8 @@ onMounted(async () => {
         StarterKit,
         TableKit.configure({ table: { resizable: true } }),
         Image,
+        Underline,
+        Link.configure({ openOnClick: false }),
       ],
       content: detail.content ?? '',
       onTransaction: () => {
@@ -81,6 +81,76 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+const imageInputEl = ref(null)
+const docxInputEl = ref(null)
+const importing = ref(false)
+
+function setLink() {
+  const previousUrl = editor.getAttributes('link').href
+  const url = window.prompt('Masukkan URL link', previousUrl || 'https://')
+  if (url === null) return
+  if (url === '') {
+    editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    return
+  }
+  editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+}
+
+function triggerImagePick() {
+  imageInputEl.value?.click()
+}
+
+async function handleImagePick(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+    const res = await api.post('/pages/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    editor.chain().focus().setImage({ src: res.data.url }).run()
+  } catch (err) {
+    errorMessage.value = 'Gagal upload gambar: ' + (err.response?.data?.message || err.message)
+  }
+}
+
+function triggerDocxPick() {
+  docxInputEl.value?.click()
+}
+
+async function handleDocxPick(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  if (!pageId.value) {
+    errorMessage.value = 'Halaman belum termuat, coba lagi sebentar.'
+    return
+  }
+
+  const confirmed = window.confirm('Import ini akan MENGGANTI seluruh isi konten halaman ini dengan isi file Word yang diupload. Lanjutkan?')
+  if (!confirmed) return
+
+  importing.value = true
+  errorMessage.value = ''
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('_method', 'PUT')
+    const res = await api.post(`/pages/${pageId.value}/import`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    const updatedPage = res.data.page
+    title.value = updatedPage.title
+    editor.commands.setContent(updatedPage.content ?? '')
+  } catch (err) {
+    errorMessage.value = 'Gagal import: ' + (err.response?.data?.message || err.message)
+  } finally {
+    importing.value = false
+  }
+}
 
 onBeforeUnmount(() => {
   editor?.destroy()
@@ -128,6 +198,7 @@ input[type="text"], select {
   background: var(--color-bg); cursor: pointer; font-size: 0.85rem;
 }
 .toolbar button.is-active { background: var(--color-accent); color: #fff; }
+.toolbar-sep { width: 1px; align-self: stretch; background: var(--color-border); margin: 0 2px; }
 
 .tiptap-editor {
   border: 1px solid var(--color-border); border-radius: 0 0 var(--radius) var(--radius);
@@ -151,6 +222,13 @@ input[type="text"], select {
   background: transparent; cursor: pointer;
 }
 .error { color: #d33; margin-bottom: 1rem; }
+.import-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.btn-import {
+  padding: 0.5rem 1rem; border: 1px solid var(--color-accent); border-radius: var(--radius);
+  background: transparent; color: var(--color-accent); font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.btn-import:disabled { opacity: 0.6; cursor: not-allowed; }
+.import-hint { font-size: 0.78rem; color: var(--color-ink-soft); }
 </style>
 
 <template>
@@ -166,6 +244,14 @@ input[type="text"], select {
         <input type="text" v-model="title" />
       </div>
 
+      <div class="field import-row">
+        <button type="button" class="btn-import" :disabled="importing" @click="triggerDocxPick">
+          {{ importing ? 'Meng-import...' : 'Import Ulang dari Word (.docx)' }}
+        </button>
+        <input ref="docxInputEl" type="file" accept=".docx" style="display:none" @change="handleDocxPick" />
+        <span class="import-hint">Ini akan mengganti seluruh isi konten di bawah dengan isi file Word yang diupload.</span>
+      </div>
+
       <div class="field">
         <label>Status</label>
         <select v-model="status">
@@ -178,12 +264,25 @@ input[type="text"], select {
         <label>Konten</label>
         <div class="toolbar">
           <span style="display:none">{{ editorVersion }}</span>
-          <button type="button" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()">Bold</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()">Italic</button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }" @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>
           <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()"><b>B</b></button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()"><i>I</i></button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()"><u>U</u></button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor.chain().focus().toggleStrike().run()"><s>S</s></button>
+          <span class="toolbar-sep"></span>
           <button type="button" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">List</button>
           <button type="button" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">1. List</button>
           <button type="button" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor.chain().focus().toggleBlockquote().run()">Quote</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" @click="setLink">Link</button>
+          <button type="button" @click="triggerImagePick">Gambar</button>
+          <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
+          <span class="toolbar-sep"></span>
+          <button type="button" @click="editor.chain().focus().undo().run()">Undo</button>
+          <button type="button" @click="editor.chain().focus().redo().run()">Redo</button>
         </div>
         <div ref="editorEl" class="tiptap-editor"></div>
       </div>

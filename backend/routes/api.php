@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('permission:manage-pages')->group(function () {
         Route::post('/pages', [PageController::class, 'store']);
+        Route::post('/pages/upload-image', [PageController::class, 'uploadImage']);
         Route::post('/pages/import', [ImportController::class, 'store']);
         Route::put('/pages/{pages}/import', [ImportController::class, 'update']);
         Route::put('/pages/{page}', [PageController::class, 'update']);

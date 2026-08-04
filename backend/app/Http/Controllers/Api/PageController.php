@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Page;
 use Illuminate\Support\Str;
 use App\Http\Resources\PageResource;
+use Illuminate\Support\Facades\Storage;
 
 class PageController extends Controller
 {
@@ -99,6 +100,18 @@ class PageController extends Controller
         $page->delete();
 
         return response()->json(['message' => 'Page deleted']);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120',
+        ]);
+
+        $path = $request->file('image')->store('editor-image', 'public');
+        $url = url(Storage::url($path));
+
+        return response()->json(['url' => $url]);
     }
 
     private function renderHtml(array $content): string
