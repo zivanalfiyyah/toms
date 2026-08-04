@@ -10,19 +10,17 @@ import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({
   category: { type: String, required: true },
-  page: { type: [String, Object], required: true }, // PERBAIKAN 1: object -> Object
+  page: { type: [String, Object], required: true }, 
   child: { type: String, required: true }
 })
 
 const docsStore = useDocsStore()
 const auth = useAuthStore()
 
-// PERBAIKAN 2: Mengambil string slug page secara aman
 const pageSlug = computed(() => {
   return typeof props.page === 'object' ? props.page.slug : props.page
 })
 
-// Mengubah nama computed artikel agar tidak bentrok dengan prop 'page'
 const docData = computed(() => docsStore.currentPage)
 const copied = ref(false)
 
@@ -32,7 +30,6 @@ function load() {
 onMounted(load)
 watch(() => [props.category, pageSlug.value, props.child], load)
 
-// PERBAIKAN 3: Mencari posisi berdasarkan child slug di 3-level flatPages
 const currentIndex = computed(() => {
   return docsStore.flatPages.findIndex(
     (p) => p.categorySlug === props.category && p.pageSlug === pageSlug.value && p.slug === props.child
@@ -83,10 +80,8 @@ async function copyPage() {
         
         <TiptapRenderer :content="docData.content" />
 
-        <!-- EditPageLink dengan URL 3-level, hanya untuk yang punya hak edit -->
-        <EditPageLink v-if="auth.canEdit" :to="`/docs/${category}/${pageSlug}/${child}/edit`" />
+        <EditPageLink :to="`/docs/${category}/${pageSlug}/${child}/edit`" />
 
-        <!-- PERBAIKAN 4: Pager Navigasi dengan URL 3-level -->
         <nav class="pager">
           <router-link 
             v-if="prevPage" 
