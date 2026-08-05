@@ -4,6 +4,8 @@ import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
+import TiptapRenderer from '../components/TiptapRenderer.vue'
+import TableOfContents from '../components/TableOfContents.vue'
 
 const props = defineProps({ 
   category: String, 
@@ -57,8 +59,12 @@ const slugify = (text) => {
 
         <h1>{{ page.title }}</h1>
         <p class="lead">{{ page.description }}</p>
-        
-        <div class="single-page-content" v-html="page.content_html"></div>
+
+        <!-- PERBAIKAN: pakai page.content (JSON) lewat TiptapRenderer supaya heading
+             otomatis dapat id (dibutuhkan agar "Pada halaman ini" bisa scroll ke posisinya).
+             Fallback ke content_html mentah kalau page.content tidak tersedia. -->
+        <TiptapRenderer v-if="page.content" :content="page.content" class="single-page-content" />
+        <div v-else class="single-page-content" v-html="page.content_html"></div>
 
         <EditPageLink :to="`/docs/${category}/${props.page}/edit`" />
 
@@ -101,14 +107,8 @@ const slugify = (text) => {
         </nav>
       </div>
 
-      <aside class="toc">
-        <p class="toc-title">Pada halaman ini</p>
-        <ul>
-          <li v-for="c in page.children" :key="c.id" :id="c.slug">
-            <a :href="`#${c.slug}`">{{ c.title }}</a>
-          </li>
-        </ul>
-      </aside>
+      <!-- PERBAIKAN: TOC sekarang baca heading asli dari page.content, bukan page.children -->
+      <TableOfContents :content="page.content" />
     </template>
   </div>
 </template>
@@ -213,36 +213,6 @@ const slugify = (text) => {
   font-family: inherit !important;
 }
 
-.toc {
-  width: 200px;
-  flex-shrink: 0;
-  padding: 1.75rem 0.5rem;
-  position: sticky;
-  top: 4.5rem;
-  align-self: flex-start;
-}
-.toc-title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-ink-soft);
-  margin-bottom: 0.6rem;
-}
-.toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--color-border); }
-.toc li { margin-bottom: 0.35rem; }
-.toc a {
-  display: block;
-  padding: 0.1rem 0 0.1rem 0.75rem;
-  margin-left: -2px;
-  border-left: 2px solid transparent;
-  font-size: 0.85rem;
-  color: var(--color-ink-soft);
-}
-.toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
-
-
 .pager {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -276,8 +246,6 @@ const slugify = (text) => {
   font-weight: 600;
   color: var(--color-ink);
 }
-
-@media (max-width: 1100px) { .toc { display: none; } }
 
 .fetch-error {
   padding: 1rem 1.2rem;
