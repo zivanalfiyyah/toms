@@ -31,10 +31,8 @@ class ImportController extends Controller
         ]);
 
         try {
-            $bodyHtml = $this->extractHtmlFromDocx($path);
+            $bodyHtml = $this->extractHtmlFromDocx($path, $documentImport->id);
             $bodyHtml = $this->cleanWordHtml($bodyHtml);
-
-            $bodyHtml = $this->extractAndSaveImages($bodyHtml, $documentImport->id);
             $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
 
             $page = Page::create([
@@ -94,9 +92,8 @@ class ImportController extends Controller
         ]);
 
         try {
-            $bodyHtml = $this->extractHtmlFromDocx($path);
+            $bodyHtml = $this->extractHtmlFromDocx($path, $documentImport->id);
             $bodyHtml = $this->cleanWordHtml($bodyHtml);
-            $bodyHtml = $this->extractAndSaveImages($bodyHtml, $documentImport->id);
             $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
 
             $pageModel->update([
@@ -129,7 +126,7 @@ class ImportController extends Controller
         }
     }
 
-    private function extractHtmlFromDocx(string $filePath): string
+    private function extractHtmlFromDocx(string $filePath, int $importId): string
     {
         $fullPath = storage_path('app/private/' . $filePath);
         if (!file_exists($fullPath)) {
@@ -148,11 +145,24 @@ class ImportController extends Controller
         $htmlWriter->save('php://output');
         $fullHtml = ob_get_clean();
 
-        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $fullHtml, $matches)) {
-            return $matches[1];
+        $fullHtml = $this->extractAndSaveImages($fullHtml, $importId);
+
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($fullHtml, LIBXML_HTML_NODEFDTD | LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+        if (!$body) {
+            return $fullHtml;
         }
 
-        return $fullHtml;
+        $innerHtml = '';
+        foreach ($body->childNodes as $child) {
+            $innerHtml .= $dom->saveHTML($child);
+        }
+
+        return $innerHtml;
     }
 
     private function injectBulletsToPhpWord($container): void
@@ -205,12 +215,12 @@ private function cleanWordHtml(string $html): string
         );
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*font-style:\s*italic[^"]*"[^>]*>(.*?)<\/span>/is',
-            fn($m) => '<em>' . $m[2] . '</em>',
+            fn($m) => '<em>' . $m[1] . '</em>',
             $html
         );
         $html = preg_replace_callback(
             '/<span[^>]*style="[^"]*text-decoration:\s*underline[^"]*"[^>]*>(.*?)<\/span>/is',
-            fn($m) => '<u>' . $m[2] . '</u>',
+            fn($m) => '<u>' . $m[1] . '</u>',
             $html
         );
 
@@ -266,25 +276,52 @@ private function cleanWordHtml(string $html): string
             LIBXML_HTML_NODEFDTD
         );
 
-        $content = [];
-
         $body = $dom->getElementsByTagName('body')->item(0);
-        
-        if ($body) {
-            foreach ($body->childNodes as $node) {
-                if ($node->nodeType === XML_ELEMENT_NODE) {
-                    $converted = $this->convertNode($node);
-                    if (!empty($converted)) {
-                        $content[] = $converted;
-                    }
-                }
-            }
-        }
+
+        $content = $body ? $this->flattenNodes($body) : [];
 
         return [
             'type' => 'doc',
             'content' => $content,
         ];
+    }
+
+    /**
+     * Walks the direct children of $parent, converting recognised content
+     * tags (p, headings, table, lists, img) into Tiptap nodes. Generic
+     * wrapper tags that carry no Tiptap meaning of their own (div, section,
+     * etc — PhpWord commonly wraps a whole page/section in one of these for
+     * page-size CSS) are transparently unwrapped: we recurse into them and
+     * splice their converted children into the result, instead of dropping
+     * everything inside them.
+     */
+    private function flattenNodes(\DOMNode $parent): array
+    {
+        $content = [];
+        $recognised = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'table', 'ul', 'ol'];
+
+        foreach ($parent->childNodes as $node) {
+            if ($node->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+
+            $tag = strtolower($node->nodeName);
+
+            if (in_array($tag, $recognised)) {
+                $converted = $this->convertNode($node);
+                if (!empty($converted)) {
+                    $content[] = $converted;
+                }
+                continue;
+            }
+
+            $nested = $this->flattenNodes($node);
+            if (!empty($nested)) {
+                array_push($content, ...$nested);
+            }
+        }
+
+        return $content;
     }
 
    private function convertNode(\DOMNode $node): array
@@ -315,7 +352,7 @@ private function cleanWordHtml(string $html): string
         }
 
         if ($tag === 'table') {
-            return $this->convertTable($node);
+            return $this->convertTable($node) ?? [];
         }
 
         if (in_array($tag, ['ul', 'ol'])) {
@@ -465,23 +502,32 @@ private function cleanWordHtml(string $html): string
 
     private function extractAndSaveImages(string $html, int $importId): string
     {
+        ini_set('pcre.backtrack_limit', '10000000');
+
         return preg_replace_callback(
-            '/<img[^>]+src=["\']data:(image\/[a-zA-Z]+);base64,([^"\']+)["\'][^>]*>/i',
+            '/<img[^>]+src=["\']data:(image\/[a-zA-Z0-9\+\-]+);base64,\s*([^"\']+)["\'][^>]*>/i',
             function ($matches) use ($importId) {
                 $mimeType = $matches[1];
-                $base64Data = $matches[2];
-                $extension = str_replace('image/', '', $mimeType);
-                $extension = $extension === 'jpeg' ? 'jpg' : $extension;
+        
+                $base64Data = preg_replace('/\s+/', '', $matches[2]);
 
-                $filename = 'import/' . $importId . '/' . uniqid('img_') . '.' . $extension;
+                $extension = str_replace(['image/', 'jpeg', 'pjpeg'], ['', 'jpg', 'jpg'], $mimeType);
+                if (empty($extension)) {
+                    $extension = 'jpg';
+                }
 
-                Storage::disk('public')->put($filename, base64_decode($base64Data));
+                $decodedData = base64_decode($base64Data, true);
 
-                $url = url(Storage::url($filename)); 
+                if ($decodedData !== false) {
+                    $filename = 'import/' . $importId . '/' . uniqid('img_') . '.' . $extension;
+                    Storage::disk('public')->put($filename, $decodedData);
+                    $url = url(Storage::url($filename));
+                    return '<img src="' . $url . '">';
+                }
 
-                return '<img src="' . $url . '">';
+                return '';
             },
             $html
-        );
+        ) ?? $html;
     }
 }

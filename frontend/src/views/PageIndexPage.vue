@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
+import EditPageLink from '../components/EditPageLink.vue'
 
 const props = defineProps({ 
   category: String, 
@@ -59,6 +60,8 @@ const slugify = (text) => {
         
         <div class="single-page-content" v-html="page.content_html"></div>
 
+        <EditPageLink :to="`/docs/${category}/${props.page}/edit`" />
+
         <template v-if="page.children && page.children.length > 0">
           <h2 class="subbab-title">Subbab</h2>
           <ul class="subbab-list">
@@ -66,7 +69,6 @@ const slugify = (text) => {
               <router-link :to="`/docs/${category}/${props.page}/${c.slug}`">{{ c.title }}</router-link>
               <span> — {{ c.description }}</span>
               <router-link
-                v-if="auth.canEdit"
                 :to="`/docs/${category}/${props.page}/${c.slug}/edit`"
                 class="edit-item-link"
                 title="Ubah halaman ini"
@@ -203,7 +205,7 @@ const slugify = (text) => {
 }
 
 .category-content :deep(.single-page-content p span) {
-  display: inline-block;
+  display: inline;
 }
 
 .category-content :deep(.single-page-content),

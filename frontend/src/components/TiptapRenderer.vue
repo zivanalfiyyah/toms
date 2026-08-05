@@ -14,7 +14,7 @@ const props = defineProps({
 
 const extensions = [
   StarterKit,
-  Image,
+  Image.configure({ inline: true }),
   Table.configure({ resizable: true }),
   TableRow,
   TableHeader,
@@ -65,31 +65,31 @@ const html = computed(() => {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
-  background-color: #ffffff;
+  background-color: transparent;
   border-radius: 8px; 
   overflow: hidden;
 }
 
 .tiptap-content :deep(th),
 .tiptap-content :deep(td) {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border);
   padding: 10px 14px; 
   text-align: left;
-  vertical-align: top; 
+  vertical-align: top;
+  color: var(--color-ink);
 }
 
 .tiptap-content :deep(th) {
-  background-color: #f1f5f9;
+  background-color: rgba(128, 128, 128, 0.15);
   font-weight: bold;
-  color: #1e293b; 
 }
 
 .tiptap-content :deep(tbody tr:nth-child(even)) {
-  background-color: #f8fafc; 
+  background-color: rgba(128, 128, 128, 0.04);
 }
 
 .tiptap-content :deep(tbody tr:hover) {
-  background-color: #f1f5f9;
+  background-color: rgba(128, 128, 128, 0.08);
 }
 
 .tiptap-content :deep(img) {

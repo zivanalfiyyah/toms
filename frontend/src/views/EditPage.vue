@@ -1,10 +1,15 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Editor } from '@tiptap/core'
+import { Editor } from '@tiptap/core' 
 import { StarterKit } from '@tiptap/starter-kit'
-import { TableKit } from '@tiptap/extension-table'
-import { Image } from '@tiptap/extension-image'
+
+import { Table as OriginalTable } from '@tiptap/extension-table'
+import { TableRow as OriginalTableRow } from '@tiptap/extension-table-row'
+import { TableCell as OriginalTableCell } from '@tiptap/extension-table-cell'
+import { TableHeader as OriginalTableHeader } from '@tiptap/extension-table-header'
+import { Image as OriginalImage } from '@tiptap/extension-image'
+
 import { Underline } from '@tiptap/extension-underline'
 import { Link } from '@tiptap/extension-link'
 import api from '../api'
@@ -32,6 +37,59 @@ const saving = ref(false)
 const errorMessage = ref('')
 const editorVersion = ref(0) 
 
+
+const CustomTable = OriginalTable.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: { default: null, parseHTML: el => el.getAttribute('style'), renderHTML: attrs => attrs.style ? { style: attrs.style } : {} },
+      border: { default: null, parseHTML: el => el.getAttribute('border'), renderHTML: attrs => attrs.border ? { border: attrs.border } : {} },
+      width: { default: null, parseHTML: el => el.getAttribute('width'), renderHTML: attrs => attrs.width ? { width: attrs.width } : {} },
+    }
+  }
+})
+
+const CustomTableRow = OriginalTableRow.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: { default: null, parseHTML: el => el.getAttribute('style'), renderHTML: attrs => attrs.style ? { style: attrs.style } : {} }
+    }
+  }
+})
+
+const CustomTableCell = OriginalTableCell.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: { default: null, parseHTML: el => el.getAttribute('style'), renderHTML: attrs => attrs.style ? { style: attrs.style } : {} },
+      width: { default: null, parseHTML: el => el.getAttribute('width'), renderHTML: attrs => attrs.width ? { width: attrs.width } : {} },
+      valign: { default: null, parseHTML: el => el.getAttribute('valign'), renderHTML: attrs => attrs.valign ? { valign: attrs.valign } : {} }
+    }
+  }
+})
+
+const CustomTableHeader = OriginalTableHeader.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: { default: null, parseHTML: el => el.getAttribute('style'), renderHTML: attrs => attrs.style ? { style: attrs.style } : {} },
+      width: { default: null, parseHTML: el => el.getAttribute('width'), renderHTML: attrs => attrs.width ? { width: attrs.width } : {} }
+    }
+  }
+})
+
+const CustomImage = OriginalImage.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: { default: null, parseHTML: el => el.getAttribute('style'), renderHTML: attrs => attrs.style ? { style: attrs.style } : {} },
+      class: { default: null, parseHTML: el => el.getAttribute('class'), renderHTML: attrs => attrs.class ? { class: attrs.class } : {} }
+    }
+  }
+})
+
+
 let editor = null
 
 onMounted(async () => {
@@ -41,6 +99,10 @@ onMounted(async () => {
   }
 
   try {
+    const catRes = await api.get('/categories', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      params: { _ts: Date.now() },
+    })
     const cat = catRes.data.find((c) => c.slug === props.category)
     const parentPage = cat?.pages?.find((p) => p.slug === props.page)
 
@@ -61,23 +123,29 @@ onMounted(async () => {
     title.value = detail.title
     status.value = detail.status ?? 'draft'
 
+    loading.value = false
+    await nextTick() 
+
     editor = new Editor({
       element: editorEl.value,
       extensions: [
         StarterKit,
-        TableKit.configure({ table: { resizable: true } }),
-        Image,
+        CustomTable.configure({ resizable: true }),
+        CustomTableRow,
+        CustomTableHeader,
+        CustomTableCell,
+        CustomImage.configure({ allowBase64: true }), 
         Underline,
         Link.configure({ openOnClick: false }),
       ],
-      content: detail.content ?? '',
+      content: detail.content_html || '<p></p>', 
       onTransaction: () => {
         editorVersion.value++
       },
     })
   } catch (err) {
+    console.error('EditPage load error:', err)
     errorMessage.value = err.response?.data?.message || 'Gagal memuat halaman.'
-  } finally {
     loading.value = false
   }
 })
@@ -87,6 +155,7 @@ const docxInputEl = ref(null)
 const importing = ref(false)
 
 function setLink() {
+  if (!editor) return
   const previousUrl = editor.getAttributes('link').href
   const url = window.prompt('Masukkan URL link', previousUrl || 'https://')
   if (url === null) return
@@ -104,7 +173,7 @@ function triggerImagePick() {
 async function handleImagePick(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
-  if (!file) return
+  if (!file || !editor) return
   try {
     const formData = new FormData()
     formData.append('image', file)
@@ -144,9 +213,13 @@ async function handleDocxPick(e) {
     })
     const updatedPage = res.data.page
     title.value = updatedPage.title
-    editor.commands.setContent(updatedPage.content ?? '')
+    
+    if (editor) {
+      editor.commands.setContent(updatedPage.content_html || updatedPage.content || '<p></p>')
+    }
   } catch (err) {
-    errorMessage.value = 'Gagal import: ' + (err.response?.data?.message || err.message)
+    const data = err.response?.data
+    errorMessage.value = 'Gagal import: ' + (data?.error || data?.message || err.message) + (data?.line ? ` (baris ${data.line})` : '')
   } finally {
     importing.value = false
   }
@@ -165,6 +238,7 @@ async function handleSave() {
       title: title.value,
       status: status.value,
       content: editor.getJSON(),
+      content_html: editor.getHTML(),
     })
     router.push(backTo)
   } catch (err) {
@@ -205,11 +279,40 @@ input[type="text"], select {
   min-height: 300px; padding: 1rem; background: var(--color-bg);
 }
 .tiptap-editor :deep(.ProseMirror) { outline: none; min-height: 280px; }
-.tiptap-editor :deep(table) { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-.tiptap-editor :deep(td), .tiptap-editor :deep(th) {
-  border: 1px solid var(--color-border); padding: 0.4rem 0.6rem; min-width: 60px;
+
+.tiptap-editor :deep(table) {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
 }
-.tiptap-editor :deep(th) { background: var(--color-surface); font-weight: 600; }
+
+.tiptap-editor :deep(td), 
+.tiptap-editor :deep(th) {
+  border: 1px solid var(--color-border, #ccc);
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 8px;
+  vertical-align: top;
+  position: relative;
+}
+
+.tiptap-editor :deep(th) {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-align: left;
+}
+
+.tiptap-editor :deep(.column-resize-handle) {
+  background-color: #adf;
+  bottom: -2px;
+  position: absolute;
+  right: -2px;
+  pointer-events: none;
+  top: 0;
+  width: 4px;
+}
 .tiptap-editor :deep(img) { max-width: 100%; height: auto; border-radius: 6px; }
 
 .actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }

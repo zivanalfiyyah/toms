@@ -20,7 +20,9 @@ class CategoryController extends Controller
             ->orderBy('order')
             ->get();
 
-        return CategoryResource::collection($categories);
+        return CategoryResource::collection($categories)
+            ->response()
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
     /**
