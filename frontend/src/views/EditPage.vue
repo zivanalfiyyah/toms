@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, ref, shallowRef, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Editor } from '@tiptap/core' 
 import { StarterKit } from '@tiptap/starter-kit'
@@ -90,7 +90,7 @@ const CustomImage = OriginalImage.extend({
 })
 
 
-let editor = null
+const editor = shallowRef(null)
 
 onMounted(async () => {
   if (!auth.canEdit) {
@@ -124,25 +124,35 @@ onMounted(async () => {
     status.value = detail.status ?? 'draft'
 
     loading.value = false
-    await nextTick() 
+    await nextTick()
 
-    editor = new Editor({
-      element: editorEl.value,
-      extensions: [
-        StarterKit,
-        CustomTable.configure({ resizable: true }),
-        CustomTableRow,
-        CustomTableHeader,
-        CustomTableCell,
-        CustomImage.configure({ allowBase64: true }), 
-        Underline,
-        Link.configure({ openOnClick: false }),
-      ],
-      content: detail.content_html || '<p></p>', 
-      onTransaction: () => {
-        editorVersion.value++
-      },
-    })
+    // Editor initialization is wrapped in its own try/catch so that a
+    // problem parsing content_html (e.g. malformed table HTML from a
+    // docx import) doesn't get mislabeled as "Gagal memuat halaman"
+    // and is easy to spot in the console.
+    try {
+      editor.value = new Editor({
+        element: editorEl.value,
+        extensions: [
+          StarterKit,
+          CustomTable.configure({ resizable: true }),
+          CustomTableRow,
+          CustomTableHeader,
+          CustomTableCell,
+          CustomImage.configure({ allowBase64: true }),
+          Underline,
+          Link.configure({ openOnClick: false }),
+        ],
+        content: detail.content_html || '<p></p>',
+        onTransaction: () => {
+          editorVersion.value++
+        },
+      })
+    } catch (editorErr) {
+      console.error('EditPage: Tiptap Editor failed to initialize with this page content:', editorErr)
+      console.error('content_html yang gagal di-parse:', detail.content_html)
+      errorMessage.value = 'Gagal memuat editor konten. Kemungkinan ada struktur HTML (mis. tabel) di halaman ini yang tidak didukung editor. Detail: ' + editorErr.message
+    }
   } catch (err) {
     console.error('EditPage load error:', err)
     errorMessage.value = err.response?.data?.message || 'Gagal memuat halaman.'
@@ -155,15 +165,15 @@ const docxInputEl = ref(null)
 const importing = ref(false)
 
 function setLink() {
-  if (!editor) return
-  const previousUrl = editor.getAttributes('link').href
+  if (!editor.value) return
+  const previousUrl = editor.value.getAttributes('link').href
   const url = window.prompt('Masukkan URL link', previousUrl || 'https://')
   if (url === null) return
   if (url === '') {
-    editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    editor.value.chain().focus().extendMarkRange('link').unsetLink().run()
     return
   }
-  editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+  editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
 function triggerImagePick() {
@@ -173,14 +183,14 @@ function triggerImagePick() {
 async function handleImagePick(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
-  if (!file || !editor) return
+  if (!file || !editor.value) return
   try {
     const formData = new FormData()
     formData.append('image', file)
     const res = await api.post('/pages/upload-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    editor.chain().focus().setImage({ src: res.data.url }).run()
+    editor.value.chain().focus().setImage({ src: res.data.url }).run()
   } catch (err) {
     errorMessage.value = 'Gagal upload gambar: ' + (err.response?.data?.message || err.message)
   }
@@ -214,8 +224,8 @@ async function handleDocxPick(e) {
     const updatedPage = res.data.page
     title.value = updatedPage.title
     
-    if (editor) {
-      editor.commands.setContent(updatedPage.content_html || updatedPage.content || '<p></p>')
+    if (editor.value) {
+      editor.value.commands.setContent(updatedPage.content_html || updatedPage.content || '<p></p>')
     }
   } catch (err) {
     const data = err.response?.data
@@ -226,19 +236,46 @@ async function handleDocxPick(e) {
 }
 
 onBeforeUnmount(() => {
-  editor?.destroy()
+  editor.value?.destroy()
 })
 
+// Repairs a ProseMirror JSON node tree before it's persisted, dropping
+// any text node without a valid `text` string (the cause of the
+// "Invalid text node in JSON" error seen when viewing a page) so a
+// corrupted page gets cleaned up the moment it's saved from the editor.
+function sanitizeNode(node) {
+  if (!node || typeof node !== 'object' || Array.isArray(node)) return null
+  if (typeof node.type !== 'string') return null
+
+  const clean = { ...node }
+
+  if (clean.type === 'text') {
+    if (typeof clean.text !== 'string' || clean.text.length === 0) return null
+    return clean
+  }
+
+  if (Array.isArray(clean.content)) {
+    clean.content = clean.content.map(sanitizeNode).filter(Boolean)
+  }
+
+  if (Array.isArray(clean.marks)) {
+    clean.marks = clean.marks.filter(m => m && typeof m.type === 'string')
+  }
+
+  return clean
+}
+
 async function handleSave() {
-  if (!editor) return
+  if (!editor.value) return
   saving.value = true
   errorMessage.value = ''
   try {
+    const cleanContent = sanitizeNode(editor.value.getJSON()) || { type: 'doc', content: [] }
     await api.put(`/pages/${pageId.value}`, {
       title: title.value,
       status: status.value,
-      content: editor.getJSON(),
-      content_html: editor.getHTML(),
+      content: cleanContent,
+      content_html: editor.value.getHTML(),
     })
     router.push(backTo)
   } catch (err) {
@@ -367,25 +404,25 @@ input[type="text"], select {
         <label>Konten</label>
         <div class="toolbar">
           <span style="display:none">{{ editorVersion }}</span>
-          <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }" @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }" @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }" @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
           <span class="toolbar-sep"></span>
-          <button type="button" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor.chain().focus().toggleBold().run()"><b>B</b></button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor.chain().focus().toggleItalic().run()"><i>I</i></button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor.chain().focus().toggleUnderline().run()"><u>U</u></button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor.chain().focus().toggleStrike().run()"><s>S</s></button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()"><b>B</b></button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()"><i>I</i></button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()"><u>U</u></button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()"><s>S</s></button>
           <span class="toolbar-sep"></span>
-          <button type="button" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">List</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">1. List</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor.chain().focus().toggleBlockquote().run()">Quote</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()">List</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()">1. List</button>
+          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()">Quote</button>
           <span class="toolbar-sep"></span>
-          <button type="button" @click="setLink">Link</button>
-          <button type="button" @click="triggerImagePick">Gambar</button>
+          <button type="button" :disabled="!editor" @click="setLink">Link</button>
+          <button type="button" :disabled="!editor" @click="triggerImagePick">Gambar</button>
           <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
           <span class="toolbar-sep"></span>
-          <button type="button" @click="editor.chain().focus().undo().run()">Undo</button>
-          <button type="button" @click="editor.chain().focus().redo().run()">Redo</button>
+          <button type="button" :disabled="!editor" @click="editor?.chain().focus().undo().run()">Undo</button>
+          <button type="button" :disabled="!editor" @click="editor?.chain().focus().redo().run()">Redo</button>
         </div>
         <div ref="editorEl" class="tiptap-editor"></div>
       </div>

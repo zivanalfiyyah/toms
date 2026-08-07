@@ -161,7 +161,6 @@ function slugify(text) {
 
         <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
           <div class="single-page-content" v-html="cat.pages[0].content_html"></div>
-          <EditPageLink :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" />
         </template>
 
         <template v-else>
@@ -180,6 +179,11 @@ function slugify(text) {
             </li>
           </ul>
         </template>
+
+        <EditPageLink 
+          v-if="cat.pages?.length" 
+          :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" 
+        />
 
         <nav class="pager">
           <router-link
