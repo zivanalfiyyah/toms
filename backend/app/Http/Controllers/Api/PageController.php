@@ -35,14 +35,18 @@ class PageController extends Controller
             'parent_id' => 'nullable|exists:pages,id',
             'title' => 'required|string|max:255',
             'content' => 'required|array',
-            'content_html' => 'required|string', 
+            'content_html' => 'sometimes|string', 
             'status' => 'in:draft,published',
             'order' => 'nullable|integer',
         ]);
 
         $validated['slug'] = Str::slug($validated['title']);
     
-        $validated['content_text'] = strip_tags($validated['content_html']);
+        if (isset($validated['content_html'])) {
+            $validated['content_text'] = strip_tags($validated['content_html']);
+        } else {
+            $validated['content_text'] = '';
+}
         $validated['created_by'] = $request->user()->id;
 
         $page = Page::create($validated);

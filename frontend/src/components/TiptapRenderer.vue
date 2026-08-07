@@ -1,25 +1,9 @@
 <script setup>
 import { computed } from 'vue'
-import { generateHTML } from '@tiptap/core'
-import { StarterKit } from '@tiptap/starter-kit'
-import { Image } from '@tiptap/extension-image'
-import { Table } from '@tiptap/extension-table'
-import { TableRow } from '@tiptap/extension-table-row'
-import { TableCell } from '@tiptap/extension-table-cell'
-import { TableHeader } from '@tiptap/extension-table-header'
 
 const props = defineProps({
   content: { type: [Object, String], required: true }
 })
-
-const extensions = [
-  StarterKit,
-  Image.configure({ inline: true }),
-  Table.configure({ resizable: true }),
-  TableRow,
-  TableHeader,
-  TableCell
-]
 
 function slugify(text) {
   if (!text) return ''
@@ -28,17 +12,15 @@ function slugify(text) {
 
 const html = computed(() => {
   try {
-    let jsonContent = props.content
+    let raw = props.content
 
-    if (typeof jsonContent === 'string') {
-      jsonContent = JSON.parse(jsonContent)
+    if (typeof raw === 'object' || (typeof raw === 'string' && raw.trim().startsWith('{'))) {
+      return '<p style="color:red; background:#ffebeb; padding:10px; border-radius:6px;"><b>⚠️ STOP!</b> Data yang dikirim ke komponen ini masih JSON. Tolong buka file halaman utamanya (Parent), dan ubah kodingannya jadi: <br><code>&lt;TiptapRenderer :content="namavariabel.content_html" /&gt;</code></p>'
     }
 
-    if (!jsonContent || !jsonContent.content || jsonContent.content.length === 0) {
+    if (!raw || raw.trim() === '') {
       return '<p><em>Tidak ada konten.</em></p>'
     }
-
-    let raw = generateHTML(jsonContent, extensions)
 
     raw = raw.replace(/<h([1-6])>(.*?)<\/h\1>/g, (m, level, text) => {
       return `<h${level} id="${slugify(text)}">${text}</h${level}>`

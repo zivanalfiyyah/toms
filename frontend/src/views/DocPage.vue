@@ -67,7 +67,6 @@ async function copyPage() {
       <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
       <div v-else-if="docsStore.loading">Memuat...</div>
       <template v-else-if="docData">
-        <!-- PERBAIKAN 5: Kirim string slug bersih ke Breadcrumb -->
         <Breadcrumb :segments="[category, pageSlug, child]" />
         
         <div class="title-row">
@@ -78,7 +77,7 @@ async function copyPage() {
           </button>
         </div>
         
-        <TiptapRenderer :content="docData.content" />
+        <TiptapRenderer :content="docData.content_html" />
 
         <EditPageLink :to="`/docs/${category}/${pageSlug}/${child}/edit`" />
 
