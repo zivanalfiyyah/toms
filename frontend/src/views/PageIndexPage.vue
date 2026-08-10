@@ -60,10 +60,7 @@ const slugify = (text) => {
         <h1>{{ page.title }}</h1>
         <p class="lead">{{ page.description }}</p>
 
-        <!-- PERBAIKAN: pakai page.content (JSON) lewat TiptapRenderer supaya heading
-             otomatis dapat id (dibutuhkan agar "Pada halaman ini" bisa scroll ke posisinya).
-             Fallback ke content_html mentah kalau page.content tidak tersedia. -->
-        <TiptapRenderer v-if="page.content" :content="page.content" class="single-page-content" />
+        <TiptapRenderer v-if="page.content_html" :content="page.content_html" class="single-page-content" />
         <div v-else class="single-page-content" v-html="page.content_html"></div>
 
         <EditPageLink :to="`/docs/${category}/${props.page}/edit`" />
@@ -107,7 +104,6 @@ const slugify = (text) => {
         </nav>
       </div>
 
-      <!-- PERBAIKAN: TOC sekarang baca heading asli dari page.content, bukan page.children -->
       <TableOfContents :content="page.content" />
     </template>
   </div>

@@ -4,6 +4,7 @@ import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
+import TiptapRenderer from '../components/TiptapRenderer.vue'
 
 const props = defineProps({
   category: { type: String, required: true }
@@ -160,7 +161,7 @@ function slugify(text) {
         <p class="lead">{{ cat.description }}</p>
 
         <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
-          <div class="single-page-content" v-html="cat.pages[0].content_html"></div>
+          <TiptapRenderer :content="cat.pages[0].content_html" class="single-page-content" />
         </template>
 
         <template v-else>

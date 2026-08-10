@@ -10,30 +10,36 @@ import { useAuthStore } from '../stores/auth'
 
 const props = defineProps({
   category: { type: String, required: true },
-  page: { type: [String, Object], required: true }, 
-  child: { type: String, required: true }
+  slugs: { type: Array, required: true } // e.g. ['sistem-manajemen-keselamatan-smk', 'komitmen-dan-kebijakan', 'komitmen-penerapan-implementasi-6a6b1073']
 })
 
 const docsStore = useDocsStore()
 const auth = useAuthStore()
-
-const pageSlug = computed(() => {
-  return typeof props.page === 'object' ? props.page.slug : props.page
-})
-
-const docData = computed(() => docsStore.currentPage)
 const copied = ref(false)
 
+// Full path segments joined, used for building nested links
+const basePath = computed(() => `/docs/${props.category}/${props.slugs.join('/')}`)
+
+const docData = computed(() => docsStore.currentPage)
+
 function load() {
-  docsStore.fetchPage(props.category, pageSlug.value, props.child)
+  // NOTE: this replaces the old fetchPage(category, page, child) call.
+  // The store/backend needs to accept an arbitrary-depth slug array and
+  // resolve it by walking parent_id down the chain (or a single query
+  // that matches the last slug + validates the ancestor chain).
+  docsStore.fetchPageByPath(props.category, props.slugs)
 }
 onMounted(load)
-watch(() => [props.category, pageSlug.value, props.child], load)
+watch(() => [props.category, ...props.slugs], load)
 
 const currentIndex = computed(() => {
   return docsStore.flatPages.findIndex(
-    (p) => p.categorySlug === props.category && p.pageSlug === pageSlug.value && p.slug === props.child
+    (p) => p.categorySlug === props.category && p.fullPath === props.slugs.join('/')
   )
+  // NOTE: flatPages only sees as deep as what /categories already
+  // returned (see docs.js comment). Pages deeper than that won't show
+  // up here, so prev/next may be absent at very deep levels until the
+  // backend can return (or we can fetch) the full nested tree.
 })
 const prevPage = computed(() => {
   const i = currentIndex.value
@@ -67,8 +73,8 @@ async function copyPage() {
       <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
       <div v-else-if="docsStore.loading">Memuat...</div>
       <template v-else-if="docData">
-        <Breadcrumb :segments="[category, pageSlug, child]" />
-        
+        <Breadcrumb :segments="[category, ...slugs]" />
+
         <div class="title-row">
           <h1>{{ docData.title }}</h1>
           <button class="copy-btn" @click="copyPage">
@@ -76,15 +82,33 @@ async function copyPage() {
             {{ copied ? 'Tersalin' : 'Salin Halaman' }}
           </button>
         </div>
-        
-        <TiptapRenderer :content="docData.content_html" />
 
-        <EditPageLink :to="`/docs/${category}/${pageSlug}/${child}/edit`" />
+        <TiptapRenderer v-if="docData.content_html" :content="docData.content_html" />
+
+        <EditPageLink :to="`${basePath}/edit`" />
+
+        <!-- Subbab: works at ANY depth now, not just level 2 or 3 -->
+        <template v-if="docData.children && docData.children.length > 0">
+          <h2 class="subbab-title">Subbab</h2>
+          <ul class="subbab-list">
+            <li v-for="c in docData.children" :key="c.id">
+              <router-link :to="`${basePath}/${c.slug}`">{{ c.title }}</router-link>
+              <span v-if="c.description"> — {{ c.description }}</span>
+              <router-link
+                :to="`${basePath}/${c.slug}/edit`"
+                class="edit-item-link"
+                title="Ubah halaman ini"
+              >
+                <span v-html="icons.edit"></span>
+              </router-link>
+            </li>
+          </ul>
+        </template>
 
         <nav class="pager">
-          <router-link 
-            v-if="prevPage" 
-            :to="`/docs/${prevPage.categorySlug}/${prevPage.pageSlug}/${prevPage.slug}`" 
+          <router-link
+            v-if="prevPage"
+            :to="`/docs/${prevPage.categorySlug}/${prevPage.fullPath}`"
             class="pager-card prev"
           >
             <span class="pager-label">&larr; Sebelumnya</span>
@@ -92,9 +116,9 @@ async function copyPage() {
           </router-link>
           <span v-else></span>
 
-          <router-link 
-            v-if="nextPage" 
-            :to="`/docs/${nextPage.categorySlug}/${nextPage.pageSlug}/${nextPage.slug}`" 
+          <router-link
+            v-if="nextPage"
+            :to="`/docs/${nextPage.categorySlug}/${nextPage.fullPath}`"
             class="pager-card next"
           >
             <span class="pager-label">Selanjutnya &rarr;</span>
@@ -123,6 +147,21 @@ async function copyPage() {
 .copy-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
 .copy-btn span { width: 14px; height: 14px; display: block; }
 .copy-btn :deep(svg) { width: 100%; height: 100%; }
+
+.subbab-title { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.subbab-list { list-style: none; padding: 0; margin: 0 0 2rem; }
+.subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
+.subbab-list a { font-weight: 600; }
+.edit-item-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  width: 13px; height: 13px;
+  color: var(--color-ink-soft);
+  vertical-align: middle;
+}
+.edit-item-link:hover { color: var(--color-accent); }
+.edit-item-link :deep(svg) { width: 100%; height: 100%; }
 
 .pager {
   display: grid;

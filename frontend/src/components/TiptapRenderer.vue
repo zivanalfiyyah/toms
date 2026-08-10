@@ -10,12 +10,6 @@ function slugify(text) {
   return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
-// Recursively repairs a ProseMirror JSON node tree that may have been
-// corrupted (typically by a docx import). Drops any text node whose
-// `text` isn't a non-empty string ("Invalid text node in JSON" is
-// exactly what ProseMirror throws for that case), and strips other
-// obviously-broken nodes (missing/invalid `type`) rather than letting
-// them blow up generateHTML.
 function sanitizeNode(node) {
   if (!node || typeof node !== 'object' || Array.isArray(node)) return null
   if (typeof node.type !== 'string') return null
@@ -38,9 +32,6 @@ function sanitizeNode(node) {
   return clean
 }
 
-// Renders top-level blocks one at a time so a single corrupted block
-// (e.g. a leftover bad node sanitizeNode couldn't fully fix, or an
-// unknown node type) doesn't take down the whole page.
 function renderBlocksSafely(jsonContent) {
   const parts = []
   for (const block of jsonContent.content) {
@@ -84,10 +75,7 @@ const html = computed(() => {
 </template>
 
 <style scoped>
-/* PERBAIKAN: kasih jarak aman di atas tiap heading supaya pas discroll
-   via anchor (#id dari klik "Pada halaman ini"), headingnya tidak
-   ketutupan header sticky di atas. Tanpa ini, browser align heading
-   persis ke y=0 viewport, padahal ada header sticky yang nutupinnya. */
+
 .tiptap-content :deep(h1),
 .tiptap-content :deep(h2),
 .tiptap-content :deep(h3),

@@ -14,19 +14,18 @@ import { Underline } from '@tiptap/extension-underline'
 import { Link } from '@tiptap/extension-link'
 import api from '../api'
 import { useAuthStore } from '../stores/auth'
+import { useDocsStore } from '../stores/docs'
 
 const props = defineProps({
   category: { type: String, required: true },
-  page: { type: String, required: true },
-  child: { type: String, default: null }
+  slugs: { type: Array, required: true }
 })
 
 const router = useRouter()
 const auth = useAuthStore()
+const docsStore = useDocsStore()
 
-const backTo = props.child
-  ? `/docs/${props.category}/${props.page}/${props.child}`
-  : `/docs/${props.category}/${props.page}`
+const backTo = `/docs/${props.category}/${props.slugs.join('/')}`
 
 const pageId = ref(null)
 const title = ref('')
@@ -104,11 +103,36 @@ onMounted(async () => {
       params: { _ts: Date.now() },
     })
     const cat = catRes.data.find((c) => c.slug === props.category)
-    const parentPage = cat?.pages?.find((p) => p.slug === props.page)
+    if (!cat) {
+      errorMessage.value = 'Halaman tidak ditemukan.'
+      loading.value = false
+      return
+    }
 
-    const target = props.child
-      ? parentPage?.children?.find((c) => c.slug === props.child)
-      : parentPage
+    // Walk the slug chain level by level, same approach as
+    // docsStore.fetchPageByPath — fetches a node's full record
+    // (which includes its children) on demand whenever we need to
+    // go deeper than what /categories already gave us locally.
+    let node = cat.pages?.find((p) => p.slug === props.slugs[0])
+    if (!node) {
+      errorMessage.value = 'Halaman tidak ditemukan.'
+      loading.value = false
+      return
+    }
+    for (let i = 1; i < props.slugs.length; i++) {
+      if (!node.children) {
+        const res = await api.get(`/pages/${node.id}`)
+        node = res.data
+      }
+      const next = node.children?.find((c) => c.slug === props.slugs[i])
+      if (!next) {
+        errorMessage.value = 'Halaman tidak ditemukan.'
+        loading.value = false
+        return
+      }
+      node = next
+    }
+    const target = node
 
     if (!target) {
       errorMessage.value = 'Halaman tidak ditemukan.'
@@ -239,10 +263,6 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
-// Repairs a ProseMirror JSON node tree before it's persisted, dropping
-// any text node without a valid `text` string (the cause of the
-// "Invalid text node in JSON" error seen when viewing a page) so a
-// corrupted page gets cleaned up the moment it's saved from the editor.
 function sanitizeNode(node) {
   if (!node || typeof node !== 'object' || Array.isArray(node)) return null
   if (typeof node.type !== 'string') return null
@@ -271,13 +291,21 @@ async function handleSave() {
   errorMessage.value = ''
   try {
     const cleanContent = sanitizeNode(editor.value.getJSON()) || { type: 'doc', content: [] }
-    await api.put(`/pages/${pageId.value}`, {
+    const res = await api.put(`/pages/${pageId.value}`, {
       title: title.value,
       status: status.value,
       content: cleanContent,
       content_html: editor.value.getHTML(),
     })
-    router.push(backTo)
+
+    const newSlug = res.data?.slug || res.data?.page?.slug
+    const redirectSlugs = newSlug && newSlug !== props.slugs[props.slugs.length - 1]
+      ? [...props.slugs.slice(0, -1), newSlug]
+      : props.slugs
+
+    await docsStore.fetchCategories()
+
+    router.push(`/docs/${props.category}/${redirectSlugs.join('/')}`)
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
   } finally {
