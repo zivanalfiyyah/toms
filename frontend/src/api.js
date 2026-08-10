@@ -16,4 +16,17 @@ api.interceptors.request.use((config) => {
   return config;
 })
 
+// Kalau backend bilang token tidak valid/expired (401), hapus sisa sesi
+// di localStorage supaya UI (mis. link Admin Panel) tidak lagi menganggap user login.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    return Promise.reject(error);
+  }
+)
+
 export default api; 

@@ -12,12 +12,16 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+const noticeMessage = route.query.reason === 'login-required'
+  ? 'Kamu harus login dulu untuk mengubah halaman ini.'
+  : ''
+
 async function handleSubmit() {
   errorMessage.value = ''
   loading.value = true
   try {
     await auth.login(email.value, password.value)
-    const redirectTo = route.query.redirect || '/'
+    const redirectTo = route.query.redirect || (auth.roleNames.includes('admin') ? '/admin' : '/')
     router.push(redirectTo)
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Email atau password salah.'
@@ -28,8 +32,18 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  padding: 1.5rem;
+}
 .login-wrap {
-  max-width: 360px; margin: 4rem auto; padding: 2rem;
+  width: 100%;
+  max-width: 360px;
+  padding: 2rem;
   border: 1px solid var(--color-border); border-radius: var(--radius);
   background: var(--color-surface);
 }
@@ -46,23 +60,34 @@ button {
 }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 .error { color: #d33; font-size: 0.85rem; margin-bottom: 1rem; }
+.notice {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1rem;
+}
 </style>
 
 <template>
-  <div class="login-wrap">
-    <h1>Login TOMS</h1>
-    <form @submit.prevent="handleSubmit">
-      <label for="email">Email</label>
-      <input id="email" v-model="email" type="email" required autocomplete="username" />
+  <div class="login-page">
+    <div class="login-wrap">
+      <h1>Login TOMS</h1>
+      <p v-if="noticeMessage" class="notice">{{ noticeMessage }}</p>
+      <form @submit.prevent="handleSubmit">
+        <label for="email">Email</label>
+        <input id="email" v-model="email" type="email" required autocomplete="username" />
 
-      <label for="password">Password</label>
-      <input id="password" v-model="password" type="password" required autocomplete="current-password" />
+        <label for="password">Password</label>
+        <input id="password" v-model="password" type="password" required autocomplete="current-password" />
 
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Memproses...' : 'Masuk' }}
-      </button>
-    </form>
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Memproses...' : 'Masuk' }}
+        </button>
+      </form>
+    </div>
   </div>
 </template>

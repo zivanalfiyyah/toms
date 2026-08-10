@@ -5,18 +5,35 @@ import AppHeader from './components/AppHeader.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import SearchModal from './components/SearchModal.vue'
 import { useThemeStore } from './stores/theme'
+import { useAuthStore } from './stores/auth'
 
 const searchOpen = ref(false)
 const sidebarOpen = ref(false)
 const themeStore = useThemeStore()
+const authStore = useAuthStore()
 const route = useRoute()
 
-// Sidebar disembunyikan hanya di halaman Home ("/"), tampil di semua halaman dokumentasi lainnya.
-const showSidebar = computed(() => route.name !== 'home')
+// Halaman login & seluruh area admin punya layout sendiri (tanpa header/sidebar dokumentasi).
+const isBareLayout = computed(() => route.name === 'login' || route.path.startsWith('/admin'))
+
+// Sidebar dokumentasi disembunyikan di halaman Home ("/") dan di layout bare.
+const showSidebar = computed(() => route.name !== 'home' && !isBareLayout.value)
 
 onMounted(() => {
   themeStore.init()
   window.addEventListener('keydown', onGlobalKeydown)
+
+  // Token di localStorage bisa saja sudah expired/invalid di sisi server.
+  // Validasi ke backend supaya link Admin Panel dkk tidak salah muncul
+  // untuk sesi yang sebenarnya sudah tidak berlaku.
+  if (authStore.token) {
+    authStore.fetchMe().catch(() => {
+      authStore.token = null
+      authStore.user = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+    })
+  }
 })
 
 function onGlobalKeydown(e) {
@@ -36,7 +53,10 @@ function onGlobalKeydown(e) {
 
 
 <template>
-  <div class="app-shell">
+  <div v-if="isBareLayout" class="app-shell-bare">
+    <router-view />
+  </div>
+  <div v-else class="app-shell">
     <AppHeader 
       :show-sidebar="showSidebar" 
       @open-search="searchOpen = true" 
