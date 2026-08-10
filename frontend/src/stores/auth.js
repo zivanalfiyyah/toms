@@ -21,8 +21,15 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(email, password) {
       const res = await api.post('/login', { email, password })
+      const user = res.data.user
+      const roles = (user?.roles || []).map((r) => r.name ?? r)
+
+      if (!roles.includes('admin') && !roles.includes('editor')) {
+        throw { response: { data: { message: 'Akun ini tidak memiliki akses untuk masuk ke sistem.' } } }
+      }
+
       this.token = res.data.token
-      this.user = res.data.user
+      this.user = user
       localStorage.setItem('token', this.token)
       localStorage.setItem('user', JSON.stringify(this.user))
     },

@@ -2,11 +2,15 @@
 import { computed, onMounted, reactive, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
+import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 
 defineEmits(['navigate'])
 const docsStore = useDocsStore()
+const authStore = useAuthStore()
 const route = useRoute()
+
+const isAdmin = computed(() => authStore.canEdit)
 
 onMounted(() => {
   if (!docsStore.categories.length) docsStore.fetchCategories()
@@ -98,6 +102,14 @@ watch(
           </ul>
         </li>
       </ul>
+    </template>
+
+    <template v-if="isAdmin">
+      <hr class="divider" />
+      <router-link to="/admin" class="category-link admin-link" @click="$emit('navigate')">
+        <span v-if="icons.kerangkaPenyelenggaraan" v-html="icons.kerangkaPenyelenggaraan" class="category-icon"></span>
+        Admin Panel
+      </router-link>
     </template>
   </aside>
 </template>
