@@ -48,7 +48,7 @@ class ImportController extends Controller
         $isPage = $type === 'page';
         $isCreate = $target === null;
 
-        $rules = ['file' => 'required|file|mimes:docx|max:10240'];
+        $rules = ['file' => 'required|file|mimes:docx|max:51200'];
 
         if ($isPage) {
             $rules['category_id'] = $isCreate ? 'required|exists:categories,id' : 'sometimes|exists:categories,id';
