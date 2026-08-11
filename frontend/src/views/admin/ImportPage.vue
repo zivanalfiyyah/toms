@@ -42,6 +42,14 @@ const pagesInSelectedCategory = computed(() => {
   return flat
 })
 
+function slugify(text) {
+  return (text || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 function onFileChange(e) {
   const file = e.target.files?.[0] || null
   errorMsg.value = ''
@@ -93,6 +101,7 @@ async function submit() {
         file: form.file,
         categoryId: form.categoryId,
         title: form.title,
+        slug: slugify(form.title),
         parentId: form.parentId || null,
       })
       result.value = data
@@ -100,6 +109,7 @@ async function submit() {
       const data = await admin.reimportDocx(form.pageId, {
         file: form.file,
         title: form.title || undefined,
+        slug: form.title ? slugify(form.title) : undefined,
       })
       result.value = data
     }

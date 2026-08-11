@@ -46,6 +46,7 @@ function slugify(text) {
 .subbab-list { list-style: none; padding: 0; margin: 0; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
 .subbab-list a { font-weight: 600; }
+.broken-link { font-weight: 600; color: #d33; cursor: not-allowed; }
 .edit-item-link {
   display: inline-flex;
   align-items: center;
@@ -167,21 +168,29 @@ function slugify(text) {
         />
 
 
-<template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
-  <TiptapRenderer 
-    v-if="cat.pages[0].content_html" 
-    :content="cat.pages[0].content_html" 
-    class="single-page-content" 
-  />
-</template>
-
-      <template v-if="cat.pages?.length">
+      <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
+        <TiptapRenderer
+          v-if="cat.pages[0].content_html"
+          :content="cat.pages[0].content_html"
+          class="single-page-content"
+        />
+      </template>
+      <template v-else-if="cat.pages?.length">
         <h2 class="subbab-title">Subbab</h2>
         <ul class="subbab-list">
           <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">
-            <router-link :to="`/docs/${cat.slug}/${page.slug}`">{{ page.title }}</router-link>
+            <router-link
+              v-if="page.slug"
+              :to="`/docs/${cat.slug}/${page.slug}`"
+            >{{ page.title }}</router-link>
+            <span
+              v-else
+              class="broken-link"
+              title="Slug halaman ini kosong di data — perbaiki dulu di backend/admin"
+            >{{ page.title }} ⚠️</span>
             <span v-if="page.description"> — {{ page.description }}</span>
             <router-link
+              v-if="page.slug"
               :to="`/docs/${cat.slug}/${page.slug}/edit`"
               class="edit-item-link"
               title="Ubah halaman ini"

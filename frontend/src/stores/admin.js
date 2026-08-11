@@ -147,13 +147,17 @@ export const useAdminStore = defineStore('admin', {
     },
 
     // ---------- Import Word ----------
-    async importDocx({ file, categoryId, title, parentId }) {
+    async importDocx({ file, categoryId, title, slug, parentId }) {
       this.importSubmitting = true
       try {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('category_id', categoryId)
         formData.append('title', title)
+        // Kirim slug eksplisit dari frontend supaya tidak bergantung
+        // sepenuhnya pada auto-generate di backend (ini penyebab bug
+        // slug kosong sebelumnya, mis. halaman "Customer Experience").
+        if (slug) formData.append('slug', slug)
         if (parentId) formData.append('parent_id', parentId)
 
         const res = await api.post('/pages/import', formData, {
@@ -165,7 +169,7 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async reimportDocx(pageId, { file, categoryId, title }) {
+    async reimportDocx(pageId, { file, categoryId, title, slug }) {
       this.importSubmitting = true
       try {
         const formData = new FormData()
@@ -173,6 +177,7 @@ export const useAdminStore = defineStore('admin', {
         formData.append('_method', 'PUT')
         if (categoryId) formData.append('category_id', categoryId)
         if (title) formData.append('title', title)
+        if (slug) formData.append('slug', slug)
 
         const res = await api.post(`/pages/${pageId}/import`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },

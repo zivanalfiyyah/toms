@@ -22,6 +22,12 @@ function onInput() {
 function getPath(r) {
     if (r.path) return r.path;
 
+    // flatPages (sumber docsStore.searchResults) mengirim categorySlug +
+    // fullPath (rangkaian slug lengkap dari root sampai halaman ini).
+    // Field pageSlug/parent di bawah tidak pernah dikirim oleh docs.js —
+    // sebelumnya bikin link ke halaman bertingkat (subbab dari subbab) salah.
+    if (r.categorySlug && r.fullPath) return `${r.categorySlug}/${r.fullPath}`;
+
     const category = r.categorySlug || r.category?.slug || '';
     const parent = r.pageSlug || r.parent?.slug || '';
     const slug = r.slug || '';

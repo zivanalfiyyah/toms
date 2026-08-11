@@ -1,9 +1,10 @@
 <script setup>
-import { computed, onMounted, reactive, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
+import SidebarPageItem from './SidebarPageItem.vue'
 
 defineEmits(['navigate'])
 const docsStore = useDocsStore()
@@ -20,29 +21,6 @@ const activeCategory = computed(() => {
   const slug = route.params.category
   return docsStore.categories.find((c) => c.slug === slug) || null
 })
-
-const activePage = computed(() => {
-  const pageSlug = route.params.page
-  return activeCategory.value?.pages?.find((p) => p.slug === pageSlug) || null
-})
-
-const expandedPages = reactive(new Set())
-
-function isExpanded(page) {
-  return expandedPages.has(page.id)
-}
-function toggleExpand(page) {
-  if (expandedPages.has(page.id)) expandedPages.delete(page.id)
-  else expandedPages.add(page.id)
-}
-
-watch(
-  activePage,
-  (page) => {
-    if (page) expandedPages.add(page.id)
-  },
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -66,41 +44,13 @@ watch(
       <hr class="divider" />
       <p class="pages-block-title">{{ activeCategory.name }}</p>
       <ul class="page-list">
-        <li v-for="page in activeCategory.pages" :key="page.id" class="page-item">
-          <div class="page-row">
-            <router-link
-              :to="`/docs/${activeCategory.slug}/${page.slug}`"
-              class="link"
-              active-class="is-active"
-              @click="$emit('navigate')"
-            >
-              {{ page.title }}
-            </router-link>
-            <button
-              v-if="page.children?.length"
-              type="button"
-              class="toggle-btn"
-              :class="{ 'is-expanded': isExpanded(page) }"
-              :aria-expanded="isExpanded(page)"
-              :aria-label="isExpanded(page) ? 'Tutup subbab' : 'Buka subbab'"
-              @click="toggleExpand(page)"
-            >
-              <span v-html="icons.chevron"></span>
-            </button>
-          </div>
-          <ul v-if="page.children?.length && isExpanded(page)" class="child-list">
-            <li v-for="child in page.children" :key="child.id">
-              <router-link
-                :to="`/docs/${activeCategory.slug}/${page.slug}/${child.slug}`"
-                class="child-link"
-                active-class="is-active"
-                @click="$emit('navigate')"
-              >
-                {{ child.title }}
-              </router-link>
-            </li>
-          </ul>
-        </li>
+        <SidebarPageItem
+          v-for="page in activeCategory.pages"
+          :key="page.id"
+          :category="activeCategory"
+          :page="page"
+          @navigate="$emit('navigate')"
+        />
       </ul>
     </template>
 
