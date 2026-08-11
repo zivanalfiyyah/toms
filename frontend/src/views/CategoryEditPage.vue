@@ -183,6 +183,11 @@ function triggerImagePick() {
   imageInputEl.value?.click()
 }
 
+function deleteSelectedImage() {
+  if (!editor.value) return
+  editor.value.chain().focus().deleteSelection().run()
+}
+
 async function handleImagePick(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
@@ -378,6 +383,10 @@ textarea { resize: vertical; min-height: 60px; }
 }
 .btn-import:disabled { opacity: 0.6; cursor: not-allowed; }
 .import-hint { font-size: 0.78rem; color: var(--color-ink-soft); }
+.btn-delete-img {
+  padding: 0.3rem 0.6rem; border: 1px solid #d33; border-radius: 6px;
+  background: transparent; color: #d33; cursor: pointer; font-size: 0.85rem;
+}
 </style>
 
 <template>
@@ -438,6 +447,14 @@ textarea { resize: vertical; min-height: 60px; }
           <button type="button" :disabled="!editor" @click="setLink">Link</button>
           <button type="button" :disabled="!editor" @click="triggerImagePick">Gambar</button>
           <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
+          <button
+            type="button"
+            v-if="editor?.isActive('image')"
+            class="btn-delete-img"
+            @click="deleteSelectedImage"
+          >
+            Hapus Gambar
+          </button>
           <span class="toolbar-sep"></span>
           <button type="button" :disabled="!editor" @click="editor?.chain().focus().undo().run()">Undo</button>
           <button type="button" :disabled="!editor" @click="editor?.chain().focus().redo().run()">Redo</button>
