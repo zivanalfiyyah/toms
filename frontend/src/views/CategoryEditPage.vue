@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, shallowRef, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Editor } from '@tiptap/core' 
+import { Editor } from '@tiptap/core'
 import { StarterKit } from '@tiptap/starter-kit'
 
 import { Table as OriginalTable } from '@tiptap/extension-table'
@@ -16,26 +16,36 @@ import api from '../api'
 import { useAuthStore } from '../stores/auth'
 import { useDocsStore } from '../stores/docs'
 
+// This mirrors EditPage.vue (which edits a Page) but edits a Category's
+// own `content` / `content_html` instead. A category can now hold its
+// own "materi" directly, independent of the pages underneath it.
 const props = defineProps({
   category: { type: String, required: true },
-  slugs: { type: Array, required: true }
+  // The router also passes slugs: [] on this route (to reuse the same
+  // pattern as edit-page's props factory); a category edit doesn't need
+  // it, but declaring it here stops it from leaking onto the root <div>
+  // as a stray HTML attribute.
+  slugs: { type: Array, default: () => [] }
 })
 
 const router = useRouter()
 const auth = useAuthStore()
 const docsStore = useDocsStore()
 
-const backTo = `/docs/${props.category}/${props.slugs.join('/')}`
+const backTo = `/docs/${props.category}`
 
-const pageId = ref(null)
-const title = ref('')
-const status = ref('draft')
+const categoryId = ref(null)
+const name = ref('')
+const description = ref('')
+const icon = ref('')
+const parentId = ref(null)
+const order = ref(0)
 const editorEl = ref(null)
 const loading = ref(true)
 const saving = ref(false)
-const errorMessage = ref('')
-const editorVersion = ref(0) 
-
+const loadErrorMessage = ref('')
+const actionErrorMessage = ref('')
+const editorVersion = ref(0)
 
 const CustomTable = OriginalTable.extend({
   addAttributes() {
@@ -88,7 +98,6 @@ const CustomImage = OriginalImage.extend({
   }
 })
 
-
 const editor = shallowRef(null)
 
 onMounted(async () => {
@@ -104,44 +113,22 @@ onMounted(async () => {
     })
     const cat = catRes.data.find((c) => c.slug === props.category)
     if (!cat) {
-      errorMessage.value = 'Halaman tidak ditemukan.'
+      loadErrorMessage.value = 'Kategori tidak ditemukan.'
       loading.value = false
       return
     }
 
-    let node = cat.pages?.find((p) => p.slug === props.slugs[0])
-    if (!node) {
-      errorMessage.value = 'Halaman tidak ditemukan.'
-      loading.value = false
-      return
-    }
-    for (let i = 1; i < props.slugs.length; i++) {
-      if (!node.children) {
-        const res = await api.get(`/pages/${node.id}`)
-        node = res.data
-      }
-      const next = node.children?.find((c) => c.slug === props.slugs[i])
-      if (!next) {
-        errorMessage.value = 'Halaman tidak ditemukan.'
-        loading.value = false
-        return
-      }
-      node = next
-    }
-    const target = node
-
-    if (!target) {
-      errorMessage.value = 'Halaman tidak ditemukan.'
-      loading.value = false
-      return
-    }
-
-    const detailRes = await api.get(`/pages/${target.id}`)
+    // /categories (index) only returns top-level categories, so if this
+    // is a nested category, fetch it directly by id to be safe.
+    const detailRes = await api.get(`/categories/${cat.id}`)
     const detail = detailRes.data
 
-    pageId.value = detail.id
-    title.value = detail.title
-    status.value = detail.status ?? 'draft'
+    categoryId.value = detail.id
+    name.value = detail.name
+    description.value = detail.description ?? ''
+    icon.value = detail.icon ?? ''
+    parentId.value = detail.parent_id ?? null
+    order.value = detail.order ?? 0
 
     loading.value = false
     await nextTick()
@@ -165,13 +152,13 @@ onMounted(async () => {
         },
       })
     } catch (editorErr) {
-      console.error('EditPage: Tiptap Editor failed to initialize with this page content:', editorErr)
+      console.error('CategoryEditPage: Tiptap Editor failed to initialize with this content:', editorErr)
       console.error('content_html yang gagal di-parse:', detail.content_html)
-      errorMessage.value = 'Gagal memuat editor konten. Kemungkinan ada struktur HTML (mis. tabel) di halaman ini yang tidak didukung editor. Detail: ' + editorErr.message
+      loadErrorMessage.value = 'Gagal memuat editor konten. Kemungkinan ada struktur HTML (mis. tabel) yang tidak didukung editor. Detail: ' + editorErr.message
     }
   } catch (err) {
-    console.error('EditPage load error:', err)
-    errorMessage.value = err.response?.data?.message || 'Gagal memuat halaman.'
+    console.error('CategoryEditPage load error:', err)
+    loadErrorMessage.value = err.response?.data?.message || 'Gagal memuat kategori.'
     loading.value = false
   }
 })
@@ -203,12 +190,14 @@ async function handleImagePick(e) {
   try {
     const formData = new FormData()
     formData.append('image', file)
+    // Reuses the generic page image-upload endpoint; it just stores the
+    // file and returns a URL, nothing page-specific about it.
     const res = await api.post('/pages/upload-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     editor.value.chain().focus().setImage({ src: res.data.url }).run()
   } catch (err) {
-    errorMessage.value = 'Gagal upload gambar: ' + (err.response?.data?.message || err.message)
+    actionErrorMessage.value = 'Gagal upload gambar: ' + (err.response?.data?.message || err.message)
   }
 }
 
@@ -220,32 +209,30 @@ async function handleDocxPick(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
   if (!file) return
-  if (!pageId.value) {
-    errorMessage.value = 'Halaman belum termuat, coba lagi sebentar.'
+  if (!categoryId.value) {
+    actionErrorMessage.value = 'Kategori belum termuat, coba lagi sebentar.'
     return
   }
 
-  const confirmed = window.confirm('Import ini akan MENGGANTI seluruh isi konten halaman ini dengan isi file Word yang diupload. Lanjutkan?')
+  const confirmed = window.confirm('Import ini akan MENGGANTI seluruh isi materi kategori ini dengan isi file Word yang diupload. Lanjutkan?')
   if (!confirmed) return
 
   importing.value = true
-  errorMessage.value = ''
+  actionErrorMessage.value = ''
   try {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('_method', 'PUT')
-    const res = await api.post(`/pages/${pageId.value}/import`, formData, {
+    const res = await api.post(`/categories/${categoryId.value}/import`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    const updatedPage = res.data.page
-    title.value = updatedPage.title
-    
+    const updatedCategory = res.data.category
     if (editor.value) {
-      editor.value.commands.setContent(updatedPage.content_html || updatedPage.content || '<p></p>')
+      editor.value.commands.setContent(updatedCategory?.content_html || '<p></p>')
     }
   } catch (err) {
     const data = err.response?.data
-    errorMessage.value = 'Gagal import: ' + (data?.error || data?.message || err.message) + (data?.line ? ` (baris ${data.line})` : '')
+    actionErrorMessage.value = 'Gagal import: ' + (data?.error || data?.message || err.message) + (data?.line ? ` (baris ${data.line})` : '')
   } finally {
     importing.value = false
   }
@@ -280,26 +267,26 @@ function sanitizeNode(node) {
 async function handleSave() {
   if (!editor.value) return
   saving.value = true
-  errorMessage.value = ''
+  actionErrorMessage.value = ''
   try {
     const cleanContent = sanitizeNode(editor.value.getJSON()) || { type: 'doc', content: [] }
-    const res = await api.put(`/pages/${pageId.value}`, {
-      title: title.value,
-      status: status.value,
+    const res = await api.put(`/categories/${categoryId.value}`, {
+      name: name.value,
+      description: description.value,
+      icon: icon.value,
+      parent_id: parentId.value,
+      order: order.value,
       content: cleanContent,
       content_html: editor.value.getHTML(),
     })
 
-    const newSlug = res.data?.slug || res.data?.page?.slug
-    const redirectSlugs = newSlug && newSlug !== props.slugs[props.slugs.length - 1]
-      ? [...props.slugs.slice(0, -1), newSlug]
-      : props.slugs
+    const newSlug = res.data?.slug ?? res.data?.data?.slug
 
     await docsStore.fetchCategories()
 
-    router.push(`/docs/${props.category}/${redirectSlugs.join('/')}`)
+    router.push(`/docs/${newSlug || props.category}`)
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
+    actionErrorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
   } finally {
     saving.value = false
   }
@@ -314,10 +301,12 @@ function handleCancel() {
 .edit-wrap { max-width: 780px; margin: 2rem auto; padding: 0 1.5rem; }
 .field { margin-bottom: 1rem; }
 label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--color-ink-soft); }
-input[type="text"], select {
+input[type="text"], input[type="number"], textarea {
   width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--color-border);
   border-radius: var(--radius); background: var(--color-bg); color: var(--color-ink);
+  font-family: inherit;
 }
+textarea { resize: vertical; min-height: 60px; }
 
 .toolbar {
   display: flex; gap: 4px; padding: 8px; flex-wrap: wrap;
@@ -345,7 +334,7 @@ input[type="text"], select {
   width: 100%;
 }
 
-.tiptap-editor :deep(td), 
+.tiptap-editor :deep(td),
 .tiptap-editor :deep(th) {
   border: 1px solid var(--color-border, #ccc);
   box-sizing: border-box;
@@ -393,35 +382,44 @@ input[type="text"], select {
 
 <template>
   <div class="edit-wrap">
-    <h1>Ubah Halaman</h1>
+    <h1>Ubah Materi Kategori</h1>
 
     <p v-if="loading">Memuat...</p>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <p v-if="loadErrorMessage" class="error">{{ loadErrorMessage }}</p>
 
-    <template v-if="!loading && !errorMessage">
+    <template v-if="!loading && !loadErrorMessage">
+      <p v-if="actionErrorMessage" class="error">{{ actionErrorMessage }}</p>
+
       <div class="field">
-        <label>Judul</label>
-        <input type="text" v-model="title" />
+        <label>Nama Kategori</label>
+        <input type="text" v-model="name" />
+      </div>
+
+      <div class="field">
+        <label>Deskripsi Singkat</label>
+        <textarea v-model="description" rows="2"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Icon (opsional)</label>
+        <input type="text" v-model="icon" placeholder="mis. book, folder, dll" />
+      </div>
+
+      <div class="field">
+        <label>Urutan</label>
+        <input type="number" v-model.number="order" />
       </div>
 
       <div class="field import-row">
         <button type="button" class="btn-import" :disabled="importing" @click="triggerDocxPick">
-          {{ importing ? 'Meng-import...' : 'Import Ulang dari Word (.docx)' }}
+          {{ importing ? 'Meng-import...' : 'Import dari Word (.docx)' }}
         </button>
         <input ref="docxInputEl" type="file" accept=".docx" style="display:none" @change="handleDocxPick" />
-        <span class="import-hint">Ini akan mengganti seluruh isi konten di bawah dengan isi file Word yang diupload.</span>
+        <span class="import-hint">Ini akan mengganti seluruh isi materi kategori di bawah dengan isi file Word yang diupload.</span>
       </div>
 
       <div class="field">
-        <label>Status</label>
-        <select v-model="status">
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Konten</label>
+        <label>Materi Kategori</label>
         <div class="toolbar">
           <span style="display:none">{{ editorVersion }}</span>
           <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }" @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>

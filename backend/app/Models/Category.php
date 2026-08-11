@@ -14,8 +14,14 @@ class Category extends Model
         'description',
         'icon',
         'slug',
-        'parent_u id',
+        'content',
+        'content_html',
+        'parent_id',
         'order',
+    ];
+
+    protected $casts = [
+        'content' => 'array',
     ];
 
     public function parent()

@@ -4,6 +4,7 @@ import CategoryPage from '../views/CategoryPage.vue'
 import DocPage from '../views/DocPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import EditPage from '../views/EditPage.vue'
+import CategoryEditPage from '../views/CategoryEditPage.vue'
 import PageIndexPage from '../views/PageIndexPage.vue'
 import AdminLayout from '../views/admin/AdminLayout.vue'
 import AdminDashboard from '../views/admin/DashboardPage.vue'
@@ -17,6 +18,17 @@ const routes = [
   { path: '/login', name: 'login', component: LoginPage },
   { path: '/docs/:category', name: 'category-page', component: CategoryPage, props: true },
 
+
+  {
+    path: '/docs/:category/edit',
+    name: 'edit-category',
+    component: CategoryEditPage,
+    meta: { requiresAdmin: true },
+    props: (route) => ({
+      category: route.params.category,
+      slugs: [] // Array kosong menandakan ini adalah Edit Kategori
+    })
+  },
   {
     path: '/docs/:category/:slugs+/edit',
     name: 'edit-page',
@@ -36,11 +48,6 @@ const routes = [
       slugs: Array.isArray(route.params.slugs) ? route.params.slugs : [route.params.slugs]
     })
   },
-  { path: '/docs/:category/:page', name: 'page-index', component: PageIndexPage, props: true },
-  { path: '/docs/:category/:page/edit', name: 'edit-page-only', component: EditPage, props: true, meta: { requiresAdmin: true } },
-  { path: '/docs/:category/:page/:child', name: 'doc-page-child', component: DocPage, props: true },
-  { path: '/docs/:category/:page/:child/edit', name: 'edit-page-child', component: EditPage, props: true, meta: { requiresAdmin: true } },
-  
   {
     path: '/admin',
     component: AdminLayout,

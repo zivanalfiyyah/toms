@@ -160,31 +160,44 @@ function slugify(text) {
         <h1>{{ cat.name }}</h1>
         <p class="lead">{{ cat.description }}</p>
 
-        <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
-          <TiptapRenderer :content="cat.pages[0].content_html" class="single-page-content" />
-        </template>
+        <TiptapRenderer
+          v-if="cat.content_html && cat.content_html.trim() !== ''"
+          :content="cat.content_html"
+          class="single-page-content"
+        />
 
-        <template v-else>
-          <h2 class="subbab-title">Subbab</h2>
-          <ul class="subbab-list">
-            <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">
-              <router-link :to="`/docs/${cat.slug}/${page.slug}`">{{ page.title }}</router-link>
-              <span v-if="page.description"> — {{ page.description }}</span>
-              <router-link
-                :to="`/docs/${cat.slug}/${page.slug}/edit`"
-                class="edit-item-link"
-                title="Ubah halaman ini"
-              >
-                <span v-html="icons.edit"></span>
-              </router-link>
-            </li>
-          </ul>
-        </template>
 
-        <EditPageLink 
+<template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
+  <TiptapRenderer 
+    v-if="cat.pages[0].content_html" 
+    :content="cat.pages[0].content_html" 
+    class="single-page-content" 
+  />
+</template>
+
+      <template v-if="cat.pages?.length">
+        <h2 class="subbab-title">Subbab</h2>
+        <ul class="subbab-list">
+          <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">
+            <router-link :to="`/docs/${cat.slug}/${page.slug}`">{{ page.title }}</router-link>
+            <span v-if="page.description"> — {{ page.description }}</span>
+            <router-link
+              :to="`/docs/${cat.slug}/${page.slug}/edit`"
+              class="edit-item-link"
+              title="Ubah halaman ini"
+            >
+              <span v-html="icons.edit"></span>
+            </router-link>
+          </li>
+        </ul>
+      </template>
+
+        <EditPageLink :to="`/docs/${cat.slug}/edit`" />
+
+        <!-- <EditPageLink 
           v-if="cat.pages?.length" 
           :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" 
-        />
+        /> -->
 
         <nav class="pager">
           <router-link

@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class DocumentImport extends Model
 {
     protected $fillable = [
-        'page_id', 'original_filename', 'file_path',
-        'imported_by', 'status', 'error_message', 'page_id',
+        'page_id', 'category_id', 'original_filename', 'file_path',
+        'imported_by', 'status', 'error_message',
     ];
 
     public function page()

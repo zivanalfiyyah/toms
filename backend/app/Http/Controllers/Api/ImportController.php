@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentImport;
 use App\Models\Page;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -14,71 +15,57 @@ class ImportController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:docx|max:10240',
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-        ]);
-
-        $file = $request->file('file');
-        $path = $file->store('imports');
-
-        $documentImport = DocumentImport::create([
-            'original_filename' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'imported_by' => $request->user()->id ?? null,
-            'status' => 'pending',
-        ]);
-
-        try {
-            $bodyHtml = $this->extractHtmlFromDocx($path, $documentImport->id);
-            $bodyHtml = $this->cleanWordHtml($bodyHtml);
-            $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
-
-            $page = Page::create([
-                'category_id' => $validated['category_id'],
-                'title' => $validated['title'],
-                'slug' => Str::slug($validated['title']),
-                'content' => $tiptapJson,
-                'content_html' => $bodyHtml,
-                'content_text' => strip_tags($bodyHtml),
-                'status' => 'draft',
-                'created_by' => $request->user()->id ?? null,
-            ]);
-
-            $documentImport->update([
-                'page_id' => $page->id,
-                'status' => 'success',
-            ]);
-
-            return response()->json([
-                'message' => 'Import success',
-                'page' => $page,
-            ], 201);
-
-        } catch (\Exception $e) {
-            $documentImport->update([
-                'status' => 'failed',
-                'error_message' => $e->getMessage() . ' on line ' . $e->getLine(),
-            ]);
-
-            return response()->json([
-                'message' => 'Import Failed',
-                'error' => $e->getMessage(),
-                'line' => $e->getLine()
-            ], 422);
-        }
+        return $this->handleImport($request, 'page');
     }
 
     public function update(Request $request, $page)
     {
-        $pageModel = $page instanceof Page ? $page : Page::findOrFail($page);
+        return $this->handleImport($request, 'page', $page);
+    }
 
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:docx|max:10240',
-            'category_id' => 'sometimes|exists:categories,id',
-            'title' => 'sometimes|string|max:255',
-        ]);
+    public function storeCategory(Request $request)
+    {
+        return $this->handleImport($request, 'category');
+    }
+
+    public function updateCategory(Request $request, $category)
+    {
+        return $this->handleImport($request, 'category', $category);
+    }
+
+    /**
+     * Shared import pipeline for both Pages and Categories, in both the
+     * "create a new one from a docx" and "re-import into an existing one"
+     * flows. The docx -> HTML -> Tiptap JSON extraction is identical either
+     * way; only which model gets created/updated (and which extra fields it
+     * needs) differs, so that's the only part that branches below.
+     *
+     * @param  string    $type   'page' or 'category'
+     * @param  int|Model|null $target  existing model/id to update, or null to create a new one
+     */
+    private function handleImport(Request $request, string $type, $target = null)
+    {
+        $isPage = $type === 'page';
+        $isCreate = $target === null;
+
+        $rules = ['file' => 'required|file|mimes:docx|max:10240'];
+
+        if ($isPage) {
+            $rules['category_id'] = $isCreate ? 'required|exists:categories,id' : 'sometimes|exists:categories,id';
+            $rules['title'] = $isCreate ? 'required|string|max:255' : 'sometimes|string|max:255';
+        } elseif ($isCreate) {
+            $rules['name'] = 'required|string|max:255';
+            $rules['parent_id'] = 'nullable|exists:categories,id';
+            $rules['order'] = 'nullable|integer';
+        }
+
+        $validated = $request->validate($rules);
+
+        $targetModel = null;
+        if (!$isCreate) {
+            $modelClass = $isPage ? Page::class : Category::class;
+            $targetModel = $target instanceof $modelClass ? $target : $modelClass::findOrFail($target);
+        }
 
         $file = $request->file('file');
         $path = $file->store('imports');
@@ -88,7 +75,8 @@ class ImportController extends Controller
             'file_path' => $path,
             'imported_by' => $request->user()->id ?? null,
             'status' => 'pending',
-            'page_id' => $pageModel->id,
+            'page_id' => ($isPage && $targetModel) ? $targetModel->id : null,
+            'category_id' => (!$isPage && $targetModel) ? $targetModel->id : null,
         ]);
 
         try {
@@ -96,21 +84,50 @@ class ImportController extends Controller
             $bodyHtml = $this->cleanWordHtml($bodyHtml);
             $tiptapJson = $this->htmlToTiptapJson($bodyHtml);
 
-            $pageModel->update([
-                'content' => $tiptapJson,
-                'content_html' => $bodyHtml,
-                'content_text' => strip_tags($bodyHtml),
-                'updated_by' => $request->user()->id ?? null,
-            ]);
+            if ($isCreate) {
+                if ($isPage) {
+                    $targetModel = Page::create([
+                        'category_id' => $validated['category_id'],
+                        'title' => $validated['title'],
+                        'slug' => Str::slug($validated['title']),
+                        'content' => $tiptapJson,
+                        'content_html' => $bodyHtml,
+                        'content_text' => strip_tags($bodyHtml),
+                        'status' => 'draft',
+                        'created_by' => $request->user()->id ?? null,
+                    ]);
+                    $documentImport->update(['page_id' => $targetModel->id, 'status' => 'success']);
+                } else {
+                    $targetModel = Category::create([
+                        'name' => $validated['name'],
+                        'slug' => Str::slug($validated['name']),
+                        'parent_id' => $validated['parent_id'] ?? null,
+                        'order' => $validated['order'] ?? 0,
+                        'content' => $tiptapJson,
+                        'content_html' => $bodyHtml,
+                    ]);
+                    $documentImport->update(['category_id' => $targetModel->id, 'status' => 'success']);
+                }
+            } else {
+                $targetModel->update($isPage ? [
+                    'content' => $tiptapJson,
+                    'content_html' => $bodyHtml,
+                    'content_text' => strip_tags($bodyHtml),
+                    'updated_by' => $request->user()->id ?? null,
+                ] : [
+                    'content' => $tiptapJson,
+                    'content_html' => $bodyHtml,
+                ]);
+                $documentImport->update(['status' => 'success']);
+            }
 
-            $documentImport->update([
-                'status' => 'success',
-            ]);
+            $entityLabel = $isPage ? 'halaman' : 'kategori';
+            $responseKey = $isPage ? 'page' : 'category';
 
             return response()->json([
-                'message' => 'Re-import/Update success',
-                'page' => $pageModel,
-            ], 200);
+                'message' => ($isCreate ? 'Import' : 'Re-import/Update') . " {$entityLabel} berhasil",
+                $responseKey => $targetModel,
+            ], $isCreate ? 201 : 200);
 
         } catch (\Exception $e) {
             $documentImport->update([
@@ -119,7 +136,7 @@ class ImportController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Update Import Failed',
+                'message' => ($isCreate ? 'Import' : 'Update Import') . ' Failed',
                 'error' => $e->getMessage(),
                 'line' => $e->getLine()
             ], 422);

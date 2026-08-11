@@ -34,6 +34,8 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'icon' => 'nullable|string|max:50',
+            'content' => 'nullable',
+            'content_html' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer',
         ]);
@@ -62,6 +64,8 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'icon' => 'nullable|string|max:50',
+            'content' => 'nullable',
+            'content_html' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
             'order' => 'nullable|integer',
         ]);

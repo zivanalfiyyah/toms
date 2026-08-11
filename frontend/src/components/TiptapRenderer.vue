@@ -2,7 +2,11 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  content: { type: [Object, String], required: true }
+  content: { 
+    type: [Object, String, null], 
+    required: false,            
+    default: ''                 
+  }
 })
 
 function slugify(text) {

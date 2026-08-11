@@ -20,6 +20,8 @@ class CategoryResource extends JsonResource
             'description' => $this->description,
             'icon' => $this->icon,
             'slug' => $this->slug,
+            'content' => $this->content,
+            'content_html' => $this->content_html,
             'parent_id' => $this->parent_id,
             'order' => $this->order,
             'children' => CategoryResource::collection($this->whenLoaded('children')),

@@ -24,18 +24,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::middleware('permission:manage-categories')->group(function () {
+Route::middleware('permission:manage-categories')->group(function () {
         Route::post('/categories', [CategoryController::class, 'store']);
+
+        Route::post('/categories/import', [ImportController::class, 'storeCategory']);
+        Route::put('/categories/{category}/import', [ImportController::class, 'updateCategory']);
+        
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-
     });
 
     Route::middleware('permission:manage-pages')->group(function () {
         Route::post('/pages', [PageController::class, 'store']);
         Route::post('/pages/upload-image', [PageController::class, 'uploadImage']);
+        
         Route::post('/pages/import', [ImportController::class, 'store']);
-        Route::put('/pages/{pages}/import', [ImportController::class, 'update']);
+        Route::put('/pages/{page}/import', [ImportController::class, 'update']);
+        
         Route::put('/pages/{page}', [PageController::class, 'update']);
         Route::delete('/pages/{page}', [PageController::class, 'destroy']);
     });
