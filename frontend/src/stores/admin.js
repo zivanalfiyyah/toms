@@ -1,6 +1,28 @@
 import { defineStore } from 'pinia'
 import api from '../api'
 
+function findPageDeep(pages, id) {
+  for (const p of pages || []) {
+    if (p.id === id) return p
+    const found = findPageDeep(p.children, id)
+    if (found) return found
+  }
+  return null
+}
+
+function removePageDeep(pages, id) {
+  if (!pages) return false
+  const idx = pages.findIndex((p) => p.id === id)
+  if (idx !== -1) {
+    pages.splice(idx, 1)
+    return true
+  }
+  for (const p of pages) {
+    if (removePageDeep(p.children, id)) return true
+  }
+  return false
+}
+
 export const useAdminStore = defineStore('admin', {
   state: () => ({
     // dashboard
@@ -117,7 +139,7 @@ export const useAdminStore = defineStore('admin', {
       const cat = this.categories.find((c) => c.id === categoryId)
       if (cat) {
         if (payload.parent_id) {
-          const parent = (cat.pages || []).find((p) => p.id === payload.parent_id)
+          const parent = findPageDeep(cat.pages, payload.parent_id)
           if (parent) {
             parent.children = parent.children || []
             parent.children.push(res.data)
@@ -133,8 +155,8 @@ export const useAdminStore = defineStore('admin', {
     async updatePage(id, payload) {
       const res = await api.put(`/pages/${id}`, payload)
       for (const cat of this.categories) {
-        const idx = (cat.pages || []).findIndex((p) => p.id === id)
-        if (idx !== -1) cat.pages[idx] = res.data
+        const existing = findPageDeep(cat.pages, id)
+        if (existing) Object.assign(existing, res.data)
       }
       return res.data
     },
@@ -142,7 +164,7 @@ export const useAdminStore = defineStore('admin', {
     async deletePage(id) {
       await api.delete(`/pages/${id}`)
       for (const cat of this.categories) {
-        cat.pages = (cat.pages || []).filter((p) => p.id !== id)
+        removePageDeep(cat.pages, id)
       }
     },
 
@@ -154,9 +176,6 @@ export const useAdminStore = defineStore('admin', {
         formData.append('file', file)
         formData.append('category_id', categoryId)
         formData.append('title', title)
-        // Kirim slug eksplisit dari frontend supaya tidak bergantung
-        // sepenuhnya pada auto-generate di backend (ini penyebab bug
-        // slug kosong sebelumnya, mis. halaman "Customer Experience").
         if (slug) formData.append('slug', slug)
         if (parentId) formData.append('parent_id', parentId)
 

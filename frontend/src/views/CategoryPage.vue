@@ -168,14 +168,8 @@ function slugify(text) {
         />
 
 
-      <template v-if="cat.pages?.length === 1 && !cat.pages[0].children?.length">
-        <TiptapRenderer
-          v-if="cat.pages[0].content_html"
-          :content="cat.pages[0].content_html"
-          class="single-page-content"
-        />
-      </template>
-      <template v-else-if="cat.pages?.length">
+      <!-- DAFTAR SUBBAB (Tampil meskipun cuma ada 1 subbab) -->
+      <template v-if="cat.pages?.length">
         <h2 class="subbab-title">Subbab</h2>
         <ul class="subbab-list">
           <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">

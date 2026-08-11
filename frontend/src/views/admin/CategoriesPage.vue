@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useAdminStore } from '../../stores/admin'
+import AdminPageTreeItem from '../../components/admin/AdminPageTreeItem.vue'
 
 const admin = useAdminStore()
 
@@ -152,25 +153,15 @@ async function removePage(page) {
       </div>
 
       <ul v-if="cat.pages?.length" class="page-list">
-        <li v-for="page in cat.pages" :key="page.id">
-          <div class="page-row">
-            <span>{{ page.title }}</span>
-            <span class="page-actions">
-              <button class="btn-link" @click="openCreateChildPage(cat, page)">+ Sub Halaman</button>
-              <button class="btn-link" @click="openEditPage(cat, page)">Edit</button>
-              <button class="btn-link danger" @click="removePage(page)">Hapus</button>
-            </span>
-          </div>
-          <ul v-if="page.children?.length" class="child-list">
-            <li v-for="child in page.children" :key="child.id">
-              <span>{{ child.title }}</span>
-              <span class="page-actions">
-                <button class="btn-link" @click="openEditPage(cat, child)">Edit</button>
-                <button class="btn-link danger" @click="removePage(child)">Hapus</button>
-              </span>
-            </li>
-          </ul>
-        </li>
+        <AdminPageTreeItem
+          v-for="page in cat.pages"
+          :key="page.id"
+          :cat="cat"
+          :page="page"
+          @add-child="openCreateChildPage"
+          @edit="openEditPage"
+          @remove="removePage"
+        />
       </ul>
       <p v-else class="empty">Belum ada halaman di kategori ini.</p>
     </div>
