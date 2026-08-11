@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import api from '../api'
 
+// Cari page dengan id tertentu di pohon pages (termasuk children di level
+// manapun), bukan cuma level pertama. Dipakai createPage/updatePage supaya
+// tetap kerja untuk halaman yang sudah nested (mis. "Standar Pool" yang
+// sendirinya adalah child dari page lain).
 function findPageDeep(pages, id) {
   for (const p of pages || []) {
     if (p.id === id) return p
@@ -10,6 +14,8 @@ function findPageDeep(pages, id) {
   return null
 }
 
+// Hapus page dengan id tertentu dari pohon pages di level manapun (in-place).
+// Return true kalau ketemu & terhapus.
 function removePageDeep(pages, id) {
   if (!pages) return false
   const idx = pages.findIndex((p) => p.id === id)
@@ -139,6 +145,9 @@ export const useAdminStore = defineStore('admin', {
       const cat = this.categories.find((c) => c.id === categoryId)
       if (cat) {
         if (payload.parent_id) {
+          // Cari parent-nya di level manapun (bukan cuma cat.pages
+          // langsung), supaya bisa nambah sub halaman ke page yang
+          // sudah nested (mis. "Standar Pool" yang sendirinya child).
           const parent = findPageDeep(cat.pages, payload.parent_id)
           if (parent) {
             parent.children = parent.children || []
@@ -168,6 +177,23 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
+    // /categories cuma mengembalikan data sampai kedalaman tertentu
+    // (kategori -> page -> child). Kalau sebuah page ternyata masih
+    // punya anak lagi di bawah itu (page.children === undefined,
+    // beda dari [] yang berarti "sudah dicek, memang tidak ada anak"),
+    // kita fetch detail page itu satu per satu — pola yang sama persis
+    // dipakai docs.js (sisi publik) di fetchPageByPath. Mutasi in-place
+    // supaya nempel ke object yang sama di dalam this.categories.
+    async loadPageChildren(page) {
+      if (page.children !== undefined) return
+      try {
+        const res = await api.get(`/pages/${page.id}`)
+        page.children = res.data.children || []
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal memuat sub halaman.'
+      }
+    },
+
     // ---------- Import Word ----------
     async importDocx({ file, categoryId, title, slug, parentId }) {
       this.importSubmitting = true
@@ -176,6 +202,9 @@ export const useAdminStore = defineStore('admin', {
         formData.append('file', file)
         formData.append('category_id', categoryId)
         formData.append('title', title)
+        // Kirim slug eksplisit dari frontend supaya tidak bergantung
+        // sepenuhnya pada auto-generate di backend (ini penyebab bug
+        // slug kosong sebelumnya, mis. halaman "Customer Experience").
         if (slug) formData.append('slug', slug)
         if (parentId) formData.append('parent_id', parentId)
 

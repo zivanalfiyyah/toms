@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 
 const admin = useAdminStore()
@@ -9,7 +9,6 @@ onMounted(() => {
   if (!admin.categories.length) admin.fetchCategories()
 })
 
-// 'create' = import jadi halaman baru, 'update' = re-import ke halaman yang sudah ada
 const mode = ref('create')
 
 const form = reactive({
@@ -24,23 +23,45 @@ const fileInputRef = ref(null)
 const submitting = computed(() => admin.importSubmitting)
 const errorMsg = ref('')
 const result = ref(null) // { message, page }
+const loadingPageTree = ref(false)
 
 const topLevelPagesInSelectedCategory = computed(() => {
   const cat = admin.categories.find((c) => c.id === Number(form.categoryId))
   return cat?.pages || []
 })
 
-const pagesInSelectedCategory = computed(() => {
-  const pages = topLevelPagesInSelectedCategory.value
-  const flat = []
-  for (const p of pages) {
-    flat.push(p)
-    for (const child of p.children || []) {
-      flat.push({ ...child, title: `— ${child.title}` })
+async function ensureChildrenLoaded(pages) {
+  for (const p of pages || []) {
+    if (p.children === undefined) {
+      await admin.loadPageChildren(p)
+    }
+    if (p.children?.length) {
+      await ensureChildrenLoaded(p.children)
     }
   }
+}
+
+watch(
+  () => [form.categoryId, mode.value],
+  async ([categoryId, currentMode]) => {
+    if (currentMode === 'update' && categoryId) {
+      loadingPageTree.value = true
+      await ensureChildrenLoaded(topLevelPagesInSelectedCategory.value)
+      loadingPageTree.value = false
+    }
+  }
+)
+
+function flattenPages(pages, depth = 0) {
+  const flat = []
+  for (const p of pages || []) {
+    flat.push(depth === 0 ? p : { ...p, title: `${'— '.repeat(depth)}${p.title}` })
+    flat.push(...flattenPages(p.children, depth + 1))
+  }
   return flat
-})
+}
+
+const pagesInSelectedCategory = computed(() => flattenPages(topLevelPagesInSelectedCategory.value))
 
 function slugify(text) {
   return (text || '')
@@ -174,11 +195,11 @@ async function submit() {
         </select>
 
         <label>Halaman yang akan diperbarui</label>
-        <select v-model="form.pageId" :disabled="!form.categoryId" required>
-          <option value="" disabled>Pilih halaman</option>
+        <select v-model="form.pageId" :disabled="!form.categoryId || loadingPageTree" required>
+          <option value="" disabled>{{ loadingPageTree ? 'Memuat daftar halaman...' : 'Pilih halaman' }}</option>
           <option v-for="p in pagesInSelectedCategory" :key="p.id" :value="p.id">{{ p.title }}</option>
         </select>
-        <p v-if="form.categoryId && !pagesInSelectedCategory.length" class="hint">
+        <p v-if="form.categoryId && !loadingPageTree && !pagesInSelectedCategory.length" class="hint">
           Belum ada halaman di kategori ini.
         </p>
 
