@@ -8,11 +8,13 @@ const router = useRouter()
 
 const menu = [
   { to: '/admin', label: 'Dashboard', icon: 'rocket', exact: true },
-  { to: '/admin/users', label: 'Pengguna', icon: 'hbif' },
+  { to: '/admin/users', label: 'Pengguna', icon: 'hbif', adminOnly: true },
   { to: '/admin/categories', label: 'Kategori & Halaman', icon: 'folder' },
   { to: '/admin/import', label: 'Import Word', icon: 'upload' },
-  { to: '/admin/access-requests', label: 'Permintaan Akses', icon: 'inbox' },
+  { to: '/admin/access-requests', label: 'Permintaan Akses', icon: 'inbox', adminOnly: true },
 ]
+
+const visibleMenu = menu.filter((item) => !item.adminOnly || auth.roleNames.includes('admin'))
 
 async function handleLogout() {
   await auth.logout()
@@ -28,7 +30,7 @@ async function handleLogout() {
       </div>
       <nav>
         <ul class="admin-nav">
-          <li v-for="item in menu" :key="item.to">
+          <li v-for="item in visibleMenu" :key="item.to">
             <router-link :to="item.to" class="admin-nav-link" :exact-active-class="'is-active'" :active-class="item.exact ? '' : 'is-active'">
               <span v-if="icons[item.icon]" v-html="icons[item.icon]" class="admin-nav-icon"></span>
               {{ item.label }}

@@ -59,10 +59,10 @@ const routes = [
     meta: { requiresAdmin: true },
     children: [
       { path: '', name: 'admin-dashboard', component: AdminDashboard },
-      { path: 'users', name: 'admin-users', component: AdminUsers },
+      { path: 'users', name: 'admin-users', component: AdminUsers, meta: { requiresAdmin: true, adminOnly: true } },
       { path: 'categories', name: 'admin-categories', component: AdminCategories },
       { path: 'import', name: 'admin-import', component: AdminImport },
-      { path: 'access-requests', name: 'admin-access-requests', component: AdminAccessRequests },
+      { path: 'access-requests', name: 'admin-access-requests', component: AdminAccessRequests, meta: { requiresAdmin: true, adminOnly: true } },
       { path: 'logs', redirect: '/admin' },
       { path: 'settings', redirect: '/admin' }
     ]
@@ -87,6 +87,10 @@ router.beforeEach((to) => {
 
   if (!auth.canEdit) {
     return { name: 'home' }
+  }
+
+  if (to.meta.adminOnly && !auth.roleNames.includes('admin')) {
+    return { name: 'admin-dashboard' }
   }
 
   return true
