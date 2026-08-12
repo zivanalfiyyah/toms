@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
@@ -12,6 +12,7 @@ const authStore = useAuthStore()
 const route = useRoute()
 
 const isAdmin = computed(() => authStore.canEdit)
+const sidebarEl = ref(null)
 
 onMounted(() => {
   if (!docsStore.categories.length) docsStore.fetchCategories()
@@ -21,13 +22,35 @@ const activeCategory = computed(() => {
   const slug = route.params.category
   return docsStore.categories.find((c) => c.slug === slug) || null
 })
+
+// Keep the currently active link in view automatically — whenever the
+// route changes (or the category list finishes loading), scroll the
+// sidebar so the active item is visible without the user scrolling.
+function scrollActiveIntoView() {
+  nextTick(() => {
+    // Prefer the active PAGE link. The category link also gets `.is-active`
+    // and sits earlier in the DOM, so a plain `.is-active` query would match
+    // it first and stop there (it's usually already visible), skipping the
+    // actual active page further down.
+    const el =
+      sidebarEl.value?.querySelector('.link.is-active') ||
+      sidebarEl.value?.querySelector('.category-link.is-active')
+    el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+
+watch(
+  () => [route.fullPath, docsStore.categories.length],
+  scrollActiveIntoView,
+  { flush: 'post', immediate: true }
+)
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" ref="sidebarEl">
     <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
     <ul class="category-nav">
-      <li v-for="cat in docsStore.categories" :key="cat.id">
+      <li v-for="cat in docsStore.categories" :key="cat.id" class="category-item">
         <router-link
           :to="`/docs/${cat.slug}`"
           class="category-link"
@@ -37,22 +60,18 @@ const activeCategory = computed(() => {
           <span v-if="icons[cat.icon]" v-html="icons[cat.icon]" class="category-icon"></span>
           {{ cat.name }}
         </router-link>
+
+        <ul v-if="activeCategory?.id === cat.id" class="page-list">
+          <SidebarPageItem
+            v-for="page in activeCategory.pages"
+            :key="page.id"
+            :category="activeCategory"
+            :page="page"
+            @navigate="$emit('navigate')"
+          />
+        </ul>
       </li>
     </ul>
-
-    <template v-if="activeCategory">
-      <hr class="divider" />
-      <p class="pages-block-title">{{ activeCategory.name }}</p>
-      <ul class="page-list">
-        <SidebarPageItem
-          v-for="page in activeCategory.pages"
-          :key="page.id"
-          :category="activeCategory"
-          :page="page"
-          @navigate="$emit('navigate')"
-        />
-      </ul>
-    </template>
 
     <template v-if="isAdmin">
       <hr class="divider" />
@@ -72,6 +91,7 @@ const activeCategory = computed(() => {
 }
 
 .category-nav { list-style: none; margin: 0 0 1.25rem; padding: 0; }
+.category-item { margin-bottom: 0.15rem; }
 .category-link {
   display: flex; align-items: center; gap: 0.6rem;
   padding: 0.4rem 0.5rem;
@@ -88,13 +108,12 @@ const activeCategory = computed(() => {
 
 .divider { border: none; border-top: 1px dashed var(--color-border); margin: 0 0 1.25rem; }
 
-.pages-block-title {
-  font-family: var(--font-display); font-size: 0.8rem; font-weight: 600;
-  color: var(--color-accent);
-  margin: 0 0 0.6rem;
-  padding: 0 0.5rem;
+.page-list {
+  list-style: none;
+  margin: 0.2rem 0 0.5rem;
+  padding: 0 0 0 0.4rem;
+  border-left: 1px dashed var(--color-border);
 }
-.page-list { list-style: none; margin: 0; padding: 0; }
 .page-item { margin-bottom: 0.1rem; }
 .page-row { display: flex; align-items: center; }
 .link { display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: var(--radius); color: var(--color-ink); font-size: 0.83rem; flex: 1; min-width: 0; }

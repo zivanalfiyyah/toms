@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref, shallowRef, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, ref, shallowRef, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Editor } from '@tiptap/core' 
 import { StarterKit } from '@tiptap/starter-kit'
@@ -12,6 +12,8 @@ import { Image as OriginalImage } from '@tiptap/extension-image'
 
 import { Underline } from '@tiptap/extension-underline'
 import { Link } from '@tiptap/extension-link'
+import { TextAlign } from '@tiptap/extension-text-align'
+import { Highlight } from '@tiptap/extension-highlight'
 import api from '../api'
 import { useAuthStore } from '../stores/auth'
 import { useDocsStore } from '../stores/docs'
@@ -158,6 +160,8 @@ onMounted(async () => {
           CustomImage.configure({ allowBase64: true }),
           Underline,
           Link.configure({ openOnClick: false }),
+          TextAlign.configure({ types: ['heading', 'paragraph'] }),
+          Highlight.configure({ multicolor: false }),
         ],
         content: detail.content_html || '<p></p>',
         onTransaction: () => {
@@ -260,6 +264,104 @@ onBeforeUnmount(() => {
   editor.value?.destroy()
 })
 
+// --- Table controls ---
+// The table extensions were already wired into the editor's schema
+// (CustomTable / CustomTableRow / CustomTableCell / CustomTableHeader),
+// so tables could be resized once inserted — but there was no toolbar
+// action to actually insert or edit one. These add that missing layer.
+function insertTable() {
+  editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+}
+function addColumnBefore() {
+  editor.value?.chain().focus().addColumnBefore().run()
+}
+function addColumnAfter() {
+  editor.value?.chain().focus().addColumnAfter().run()
+}
+function deleteColumn() {
+  editor.value?.chain().focus().deleteColumn().run()
+}
+function addRowBefore() {
+  editor.value?.chain().focus().addRowBefore().run()
+}
+function addRowAfter() {
+  editor.value?.chain().focus().addRowAfter().run()
+}
+function deleteRow() {
+  editor.value?.chain().focus().deleteRow().run()
+}
+function deleteTable() {
+  if (!window.confirm('Hapus seluruh tabel ini?')) return
+  editor.value?.chain().focus().deleteTable().run()
+}
+function mergeOrSplitCells() {
+  editor.value?.chain().focus().mergeOrSplit().run()
+}
+function toggleHeaderRow() {
+  editor.value?.chain().focus().toggleHeaderRow().run()
+}
+function toggleHeaderColumn() {
+  editor.value?.chain().focus().toggleHeaderColumn().run()
+}
+
+// --- Heading dropdown (Paragraf / Heading 1-3) ---
+// editorVersion is bumped on every editor transaction (see onTransaction
+// above), so referencing it here makes this computed re-evaluate live as
+// the cursor moves or the user types — same trick the toolbar buttons use.
+const currentBlockType = computed(() => {
+  void editorVersion.value
+  if (!editor.value) return 'paragraph'
+  for (const level of [1, 2, 3]) {
+    if (editor.value.isActive('heading', { level })) return String(level)
+  }
+  return 'paragraph'
+})
+
+function onHeadingChange(e) {
+  const val = e.target.value
+  if (!editor.value) return
+  if (val === 'paragraph') {
+    editor.value.chain().focus().setParagraph().run()
+  } else {
+    editor.value.chain().focus().setHeading({ level: Number(val) }).run()
+  }
+}
+
+// --- Text align dropdown ---
+const currentAlign = computed(() => {
+  void editorVersion.value
+  if (!editor.value) return 'left'
+  for (const align of ['left', 'center', 'right', 'justify']) {
+    if (editor.value.isActive({ textAlign: align })) return align
+  }
+  return 'left'
+})
+
+function onAlignChange(e) {
+  editor.value?.chain().focus().setTextAlign(e.target.value).run()
+}
+
+// --- Raw HTML source view ---
+// Lets an admin who's comfortable with HTML tweak markup directly
+// (e.g. fixing something the toolbar can't reach), then apply it back
+// into the editor.
+const showHtmlSource = ref(false)
+const htmlSource = ref('')
+
+function toggleHtmlSource() {
+  if (!editor.value) return
+  if (!showHtmlSource.value) {
+    htmlSource.value = editor.value.getHTML()
+  }
+  showHtmlSource.value = !showHtmlSource.value
+}
+
+function applyHtmlSource() {
+  if (!editor.value) return
+  editor.value.commands.setContent(htmlSource.value || '<p></p>')
+  showHtmlSource.value = false
+}
+
 function sanitizeNode(node) {
   if (!node || typeof node !== 'object' || Array.isArray(node)) return null
   if (typeof node.type !== 'string') return null
@@ -335,6 +437,29 @@ input[type="text"], select {
 }
 .toolbar button.is-active { background: var(--color-accent); color: #fff; }
 .toolbar-sep { width: 1px; align-self: stretch; background: var(--color-border); margin: 0 2px; }
+
+.toolbar-select {
+  padding: 0.3rem 0.4rem; border: 1px solid var(--color-border); border-radius: 6px;
+  background: var(--color-bg); color: var(--color-ink); font-size: 0.85rem; cursor: pointer;
+}
+
+.table-toolbar {
+  border-top: none;
+  border-radius: 0;
+  background: var(--color-accent-soft, #eef2ff);
+}
+.toolbar-label { font-size: 0.8rem; color: var(--color-ink-soft); align-self: center; margin-right: 2px; }
+
+.html-source-panel {
+  border: 1px solid var(--color-border); border-top: none; background: var(--color-surface);
+  padding: 0.75rem;
+}
+.html-source-textarea {
+  width: 100%; min-height: 180px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.8rem;
+  border: 1px solid var(--color-border); border-radius: var(--radius); padding: 0.6rem;
+  background: var(--color-bg); color: var(--color-ink); resize: vertical;
+}
+.html-source-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
 
 .tiptap-editor {
   border: 1px solid var(--color-border); border-radius: 0 0 var(--radius) var(--radius);
@@ -433,21 +558,35 @@ input[type="text"], select {
         <label>Konten</label>
         <div class="toolbar">
           <span style="display:none">{{ editorVersion }}</span>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }" @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()">H1</button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }" @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
+          <button type="button" :disabled="!editor" title="Undo" @click="editor?.chain().focus().undo().run()">↺</button>
+          <button type="button" :disabled="!editor" title="Redo" @click="editor?.chain().focus().redo().run()">↻</button>
           <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()"><b>B</b></button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()"><i>I</i></button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()"><u>U</u></button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()"><s>S</s></button>
+          <select class="toolbar-select" :disabled="!editor" title="Gaya Paragraf" :value="currentBlockType" @change="onHeadingChange">
+            <option value="paragraph">Paragraf</option>
+            <option value="1">Heading 1</option>
+            <option value="2">Heading 2</option>
+            <option value="3">Heading 3</option>
+          </select>
           <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()">List</button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()">1. List</button>
-          <button type="button" :disabled="!editor" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()">Quote</button>
+          <button type="button" :disabled="!editor" title="Tebal" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()"><b>B</b></button>
+          <button type="button" :disabled="!editor" title="Miring" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()"><i>I</i></button>
+          <button type="button" :disabled="!editor" title="Garis Bawah" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()"><u>U</u></button>
+          <button type="button" :disabled="!editor" title="Coret" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()"><s>S</s></button>
+          <button type="button" :disabled="!editor" title="Sorot (Highlight)" :class="{ 'is-active': editor?.isActive('highlight') }" @click="editor?.chain().focus().toggleHighlight().run()">🖍</button>
           <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" @click="setLink">Link</button>
-          <button type="button" :disabled="!editor" @click="triggerImagePick">Gambar</button>
+          <select class="toolbar-select" :disabled="!editor" title="Perataan Teks" :value="currentAlign" @change="onAlignChange">
+            <option value="left">Rata Kiri</option>
+            <option value="center">Rata Tengah</option>
+            <option value="right">Rata Kanan</option>
+            <option value="justify">Rata Kiri-Kanan</option>
+          </select>
+          <span class="toolbar-sep"></span>
+          <button type="button" :disabled="!editor" title="Daftar Bullet" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()">List</button>
+          <button type="button" :disabled="!editor" title="Daftar Bernomor" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()">1. List</button>
+          <button type="button" :disabled="!editor" title="Kutipan" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()">Quote</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" :disabled="!editor" title="Sisipkan Link" @click="setLink">🔗 Link</button>
+          <button type="button" :disabled="!editor" title="Sisipkan Gambar" @click="triggerImagePick">🖼 Gambar</button>
           <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
           <button
             type="button"
@@ -458,10 +597,40 @@ input[type="text"], select {
             Hapus Gambar
           </button>
           <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" @click="editor?.chain().focus().undo().run()">Undo</button>
-          <button type="button" :disabled="!editor" @click="editor?.chain().focus().redo().run()">Redo</button>
+          <button type="button" :disabled="!editor" title="Sisipkan Tabel" @click="insertTable">▦ Tabel</button>
+          <button type="button" :disabled="!editor" title="Blok Kode" :class="{ 'is-active': editor?.isActive('codeBlock') }" @click="editor?.chain().focus().toggleCodeBlock().run()">&lt;/&gt;</button>
+          <button type="button" :disabled="!editor" title="Garis Pemisah" @click="editor?.chain().focus().setHorizontalRule().run()">― HR</button>
+          <button type="button" :disabled="!editor" title="Bersihkan Format" @click="editor?.chain().focus().unsetAllMarks().clearNodes().run()">Clear</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" :disabled="!editor" title="Lihat/Edit HTML mentah" :class="{ 'is-active': showHtmlSource }" @click="toggleHtmlSource">&lt;&gt; HTML</button>
         </div>
-        <div ref="editorEl" class="tiptap-editor"></div>
+
+        <div v-if="showHtmlSource" class="html-source-panel">
+          <textarea v-model="htmlSource" class="html-source-textarea" spellcheck="false"></textarea>
+          <div class="html-source-actions">
+            <button type="button" class="btn-import" @click="applyHtmlSource">Terapkan HTML</button>
+            <button type="button" class="btn-cancel" @click="showHtmlSource = false">Batal</button>
+          </div>
+        </div>
+
+        <div v-if="editor?.isActive('table') && !showHtmlSource" class="toolbar table-toolbar">
+          <span class="toolbar-label">Tabel:</span>
+          <button type="button" @click="addRowBefore">+ Baris Atas</button>
+          <button type="button" @click="addRowAfter">+ Baris Bawah</button>
+          <button type="button" @click="deleteRow">Hapus Baris</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" @click="addColumnBefore">+ Kolom Kiri</button>
+          <button type="button" @click="addColumnAfter">+ Kolom Kanan</button>
+          <button type="button" @click="deleteColumn">Hapus Kolom</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" @click="mergeOrSplitCells">Gabung/Pisah Sel</button>
+          <button type="button" :class="{ 'is-active': editor?.isActive('tableHeader') }" @click="toggleHeaderRow">Header Baris</button>
+          <button type="button" @click="toggleHeaderColumn">Header Kolom</button>
+          <span class="toolbar-sep"></span>
+          <button type="button" class="btn-delete-img" @click="deleteTable">Hapus Tabel</button>
+        </div>
+
+        <div ref="editorEl" class="tiptap-editor" v-show="!showHtmlSource"></div>
       </div>
 
       <div class="actions">

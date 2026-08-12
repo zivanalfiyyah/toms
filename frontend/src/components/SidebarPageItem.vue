@@ -42,7 +42,11 @@ const isAncestorOfActive = computed(() => {
 })
 
 const state = reactive({ expanded: false })
-watch(isAncestorOfActive, (v) => { if (v) state.expanded = true }, { immediate: true })
+// Sync expand state with the active path on every navigation: open the
+// branch that leads to the active page, and close any branch that no
+// longer does — so the sidebar always matches the current page without
+// leftover branches piling up from earlier clicks.
+watch(isAncestorOfActive, (v) => { state.expanded = v }, { immediate: true })
 
 function toggle() {
   state.expanded = !state.expanded

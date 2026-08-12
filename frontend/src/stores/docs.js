@@ -34,14 +34,6 @@ export const useDocsStore = defineStore('docs', {
       return result
     },
 
-    // Recursively flattens the whole tree (as deep as what's currently
-    // loaded in `categories`, i.e. category -> pages -> children).
-    // NOTE: this still can't see levels deeper than what /categories
-    // returns (currently 2 levels under category). Prev/Next pager
-    // will only be fully accurate for pages within that depth. Making
-    // it accurate at every depth requires either the backend to return
-    // the full nested tree from /categories, or a dedicated flatten
-    // endpoint — flagging this as a follow-up, not silently faking it.
     flatPages: (state) => {
       const result = []
       function walk(pages, categorySlug, parentSlugs) {
@@ -79,12 +71,6 @@ export const useDocsStore = defineStore('docs', {
       }
     },
 
-    // Resolves a page at ANY depth by walking the slug chain one level
-    // at a time. Levels already present in `categories` (page + its
-    // direct children) are matched locally with no extra request.
-    // Once we run out of locally-known children, we fetch that node's
-    // full record (which includes ITS children) and keep walking —
-    // repeating for however many levels deep the URL goes.
     async fetchPageByPath(categorySlug, slugs) {
       this.loading = true
       this.error = null
@@ -110,14 +96,6 @@ export const useDocsStore = defineStore('docs', {
           return
         }
 
-        // walk the rest of the chain, fetching on demand whenever the
-        // current node's children haven't been loaded locally yet.
-        // IMPORTANT: we mutate `node.children` in place (instead of
-        // replacing `node` with a fresh object) so the fetched data
-        // gets permanently attached to the same object living inside
-        // `this.categories`. That's what lets `flatPages` (and the
-        // prev/next pager) see levels deeper than what /categories
-        // originally returned.
         for (let i = 1; i < slugs.length; i++) {
           if (!node.children) {
             const res = await api.get(`/pages/${node.id}`)
@@ -131,10 +109,6 @@ export const useDocsStore = defineStore('docs', {
           node = next
         }
 
-        // always fetch the final node's full record so we have its
-        // content_html AND its own children (for the Subbab list).
-        // Same in-place approach: attach children onto `node` itself
-        // rather than discarding it, so it's cached for next time too.
         const res = await api.get(`/pages/${node.id}`)
         node.content_html = res.data.content_html
         node.content = res.data.content
