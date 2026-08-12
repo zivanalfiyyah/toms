@@ -13,8 +13,11 @@ const themeStore = useThemeStore()
 const authStore = useAuthStore()
 const route = useRoute()
 
-// Halaman login & seluruh area admin punya layout sendiri (tanpa header/sidebar dokumentasi).
-const isBareLayout = computed(() => route.name === 'login' || route.path.startsWith('/admin'))
+// Halaman login, request-access, accept-invite, & seluruh area admin punya
+// layout sendiri (tanpa header/sidebar dokumentasi).
+const isBareLayout = computed(() =>
+  ['login', 'request-access', 'accept-invite'].includes(route.name) || route.path.startsWith('/admin')
+)
 
 // Sidebar dokumentasi disembunyikan di halaman Home ("/") dan di layout bare.
 const showSidebar = computed(() => route.name !== 'home' && !isBareLayout.value)

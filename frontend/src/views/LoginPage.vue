@@ -68,6 +68,16 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   padding: 0.6rem 0.8rem;
   margin-bottom: 1rem;
 }
+.request-access-link {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  margin-top: 1.2rem;
+}
+.request-access-link a {
+  color: var(--color-accent);
+  font-weight: 600;
+}
 </style>
 
 <template>
@@ -88,6 +98,10 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
           {{ loading ? 'Memproses...' : 'Masuk' }}
         </button>
       </form>
+
+      <p class="request-access-link">
+        Belum punya akses? <router-link to="/request-access">Minta akses di sini</router-link>
+      </p>
     </div>
   </div>
 </template>

@@ -25,26 +25,24 @@ function removePageDeep(pages, id) {
 
 export const useAdminStore = defineStore('admin', {
   state: () => ({
-    // dashboard
     stats: null,
     statsLoading: false,
 
-    // users
     users: [],
     usersLoading: false,
 
-    // categories & pages (dikelola terpisah dari docs.js karena butuh aksi tulis)
     categories: [],
     categoriesLoading: false,
 
-    // import word
     importSubmitting: false,
+
+    accessRequests: [],
+    accessRequestsLoading: false,
 
     error: null,
   }),
 
   actions: {
-    // ---------- Dashboard ----------
     async fetchStats() {
       this.statsLoading = true
       this.error = null
@@ -58,7 +56,6 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    // ---------- Users ----------
     async fetchUsers() {
       this.usersLoading = true
       this.error = null
@@ -90,7 +87,6 @@ export const useAdminStore = defineStore('admin', {
       this.users = this.users.filter((u) => u.id !== id)
     },
 
-    // ---------- Categories & Pages ----------
     async fetchCategories() {
       this.categoriesLoading = true
       this.error = null
@@ -168,7 +164,6 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    // ---------- Import Word ----------
     async importDocx({ file, categoryId, title, slug, parentId }) {
       this.importSubmitting = true
       try {
@@ -202,6 +197,36 @@ export const useAdminStore = defineStore('admin', {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
         return res.data
+      } finally {
+        this.importSubmitting = false
+      }
+    },
+
+    async fetchAccessRequests() {
+      this.accessRequestsLoading = true
+      this.error = null
+      try {
+        const res = await api.get('/access-requests')
+        this.accessRequests = res.data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal memuat permintaan akses.'
+      } finally {
+        this.accessRequestsLoading = false
+      }
+    },
+
+    async rejectAccessRequest(id) {
+      await api.post(`/access-requests/${id}/reject`)
+      const idx = this.accessRequests.findIndex((r) => r.id === id)
+      if (idx !== -1) this.accessRequests[idx].status = 'rejected'
+    },
+
+    async inviteFromAccessRequest(id, role) {
+      this.importSubmitting = true
+      try {
+        await api.post(`/access-requests/${id}/invite`, { role })
+        const idx = this.accessRequests.findIndex((r) => r.id === id)
+        if (idx !== -1) this.accessRequests[idx].status = 'invited'
       } finally {
         this.importSubmitting = false
       }

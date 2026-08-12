@@ -11,11 +11,16 @@ import AdminDashboard from '../views/admin/DashboardPage.vue'
 import AdminUsers from '../views/admin/UsersPage.vue'
 import AdminCategories from '../views/admin/CategoriesPage.vue'
 import AdminImport from '../views/admin/ImportPage.vue'
+import AdminAccessRequests from '../views/admin/AccessRequestsPage.vue'
+import RequestAccessPage from '../views/RequestAccessPage.vue'
+import AcceptInvitePage from '../views/AcceptInvitePage.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
   { path: '/login', name: 'login', component: LoginPage },
+  { path: '/request-access', name: 'request-access', component: RequestAccessPage },
+  { path: '/accept-invite/:token', name: 'accept-invite', component: AcceptInvitePage, props: true },
   { path: '/docs/:category', name: 'category-page', component: CategoryPage, props: true },
 
 
@@ -26,7 +31,7 @@ const routes = [
     meta: { requiresAdmin: true },
     props: (route) => ({
       category: route.params.category,
-      slugs: [] // Array kosong menandakan ini adalah Edit Kategori
+      slugs: []
     })
   },
   {
@@ -57,10 +62,13 @@ const routes = [
       { path: 'users', name: 'admin-users', component: AdminUsers },
       { path: 'categories', name: 'admin-categories', component: AdminCategories },
       { path: 'import', name: 'admin-import', component: AdminImport },
+      { path: 'access-requests', name: 'admin-access-requests', component: AdminAccessRequests },
       { path: 'logs', redirect: '/admin' },
       { path: 'settings', redirect: '/admin' }
     ]
-  }
+  },
+
+  { path: '/admin/login', name: 'admin-login', component: LoginPage }
 ]
 
 const router = createRouter({

@@ -11,6 +11,7 @@ const menu = [
   { to: '/admin/users', label: 'Pengguna', icon: 'hbif' },
   { to: '/admin/categories', label: 'Kategori & Halaman', icon: 'folder' },
   { to: '/admin/import', label: 'Import Word', icon: 'upload' },
+  { to: '/admin/access-requests', label: 'Permintaan Akses', icon: 'inbox' },
 ]
 
 async function handleLogout() {

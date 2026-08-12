@@ -26,6 +26,14 @@
     </button>
 
     <div class="header-right">
+      <router-link
+        v-if="!auth.isLoggedIn"
+        to="/admin/login"
+        class="admin-btn"
+        aria-label="Login Admin"
+      >
+        <span v-html="icons.hbif"></span>
+      </router-link>
       <ThemeToggle />
     </div>
   </header>
@@ -34,6 +42,9 @@
 <script setup>
 import ThemeToggle from './ThemeToggle.vue'
 import { icons } from '../icons'
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
 
 defineProps({
   showSidebar: { type: Boolean, default: true }
@@ -105,7 +116,20 @@ defineEmits(['open-search', 'toggle-sidebar'])
   border-radius: 4px; padding: 1px 6px; font-size: 0.72rem;
 }
 
-.header-right { display: flex; align-items: center; }
+.header-right { display: flex; align-items: center; gap: 0.6rem; }
+
+.admin-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+}
+.admin-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.admin-btn span { width: 18px; height: 18px; display: block; }
+.admin-btn :deep(svg) { width: 100%; height: 100%; }
 
 @media (max-width: 860px) {
   .hamburger { display: flex; }
