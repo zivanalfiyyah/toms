@@ -14,6 +14,14 @@ import { Underline } from '@tiptap/extension-underline'
 import { Link } from '@tiptap/extension-link'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Highlight } from '@tiptap/extension-highlight'
+
+import {
+  Undo, Redo, Bold, Italic, Underline as UnderlineIcon, Strikethrough,
+  Highlighter, AlignLeft, AlignCenter, AlignRight, AlignJustify,
+  List, ListOrdered, Quote, Link as LinkIcon, Image as ImageIcon,
+  Table, Code, Minus, Eraser, Code2, Trash2, FileUp, Save, X, Plus
+} from 'lucide-vue-next'
+
 import api from '../api'
 import { useAuthStore } from '../stores/auth'
 import { useDocsStore } from '../stores/docs'
@@ -37,7 +45,6 @@ const loading = ref(true)
 const saving = ref(false)
 const errorMessage = ref('')
 const editorVersion = ref(0) 
-
 
 const CustomTable = OriginalTable.extend({
   addAttributes() {
@@ -89,7 +96,6 @@ const CustomImage = OriginalImage.extend({
     }
   }
 })
-
 
 const editor = shallowRef(null)
 
@@ -169,9 +175,8 @@ onMounted(async () => {
         },
       })
     } catch (editorErr) {
-      console.error('EditPage: Tiptap Editor failed to initialize with this page content:', editorErr)
-      console.error('content_html yang gagal di-parse:', detail.content_html)
-      errorMessage.value = 'Gagal memuat editor konten. Kemungkinan ada struktur HTML (mis. tabel) di halaman ini yang tidak didukung editor. Detail: ' + editorErr.message
+      console.error('EditPage: Tiptap Editor failed to initialize:', editorErr)
+      errorMessage.value = 'Gagal memuat editor konten: ' + editorErr.message
     }
   } catch (err) {
     console.error('EditPage load error:', err)
@@ -254,7 +259,7 @@ async function handleDocxPick(e) {
     }
   } catch (err) {
     const data = err.response?.data
-    errorMessage.value = 'Gagal import: ' + (data?.error || data?.message || err.message) + (data?.line ? ` (baris ${data.line})` : '')
+    errorMessage.value = 'Gagal import: ' + (data?.error || data?.message || err.message)
   } finally {
     importing.value = false
   }
@@ -265,49 +270,23 @@ onBeforeUnmount(() => {
 })
 
 // --- Table controls ---
-// The table extensions were already wired into the editor's schema
-// (CustomTable / CustomTableRow / CustomTableCell / CustomTableHeader),
-// so tables could be resized once inserted — but there was no toolbar
-// action to actually insert or edit one. These add that missing layer.
 function insertTable() {
   editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
 }
-function addColumnBefore() {
-  editor.value?.chain().focus().addColumnBefore().run()
-}
-function addColumnAfter() {
-  editor.value?.chain().focus().addColumnAfter().run()
-}
-function deleteColumn() {
-  editor.value?.chain().focus().deleteColumn().run()
-}
-function addRowBefore() {
-  editor.value?.chain().focus().addRowBefore().run()
-}
-function addRowAfter() {
-  editor.value?.chain().focus().addRowAfter().run()
-}
-function deleteRow() {
-  editor.value?.chain().focus().deleteRow().run()
-}
+function addColumnBefore() { editor.value?.chain().focus().addColumnBefore().run() }
+function addColumnAfter() { editor.value?.chain().focus().addColumnAfter().run() }
+function deleteColumn() { editor.value?.chain().focus().deleteColumn().run() }
+function addRowBefore() { editor.value?.chain().focus().addRowBefore().run() }
+function addRowAfter() { editor.value?.chain().focus().addRowAfter().run() }
+function deleteRow() { editor.value?.chain().focus().deleteRow().run() }
 function deleteTable() {
   if (!window.confirm('Hapus seluruh tabel ini?')) return
   editor.value?.chain().focus().deleteTable().run()
 }
-function mergeOrSplitCells() {
-  editor.value?.chain().focus().mergeOrSplit().run()
-}
-function toggleHeaderRow() {
-  editor.value?.chain().focus().toggleHeaderRow().run()
-}
-function toggleHeaderColumn() {
-  editor.value?.chain().focus().toggleHeaderColumn().run()
-}
+function mergeOrSplitCells() { editor.value?.chain().focus().mergeOrSplit().run() }
+function toggleHeaderRow() { editor.value?.chain().focus().toggleHeaderRow().run() }
 
-// --- Heading dropdown (Paragraf / Heading 1-3) ---
-// editorVersion is bumped on every editor transaction (see onTransaction
-// above), so referencing it here makes this computed re-evaluate live as
-// the cursor moves or the user types — same trick the toolbar buttons use.
+// --- Dropdowns ---
 const currentBlockType = computed(() => {
   void editorVersion.value
   if (!editor.value) return 'paragraph'
@@ -327,7 +306,6 @@ function onHeadingChange(e) {
   }
 }
 
-// --- Text align dropdown ---
 const currentAlign = computed(() => {
   void editorVersion.value
   if (!editor.value) return 'left'
@@ -341,10 +319,7 @@ function onAlignChange(e) {
   editor.value?.chain().focus().setTextAlign(e.target.value).run()
 }
 
-// --- Raw HTML source view ---
-// Lets an admin who's comfortable with HTML tweak markup directly
-// (e.g. fixing something the toolbar can't reach), then apply it back
-// into the editor.
+// --- HTML View ---
 const showHtmlSource = ref(false)
 const htmlSource = ref('')
 
@@ -367,20 +342,16 @@ function sanitizeNode(node) {
   if (typeof node.type !== 'string') return null
 
   const clean = { ...node }
-
   if (clean.type === 'text') {
     if (typeof clean.text !== 'string' || clean.text.length === 0) return null
     return clean
   }
-
   if (Array.isArray(clean.content)) {
     clean.content = clean.content.map(sanitizeNode).filter(Boolean)
   }
-
   if (Array.isArray(clean.marks)) {
     clean.marks = clean.marks.filter(m => m && typeof m.type === 'string')
   }
-
   return clean
 }
 
@@ -403,7 +374,6 @@ async function handleSave() {
       : props.slugs
 
     await docsStore.fetchCategories()
-
     router.push(`/docs/${props.category}/${redirectSlugs.join('/')}`)
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Gagal menyimpan perubahan.'
@@ -417,228 +387,555 @@ function handleCancel() {
 }
 </script>
 
-<style scoped>
-.edit-wrap { max-width: 780px; margin: 2rem auto; padding: 0 1.5rem; }
-.field { margin-bottom: 1rem; }
-label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--color-ink-soft); }
-input[type="text"], select {
-  width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--color-border);
-  border-radius: var(--radius); background: var(--color-bg); color: var(--color-ink);
-}
-
-.toolbar {
-  display: flex; gap: 4px; padding: 8px; flex-wrap: wrap;
-  border: 1px solid var(--color-border); border-bottom: none;
-  border-radius: var(--radius) var(--radius) 0 0; background: var(--color-surface);
-}
-.toolbar button {
-  padding: 0.3rem 0.6rem; border: 1px solid var(--color-border); border-radius: 6px;
-  background: var(--color-bg); cursor: pointer; font-size: 0.85rem;
-}
-.toolbar button.is-active { background: var(--color-accent); color: #fff; }
-.toolbar-sep { width: 1px; align-self: stretch; background: var(--color-border); margin: 0 2px; }
-
-.toolbar-select {
-  padding: 0.3rem 0.4rem; border: 1px solid var(--color-border); border-radius: 6px;
-  background: var(--color-bg); color: var(--color-ink); font-size: 0.85rem; cursor: pointer;
-}
-
-.table-toolbar {
-  border-top: none;
-  border-radius: 0;
-  background: var(--color-accent-soft, #eef2ff);
-}
-.toolbar-label { font-size: 0.8rem; color: var(--color-ink-soft); align-self: center; margin-right: 2px; }
-
-.html-source-panel {
-  border: 1px solid var(--color-border); border-top: none; background: var(--color-surface);
-  padding: 0.75rem;
-}
-.html-source-textarea {
-  width: 100%; min-height: 180px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.8rem;
-  border: 1px solid var(--color-border); border-radius: var(--radius); padding: 0.6rem;
-  background: var(--color-bg); color: var(--color-ink); resize: vertical;
-}
-.html-source-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
-
-.tiptap-editor {
-  border: 1px solid var(--color-border); border-radius: 0 0 var(--radius) var(--radius);
-  min-height: 300px; padding: 1rem; background: var(--color-bg);
-}
-.tiptap-editor :deep(.ProseMirror) { outline: none; min-height: 280px; }
-
-.tiptap-editor :deep(table) {
-  border-collapse: collapse;
-  margin: 1rem 0;
-  overflow: hidden;
-  table-layout: fixed;
-  width: 100%;
-}
-
-.tiptap-editor :deep(td), 
-.tiptap-editor :deep(th) {
-  border: 1px solid var(--color-border, #ccc);
-  box-sizing: border-box;
-  min-width: 1em;
-  padding: 8px;
-  vertical-align: top;
-  position: relative;
-}
-
-.tiptap-editor :deep(th) {
-  background-color: #f8f9fa;
-  font-weight: bold;
-  text-align: left;
-}
-
-.tiptap-editor :deep(.column-resize-handle) {
-  background-color: #adf;
-  bottom: -2px;
-  position: absolute;
-  right: -2px;
-  pointer-events: none;
-  top: 0;
-  width: 4px;
-}
-.tiptap-editor :deep(img) { max-width: 100%; height: auto; border-radius: 6px; }
-
-.actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
-.btn-save {
-  padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius);
-  background: var(--color-accent); color: #fff; font-weight: 600; cursor: pointer;
-}
-.btn-cancel {
-  padding: 0.6rem 1.2rem; border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: transparent; cursor: pointer;
-}
-.error { color: #d33; margin-bottom: 1rem; }
-.import-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
-.btn-import {
-  padding: 0.5rem 1rem; border: 1px solid var(--color-accent); border-radius: var(--radius);
-  background: transparent; color: var(--color-accent); font-weight: 600; cursor: pointer; font-size: 0.85rem;
-}
-.btn-import:disabled { opacity: 0.6; cursor: not-allowed; }
-.import-hint { font-size: 0.78rem; color: var(--color-ink-soft); }
-.btn-delete-img {
-  padding: 0.3rem 0.6rem; border: 1px solid #d33; border-radius: 6px;
-  background: transparent; color: #d33; cursor: pointer; font-size: 0.85rem;
-}
-</style>
-
 <template>
   <div class="edit-wrap">
-    <h1>Ubah Halaman</h1>
+    <div class="page-header">
+      <h2>Edit Halaman Dokumen</h2>
+      <p class="sub-title">Kelola isi dan tata letak konten dokumen dengan mudah.</p>
+    </div>
 
-    <p v-if="loading">Memuat...</p>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <div v-if="loading" class="loading-state">Memuat data halaman...</div>
+    <div v-if="errorMessage" class="error-banner">{{ errorMessage }}</div>
 
     <template v-if="!loading && !errorMessage">
-      <div class="field">
-        <label>Judul</label>
-        <input type="text" v-model="title" />
-      </div>
-
-      <div class="field import-row">
-        <button type="button" class="btn-import" :disabled="importing" @click="triggerDocxPick">
-          {{ importing ? 'Meng-import...' : 'Import Ulang dari Word (.docx)' }}
-        </button>
-        <input ref="docxInputEl" type="file" accept=".docx" style="display:none" @change="handleDocxPick" />
-        <span class="import-hint">Ini akan mengganti seluruh isi konten di bawah dengan isi file Word yang diupload.</span>
-      </div>
-
-      <div class="field">
-        <label>Status</label>
-        <select v-model="status">
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Konten</label>
-        <div class="toolbar">
-          <span style="display:none">{{ editorVersion }}</span>
-          <button type="button" :disabled="!editor" title="Undo" @click="editor?.chain().focus().undo().run()">↺</button>
-          <button type="button" :disabled="!editor" title="Redo" @click="editor?.chain().focus().redo().run()">↻</button>
-          <span class="toolbar-sep"></span>
-          <select class="toolbar-select" :disabled="!editor" title="Gaya Paragraf" :value="currentBlockType" @change="onHeadingChange">
-            <option value="paragraph">Paragraf</option>
-            <option value="1">Heading 1</option>
-            <option value="2">Heading 2</option>
-            <option value="3">Heading 3</option>
-          </select>
-          <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" title="Tebal" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()"><b>B</b></button>
-          <button type="button" :disabled="!editor" title="Miring" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()"><i>I</i></button>
-          <button type="button" :disabled="!editor" title="Garis Bawah" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()"><u>U</u></button>
-          <button type="button" :disabled="!editor" title="Coret" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()"><s>S</s></button>
-          <button type="button" :disabled="!editor" title="Sorot (Highlight)" :class="{ 'is-active': editor?.isActive('highlight') }" @click="editor?.chain().focus().toggleHighlight().run()">🖍</button>
-          <span class="toolbar-sep"></span>
-          <select class="toolbar-select" :disabled="!editor" title="Perataan Teks" :value="currentAlign" @change="onAlignChange">
-            <option value="left">Rata Kiri</option>
-            <option value="center">Rata Tengah</option>
-            <option value="right">Rata Kanan</option>
-            <option value="justify">Rata Kiri-Kanan</option>
-          </select>
-          <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" title="Daftar Bullet" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()">List</button>
-          <button type="button" :disabled="!editor" title="Daftar Bernomor" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()">1. List</button>
-          <button type="button" :disabled="!editor" title="Kutipan" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()">Quote</button>
-          <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" title="Sisipkan Link" @click="setLink">🔗 Link</button>
-          <button type="button" :disabled="!editor" title="Sisipkan Gambar" @click="triggerImagePick">🖼 Gambar</button>
-          <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
-          <button
-            type="button"
-            v-if="editor?.isActive('image')"
-            class="btn-delete-img"
-            @click="deleteSelectedImage"
-          >
-            Hapus Gambar
-          </button>
-          <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" title="Sisipkan Tabel" @click="insertTable">▦ Tabel</button>
-          <button type="button" :disabled="!editor" title="Blok Kode" :class="{ 'is-active': editor?.isActive('codeBlock') }" @click="editor?.chain().focus().toggleCodeBlock().run()">&lt;/&gt;</button>
-          <button type="button" :disabled="!editor" title="Garis Pemisah" @click="editor?.chain().focus().setHorizontalRule().run()">― HR</button>
-          <button type="button" :disabled="!editor" title="Bersihkan Format" @click="editor?.chain().focus().unsetAllMarks().clearNodes().run()">Clear</button>
-          <span class="toolbar-sep"></span>
-          <button type="button" :disabled="!editor" title="Lihat/Edit HTML mentah" :class="{ 'is-active': showHtmlSource }" @click="toggleHtmlSource">&lt;&gt; HTML</button>
+      <div class="form-grid">
+        <div class="field title-field">
+          <label>Judul Halaman</label>
+          <input type="text" v-model="title" placeholder="Masukkan judul halaman..." />
         </div>
 
-        <div v-if="showHtmlSource" class="html-source-panel">
-          <textarea v-model="htmlSource" class="html-source-textarea" spellcheck="false"></textarea>
-          <div class="html-source-actions">
-            <button type="button" class="btn-import" @click="applyHtmlSource">Terapkan HTML</button>
-            <button type="button" class="btn-cancel" @click="showHtmlSource = false">Batal</button>
+        <div class="field status-field">
+          <label>Status Publikasi</label>
+          <select v-model="status">
+            <option value="draft">Draft (Konsep)</option>
+            <option value="published">Published (Terbit)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="import-card">
+        <div class="import-info">
+          <strong>Impor dari Microsoft Word</strong>
+          <span>Ganti konten halaman secara otomatis dari berkas .docx</span>
+        </div>
+        <button type="button" class="btn-secondary" :disabled="importing" @click="triggerDocxPick">
+          <FileUp :size="16" />
+          {{ importing ? 'Mengimpor...' : 'Pilih Berkas Word' }}
+        </button>
+        <input ref="docxInputEl" type="file" accept=".docx" style="display:none" @change="handleDocxPick" />
+      </div>
+
+      <div class="editor-container">
+        <div class="toolbar">
+          <span style="display:none">{{ editorVersion }}</span>
+
+          <!-- Riwayat -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Batal (Undo)" @click="editor?.chain().focus().undo().run()"><Undo :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Ulangi (Redo)" @click="editor?.chain().focus().redo().run()"><Redo :size="16" /></button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Format Paragraf & Teks -->
+          <div class="toolbar-group">
+            <select class="toolbar-select" :disabled="!editor" title="Gaya Teks" :value="currentBlockType" @change="onHeadingChange">
+              <option value="paragraph">Teks Normal</option>
+              <option value="1">Judul Utama (H1)</option>
+              <option value="2">Sub Judul (H2)</option>
+              <option value="3">Sub-sub Judul (H3)</option>
+            </select>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Styling -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Cetak Tebal" :class="{ 'is-active': editor?.isActive('bold') }" @click="editor?.chain().focus().toggleBold().run()"><Bold :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Cetak Miring" :class="{ 'is-active': editor?.isActive('italic') }" @click="editor?.chain().focus().toggleItalic().run()"><Italic :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Garis Bawah" :class="{ 'is-active': editor?.isActive('underline') }" @click="editor?.chain().focus().toggleUnderline().run()"><UnderlineIcon :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Coret Teks" :class="{ 'is-active': editor?.isActive('strike') }" @click="editor?.chain().focus().toggleStrike().run()"><Strikethrough :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Sorot Warna" :class="{ 'is-active': editor?.isActive('highlight') }" @click="editor?.chain().focus().toggleHighlight().run()"><Highlighter :size="16" /></button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Perataan -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Rata Kiri" :class="{ 'is-active': currentAlign === 'left' }" @click="editor?.chain().focus().setTextAlign('left').run()"><AlignLeft :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Rata Tengah" :class="{ 'is-active': currentAlign === 'center' }" @click="editor?.chain().focus().setTextAlign('center').run()"><AlignCenter :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Rata Kanan" :class="{ 'is-active': currentAlign === 'right' }" @click="editor?.chain().focus().setTextAlign('right').run()"><AlignRight :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Rata Kiri-Kanan" :class="{ 'is-active': currentAlign === 'justify' }" @click="editor?.chain().focus().setTextAlign('justify').run()"><AlignJustify :size="16" /></button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Daftar & Elemen -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Daftar Simbol" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()"><List :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Daftar Angka" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()"><ListOrdered :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Kutipan" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()"><Quote :size="16" /></button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Media & Elemen Lanjutan -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Sisipkan Link" @click="setLink"><LinkIcon :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Sisipkan Gambar" @click="triggerImagePick"><ImageIcon :size="16" /></button>
+            <input ref="imageInputEl" type="file" accept="image/*" style="display:none" @change="handleImagePick" />
+            <button type="button" class="btn-icon" :disabled="!editor" title="Sisipkan Tabel" @click="insertTable"><Table :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Blok Kode" :class="{ 'is-active': editor?.isActive('codeBlock') }" @click="editor?.chain().focus().toggleCodeBlock().run()"><Code :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Garis Pemisah" @click="editor?.chain().focus().setHorizontalRule().run()"><Minus :size="16" /></button>
+          </div>
+
+          <div class="toolbar-divider"></div>
+
+          <!-- Alat Bantu -->
+          <div class="toolbar-group">
+            <button type="button" class="btn-icon" :disabled="!editor" title="Bersihkan Format Teks" @click="editor?.chain().focus().unsetAllMarks().clearNodes().run()"><Eraser :size="16" /></button>
+            <button type="button" class="btn-icon" :disabled="!editor" title="Kode Sumber HTML" :class="{ 'is-active': showHtmlSource }" @click="toggleHtmlSource"><Code2 :size="16" /></button>
+            <button v-if="editor?.isActive('image')" type="button" class="btn-icon btn-danger" title="Hapus Gambar Terpilih" @click="deleteSelectedImage"><Trash2 :size="16" /></button>
           </div>
         </div>
 
-        <div v-if="editor?.isActive('table') && !showHtmlSource" class="toolbar table-toolbar">
-          <span class="toolbar-label">Tabel:</span>
-          <button type="button" @click="addRowBefore">+ Baris Atas</button>
-          <button type="button" @click="addRowAfter">+ Baris Bawah</button>
-          <button type="button" @click="deleteRow">Hapus Baris</button>
-          <span class="toolbar-sep"></span>
-          <button type="button" @click="addColumnBefore">+ Kolom Kiri</button>
-          <button type="button" @click="addColumnAfter">+ Kolom Kanan</button>
-          <button type="button" @click="deleteColumn">Hapus Kolom</button>
-          <span class="toolbar-sep"></span>
-          <button type="button" @click="mergeOrSplitCells">Gabung/Pisah Sel</button>
-          <button type="button" :class="{ 'is-active': editor?.isActive('tableHeader') }" @click="toggleHeaderRow">Header Baris</button>
-          <button type="button" @click="toggleHeaderColumn">Header Kolom</button>
-          <span class="toolbar-sep"></span>
-          <button type="button" class="btn-delete-img" @click="deleteTable">Hapus Tabel</button>
+        <!-- Toolbar Tambahan jika Tabel Aktif -->
+        <div v-if="editor?.isActive('table') && !showHtmlSource" class="table-toolbar">
+          <span class="table-title"><Table :size="14" /> Pengaturan Tabel:</span>
+          <div class="table-actions">
+            <button type="button" @click="addRowBefore"><Plus :size="12" /> Baris Atas</button>
+            <button type="button" @click="addRowAfter"><Plus :size="12" /> Baris Bawah</button>
+            <button type="button" class="btn-text-danger" @click="deleteRow">Hapus Baris</button>
+            <span class="sub-divider"></span>
+            <button type="button" @click="addColumnBefore"><Plus :size="12" /> Kolom Kiri</button>
+            <button type="button" @click="addColumnAfter"><Plus :size="12" /> Kolom Kanan</button>
+            <button type="button" class="btn-text-danger" @click="deleteColumn">Hapus Kolom</button>
+            <span class="sub-divider"></span>
+            <button type="button" @click="mergeOrSplitCells">Gabung/Pisah Sel</button>
+            <button type="button" :class="{ 'is-active': editor?.isActive('tableHeader') }" @click="toggleHeaderRow">Baris Header</button>
+            <button type="button" class="btn-text-danger" @click="deleteTable"><Trash2 :size="12" /> Hapus Tabel</button>
+          </div>
         </div>
 
+        <!-- Mode Edit HTML Mentah -->
+        <div v-if="showHtmlSource" class="html-source-panel">
+          <div class="panel-header">Kode HTML Mentah</div>
+          <textarea v-model="htmlSource" class="html-source-textarea" spellcheck="false"></textarea>
+          <div class="html-source-actions">
+            <button type="button" class="btn-primary-sm" @click="applyHtmlSource">Terapkan Perubahan</button>
+            <button type="button" class="btn-secondary-sm" @click="showHtmlSource = false">Batal</button>
+          </div>
+        </div>
+
+        <!-- Area Kanvas Tiptap Editor -->
         <div ref="editorEl" class="tiptap-editor" v-show="!showHtmlSource"></div>
       </div>
 
+      <!-- Tombol Aksi Bawah -->
       <div class="actions">
         <button class="btn-save" :disabled="saving" @click="handleSave">
-          {{ saving ? 'Menyimpan...' : 'Simpan' }}
+          <Save :size="18" />
+          {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
         </button>
-        <button class="btn-cancel" @click="handleCancel">Batal</button>
+        <button class="btn-cancel" @click="handleCancel">
+          <X :size="18" />
+          Batal
+        </button>
       </div>
     </template>
   </div>
 </template>
+
+<style scoped>
+.edit-wrap {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  font-family: inherit;
+  color: #334155;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.page-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+.sub-title {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.loading-state {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.375rem;
+  color: #475569;
+}
+
+.field input[type="text"],
+.field select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input[type="text"]:focus,
+.field select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.import-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.import-info strong {
+  display: block;
+  font-size: 0.875rem;
+  color: #1e293b;
+}
+
+.import-info span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.editor-container {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #cbd5e1;
+  margin: 0 0.25rem;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-icon.is-active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  color: #ef4444;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.toolbar-select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.8125rem;
+  outline: none;
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #f0f9ff;
+  border-bottom: 1px solid #bae6fd;
+  font-size: 0.8125rem;
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #0369a1;
+  white-space: nowrap;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.table-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #93c5fd;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #1e40af;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.table-actions button:hover {
+  background: #dbeafe;
+}
+
+.table-actions button.is-active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.sub-divider {
+  width: 1px;
+  height: 14px;
+  background: #93c5fd;
+  margin: 0 0.15rem;
+}
+
+.btn-text-danger {
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.btn-text-danger:hover {
+  background: #fee2e2 !important;
+}
+
+.html-source-panel {
+  padding: 0.75rem;
+  background: #0f172a;
+}
+
+.panel-header {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.html-source-textarea {
+  width: 100%;
+  min-height: 250px;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: #1e293b;
+  color: #f1f5f9;
+  resize: vertical;
+  outline: none;
+}
+
+.html-source-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-primary-sm {
+  padding: 0.35rem 0.75rem;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.btn-secondary-sm {
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.tiptap-editor {
+  min-height: 350px;
+  padding: 1.25rem;
+}
+
+.tiptap-editor :deep(.ProseMirror) {
+  outline: none;
+  min-height: 320px;
+}
+
+.tiptap-editor :deep(table) {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.tiptap-editor :deep(td),
+.tiptap-editor :deep(th) {
+  border: 1px solid #cbd5e1;
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.tiptap-editor :deep(th) {
+  background-color: #f8fafc;
+  font-weight: 600;
+}
+
+.tiptap-editor :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #f1f5f9;
+}
+</style>

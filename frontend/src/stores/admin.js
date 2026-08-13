@@ -106,12 +106,42 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    async createCategory(payload) {
-      const nextOrder = this.categories.length
-        ? Math.max(...this.categories.map((c) => c.order ?? 0)) + 1
-        : 1
-      const res = await api.post('/categories', { ...payload, order: nextOrder })
-      this.categories.push(res.data)
+    // insertBeforeId opsional: kalau diisi, kategori baru disisipkan tepat
+    // sebelum kategori dengan id tsb, dan semua kategori dari posisi itu
+    // ke bawah digeser +1. Kalau tidak diisi, behavior lama tetap jalan
+    // (selalu ditambahkan di paling bawah).
+    async createCategory(payload, insertBeforeId = null) {
+      let order
+
+      if (insertBeforeId) {
+        const sorted = [...this.categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        const targetIdx = sorted.findIndex((c) => c.id === insertBeforeId)
+
+        if (targetIdx !== -1) {
+          order = sorted[targetIdx].order ?? targetIdx + 1
+          // Geser kategori dari posisi target ke bawah, +1 semua, lewat
+          // endpoint update kategori yang sudah ada (tidak nebak endpoint baru).
+          for (const cat of sorted.slice(targetIdx)) {
+            const newOrder = (cat.order ?? 0) + 1
+            await api.put(`/categories/${cat.id}`, {
+              name: cat.name,
+              slug: cat.slug,
+              icon: cat.icon,
+              order: newOrder,
+            })
+            cat.order = newOrder
+          }
+        }
+      }
+
+      if (order === undefined) {
+        order = this.categories.length
+          ? Math.max(...this.categories.map((c) => c.order ?? 0)) + 1
+          : 1
+      }
+
+      const res = await api.post('/categories', { ...payload, order })
+      await this.fetchCategories()
       return res.data
     },
 
@@ -120,6 +150,93 @@ export const useAdminStore = defineStore('admin', {
       const idx = this.categories.findIndex((c) => c.id === id)
       if (idx !== -1) this.categories[idx] = res.data
       return res.data
+    },
+
+    // Tukar posisi (order) kategori dengan tetangganya (naik/turun satu
+    // langkah). Pakai endpoint update kategori yang sudah ada, cuma
+    // ganti field order-nya saja. Setelah itu ambil ulang data dari
+    // server (bukan cuma ubah state lokal) supaya kalau backend diam-diam
+    // menolak field order, tampilan tidak "bohong" bilang berhasil.
+    async reorderCategory(id, direction) {
+      const sorted = [...this.categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      const idx = sorted.findIndex((c) => c.id === id)
+      if (idx === -1) return
+
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+      if (swapIdx < 0 || swapIdx >= sorted.length) return
+
+      const a = sorted[idx]
+      const b = sorted[swapIdx]
+      const aOrder = a.order
+      const bOrder = b.order
+
+      await Promise.all([
+        api.put(`/categories/${a.id}`, { name: a.name, slug: a.slug, icon: a.icon, order: bOrder }),
+        api.put(`/categories/${b.id}`, { name: b.name, slug: b.slug, icon: b.icon, order: aOrder }),
+      ])
+
+      await this.fetchCategories()
+
+      const stillWrongOrder = (() => {
+        const refreshedA = this.categories.find((c) => c.id === a.id)
+        const refreshedB = this.categories.find((c) => c.id === b.id)
+        if (!refreshedA || !refreshedB) return false
+        return direction === 'up'
+          ? (refreshedA.order ?? 0) >= (refreshedB.order ?? 0)
+          : (refreshedA.order ?? 0) <= (refreshedB.order ?? 0)
+      })()
+
+      if (stillWrongOrder) {
+        throw new Error(
+          'Urutan tidak tersimpan di server — backend tampaknya belum mendukung update field "order" pada kategori.'
+        )
+      }
+    },
+
+    // Pindahkan kategori yang sudah ada ke posisi tepat sebelum kategori
+    // lain (bisa lompat berapa langkah pun, bukan cuma tetangga terdekat
+    // seperti reorderCategory). Dipakai dari modal Edit Kategori.
+    async moveCategoryTo(id, beforeId) {
+      if (!beforeId || beforeId === id) return
+
+      const sorted = [...this.categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      const moving = sorted.find((c) => c.id === id)
+      const target = sorted.find((c) => c.id === beforeId)
+      if (!moving || !target) return
+
+      const rest = sorted.filter((c) => c.id !== id)
+      const targetIdx = rest.findIndex((c) => c.id === beforeId)
+      if (targetIdx === -1) return
+      rest.splice(targetIdx, 0, moving)
+
+      // Hitung urutan baru berurutan, lalu cuma kirim update untuk yang
+      // order-nya benar-benar berubah (pakai endpoint update yang sudah ada).
+      for (let i = 0; i < rest.length; i++) {
+        const cat = rest[i]
+        const newOrder = i + 1
+        if ((cat.order ?? 0) !== newOrder) {
+          await api.put(`/categories/${cat.id}`, {
+            name: cat.name,
+            slug: cat.slug,
+            icon: cat.icon,
+            order: newOrder,
+          })
+        }
+      }
+
+      await this.fetchCategories()
+
+      const refreshedMoving = this.categories.find((c) => c.id === id)
+      const refreshedTarget = this.categories.find((c) => c.id === beforeId)
+      if (
+        refreshedMoving &&
+        refreshedTarget &&
+        (refreshedMoving.order ?? 0) >= (refreshedTarget.order ?? 0)
+      ) {
+        throw new Error(
+          'Posisi tidak tersimpan di server — backend tampaknya belum mendukung update field "order" pada kategori.'
+        )
+      }
     },
 
     async deleteCategory(id) {
@@ -216,6 +333,28 @@ export const useAdminStore = defineStore('admin', {
         const res = await api.post(`/pages/${pageId}/import`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
+        return res.data
+      } finally {
+        this.importSubmitting = false
+      }
+    },
+
+    // Import docx sebagai konten kategori itu sendiri (bukan page).
+    // Asumsi endpoint backend: POST /categories/:id/import (pakai
+    // _method=PUT via FormData, sama seperti pola reimportDocx di atas).
+    // Kalau nama endpoint backend beda, cukup ganti path di bawah ini.
+    async importDocxToCategory(categoryId, { file }) {
+      this.importSubmitting = true
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('_method', 'PUT')
+
+        const res = await api.post(`/categories/${categoryId}/import`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        const idx = this.categories.findIndex((c) => c.id === categoryId)
+        if (idx !== -1) this.categories[idx] = { ...this.categories[idx], ...res.data }
         return res.data
       } finally {
         this.importSubmitting = false

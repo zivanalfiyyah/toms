@@ -12,7 +12,7 @@ onMounted(() => {
 // ---- Category form ----
 const showCatForm = ref(false)
 const editingCatId = ref(null)
-const catForm = reactive({ name: '', slug: '', icon: '' })
+const catForm = reactive({ name: '', slug: '', icon: '', insertBeforeId: '' })
 const catSaving = ref(false)
 const catError = ref('')
 
@@ -21,6 +21,7 @@ function openCreateCategory() {
   catForm.name = ''
   catForm.slug = ''
   catForm.icon = ''
+  catForm.insertBeforeId = ''
   catError.value = ''
   showCatForm.value = true
 }
@@ -30,6 +31,7 @@ function openEditCategory(cat) {
   catForm.name = cat.name || ''
   catForm.slug = cat.slug || ''
   catForm.icon = cat.icon || ''
+  catForm.insertBeforeId = ''
   catError.value = ''
   showCatForm.value = true
 }
@@ -39,13 +41,23 @@ async function submitCategory() {
   catError.value = ''
   try {
     if (editingCatId.value) {
-      await admin.updateCategory(editingCatId.value, { ...catForm })
+      await admin.updateCategory(editingCatId.value, {
+        name: catForm.name,
+        slug: catForm.slug,
+        icon: catForm.icon,
+      })
+      if (catForm.insertBeforeId) {
+        await admin.moveCategoryTo(editingCatId.value, catForm.insertBeforeId)
+      }
     } else {
-      await admin.createCategory({ ...catForm })
+      await admin.createCategory(
+        { name: catForm.name, slug: catForm.slug, icon: catForm.icon },
+        catForm.insertBeforeId || null
+      )
     }
     showCatForm.value = false
   } catch (err) {
-    catError.value = err.response?.data?.message || 'Gagal menyimpan kategori.'
+    catError.value = err.response?.data?.message || err.message || 'Gagal menyimpan kategori.'
   } finally {
     catSaving.value = false
   }
@@ -57,6 +69,14 @@ async function removeCategory(cat) {
     await admin.deleteCategory(cat.id)
   } catch (err) {
     alert(err.response?.data?.message || 'Gagal menghapus kategori.')
+  }
+}
+
+async function moveCategory(cat, direction) {
+  try {
+    await admin.reorderCategory(cat.id, direction)
+  } catch (err) {
+    alert(err.response?.data?.message || err.message || 'Gagal mengubah urutan kategori.')
   }
 }
 
@@ -142,10 +162,22 @@ async function removePage(page) {
     <p v-if="admin.error" class="error">{{ admin.error }}</p>
     <p v-if="admin.categoriesLoading">Memuat...</p>
 
-    <div v-for="cat in admin.categories" :key="cat.id" class="category-block">
+    <div v-for="(cat, catIdx) in admin.categories" :key="cat.id" class="category-block">
       <div class="category-head">
         <h3>{{ cat.name }} <span class="slug">/{{ cat.slug }}</span></h3>
         <div class="actions">
+          <button
+            class="btn-link"
+            title="Naikkan urutan"
+            :disabled="catIdx === 0"
+            @click="moveCategory(cat, 'up')"
+          >↑</button>
+          <button
+            class="btn-link"
+            title="Turunkan urutan"
+            :disabled="catIdx === admin.categories.length - 1"
+            @click="moveCategory(cat, 'down')"
+          >↓</button>
           <button class="btn-link" @click="openCreatePage(cat)">+ Halaman</button>
           <button class="btn-link" @click="openEditCategory(cat)">Edit</button>
           <button class="btn-link danger" @click="removeCategory(cat)">Hapus</button>
@@ -179,6 +211,15 @@ async function removePage(page) {
           <input v-model="catForm.slug" type="text" required />
           <label>Icon (opsional, nama key dari icons/index.js)</label>
           <input v-model="catForm.icon" type="text" />
+          <label>{{ editingCatId ? 'Pindahkan sebelum (opsional)' : 'Sisipkan sebelum (opsional)' }}</label>
+          <select v-model="catForm.insertBeforeId">
+            <option value="">{{ editingCatId ? 'Tidak — biarkan posisi sekarang' : 'Tidak — taruh di paling bawah' }}</option>
+            <option
+              v-for="c in admin.categories.filter((c) => c.id !== editingCatId)"
+              :key="c.id"
+              :value="c.id"
+            >{{ c.name }}</option>
+          </select>
           <p v-if="catError" class="error">{{ catError }}</p>
           <div class="modal-actions">
             <button type="button" class="btn-secondary" @click="showCatForm = false">Batal</button>
@@ -264,7 +305,8 @@ async function removePage(page) {
 }
 .modal h3 { margin: 0 0 1rem; font-size: 1rem; }
 .modal label { display: block; font-size: 0.82rem; color: var(--color-ink-soft); margin: 0 0 0.3rem; }
-.modal input {
+.modal input,
+.modal select {
   width: 100%; padding: 0.5rem 0.65rem; margin-bottom: 0.9rem;
   border: 1px solid var(--color-border); border-radius: var(--radius);
   background: var(--color-bg); color: var(--color-ink); font-size: 0.87rem;

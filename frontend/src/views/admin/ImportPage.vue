@@ -115,6 +115,10 @@ async function submit() {
     errorMsg.value = 'Pilih halaman yang ingin diperbarui.'
     return
   }
+  if (mode.value === 'category' && !form.categoryId) {
+    errorMsg.value = 'Pilih kategori yang ingin diperbarui.'
+    return
+  }
 
   try {
     if (mode.value === 'create') {
@@ -126,11 +130,16 @@ async function submit() {
         parentId: form.parentId || null,
       })
       result.value = data
-    } else {
+    } else if (mode.value === 'update') {
       const data = await admin.reimportDocx(form.pageId, {
         file: form.file,
         title: form.title || undefined,
         slug: form.title ? slugify(form.title) : undefined,
+      })
+      result.value = data
+    } else {
+      const data = await admin.importDocxToCategory(form.categoryId, {
+        file: form.file,
       })
       result.value = data
     }
@@ -164,6 +173,14 @@ async function submit() {
       >
         Update Halaman yang Ada
       </button>
+      <button
+        type="button"
+        class="tab"
+        :class="{ active: mode === 'category' }"
+        @click="switchMode('category')"
+      >
+        Import ke Kategori
+      </button>
     </div>
 
     <p v-if="admin.error" class="error">{{ admin.error }}</p>
@@ -187,7 +204,7 @@ async function submit() {
         <input v-model="form.title" type="text" placeholder="Judul halaman baru" required />
       </template>
 
-      <template v-else>
+      <template v-else-if="mode === 'update'">
         <label>Kategori</label>
         <select v-model="form.categoryId" @change="form.pageId = ''">
           <option value="" disabled>Pilih kategori</option>
@@ -207,6 +224,17 @@ async function submit() {
         <input v-model="form.title" type="text" placeholder="Judul halaman" />
       </template>
 
+      <template v-else>
+        <label>Kategori yang akan diperbarui</label>
+        <select v-model="form.categoryId" required>
+          <option value="" disabled>Pilih kategori</option>
+          <option v-for="cat in admin.categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+        </select>
+        <p class="hint">
+          Dokumen akan diimpor sebagai konten kategori ini, bukan sebagai halaman terpisah.
+        </p>
+      </template>
+
       <label>File Word (.docx, maks 10MB)</label>
       <input ref="fileInputRef" type="file" accept=".docx" @change="onFileChange" required />
 
@@ -216,7 +244,15 @@ async function submit() {
       </p>
 
       <button type="submit" class="btn-primary" :disabled="submitting">
-        {{ submitting ? 'Mengimpor...' : mode === 'create' ? 'Import sebagai Halaman Baru' : 'Update Halaman' }}
+        {{
+          submitting
+            ? 'Mengimpor...'
+            : mode === 'create'
+              ? 'Import sebagai Halaman Baru'
+              : mode === 'update'
+                ? 'Update Halaman'
+                : 'Import ke Kategori'
+        }}
       </button>
     </form>
   </div>
