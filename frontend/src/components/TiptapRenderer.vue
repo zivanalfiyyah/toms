@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { extractHeadings } from '../utils/headings'
 
 const props = defineProps({
   content: { 
@@ -9,10 +10,10 @@ const props = defineProps({
   }
 })
 
-function slugify(text) {
-  if (!text) return ''
-  return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-}
+// Emit daftar heading (H1-H6) yang berhasil diparsing dari konten, supaya
+// komponen TOC ("Pada halaman ini") di parent bisa dibangun dari sumber
+// yang PERSIS SAMA dengan yang dirender di sini — id-nya dijamin cocok.
+const emit = defineEmits(['headings'])
 
 function sanitizeNode(node) {
   if (!node || typeof node !== 'object' || Array.isArray(node)) return null
@@ -50,28 +51,37 @@ function renderBlocksSafely(jsonContent) {
   return parts.join('')
 }
 
-const html = computed(() => {
+const parsed = computed(() => {
   try {
     let raw = props.content
 
     if (typeof raw === 'object' || (typeof raw === 'string' && raw.trim().startsWith('{'))) {
-      return '<p style="color:red; background:#ffebeb; padding:10px; border-radius:6px;"><b>⚠️ STOP!</b> Data yang dikirim ke komponen ini masih JSON. Tolong buka file halaman utamanya (Parent), dan ubah kodingannya jadi: <br><code>&lt;TiptapRenderer :content="namavariabel.content_html" /&gt;</code></p>'
+      return {
+        html: '<p style="color:red; background:#ffebeb; padding:10px; border-radius:6px;"><b>⚠️ STOP!</b> Data yang dikirim ke komponen ini masih JSON. Tolong buka file halaman utamanya (Parent), dan ubah kodingannya jadi: <br><code>&lt;TiptapRenderer :content="namavariabel.content_html" /&gt;</code></p>',
+        headings: [],
+      }
     }
 
     if (!raw || raw.trim() === '') {
-      return '<p><em>Tidak ada konten.</em></p>'
+      return { html: '<p><em>Tidak ada konten.</em></p>', headings: [] }
     }
 
-    raw = raw.replace(/<h([1-6])>(.*?)<\/h\1>/g, (m, level, text) => {
-      return `<h${level} id="${slugify(text)}">${text}</h${level}>`
-    })
-
-    return raw
+    return extractHeadings(raw)
   } catch (e) {
     console.error('🔥 ERROR RENDER TIPTAP:', e)
-    return `<p style="color:red;">[Error Render]: ${e.message}</p>`
+    return { html: `<p style="color:red;">[Error Render]: ${e.message}</p>`, headings: [] }
   }
 })
+
+const html = computed(() => parsed.value.html)
+
+// Beritahu parent setiap kali daftar heading berubah (ganti halaman,
+// konten baru disimpan, dsb).
+watch(
+  () => parsed.value.headings,
+  (headings) => emit('headings', headings),
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -131,4 +141,4 @@ const html = computed(() => {
   margin: 1.5rem auto !important;
   object-fit: contain !important;
 }
-</style>
+</style>

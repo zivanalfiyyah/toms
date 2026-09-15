@@ -16,6 +16,10 @@ const props = defineProps({
 const docsStore = useDocsStore()
 const auth = useAuthStore()
 const copied = ref(false)
+// Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js),
+// bukan lagi dibaca ulang dari docData.content — supaya TOC selalu sinkron
+// dengan apa yang sebenarnya dirender.
+const pageHeadings = ref([])
 
 // Full path segments joined, used for building nested links
 const basePath = computed(() => `/docs/${props.category}/${props.slugs.join('/')}`)
@@ -27,6 +31,7 @@ function load() {
   // The store/backend needs to accept an arbitrary-depth slug array and
   // resolve it by walking parent_id down the chain (or a single query
   // that matches the last slug + validates the ancestor chain).
+  pageHeadings.value = []
   docsStore.fetchPageByPath(props.category, props.slugs)
 }
 onMounted(load)
@@ -83,7 +88,11 @@ async function copyPage() {
           </button>
         </div>
 
-        <TiptapRenderer v-if="docData.content_html" :content="docData.content_html" />
+        <TiptapRenderer
+          v-if="docData.content_html"
+          :content="docData.content_html"
+          @headings="pageHeadings = $event"
+        />
 
         <EditPageLink :to="`${basePath}/edit`" />
 
@@ -129,7 +138,7 @@ async function copyPage() {
       <p v-else>Halaman tidak ditemukan.</p>
     </div>
 
-    <TableOfContents v-if="docData" :content="docData.content" />
+    <TableOfContents v-if="docData" :headings="pageHeadings" />
   </div>
 </template>
 
@@ -189,4 +198,4 @@ async function copyPage() {
   color: #d33;
   background: rgba(211, 51, 51, 0.06);
 }
-</style>
+</style>

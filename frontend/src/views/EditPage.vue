@@ -158,7 +158,11 @@ onMounted(async () => {
       editor.value = new Editor({
         element: editorEl.value,
         extensions: [
-          StarterKit,
+          // StarterKit v3 sudah membundel Link & Underline secara bawaan.
+          // Dinonaktifkan di sini karena kita mendaftarkan versi kita
+          // sendiri (dengan config openOnClick: false) di bawah — tanpa
+          // ini, Tiptap akan warning "Duplicate extension names".
+          StarterKit.configure({ link: false, underline: false }),
           CustomTable.configure({ resizable: true }),
           CustomTableRow,
           CustomTableHeader,
@@ -268,6 +272,24 @@ async function handleDocxPick(e) {
 onBeforeUnmount(() => {
   editor.value?.destroy()
 })
+
+// --- Daftar berpenomoran: angka (1,2,3) / huruf besar (A,B,C) / huruf
+// kecil (a,b,c) — ordered-list Tiptap sudah mendukung atribut "type"
+// bawaan (dipetakan langsung ke atribut HTML <ol type="...">), jadi
+// tinggal set/reset atribut itu di node orderedList yang aktif.
+// Kalau kursor belum ada di dalam ordered-list sama sekali, list-nya
+// dibuat dulu (toggleOrderedList) baru tipenya diset dalam 1 transaksi
+// yang sama supaya tidak ada "kedipan" state di antaranya.
+function setOrderedListType(type) {
+  if (!editor.value) return
+  const alreadyThisType = editor.value.isActive('orderedList', { type })
+  const chain = editor.value.chain().focus()
+  if (!editor.value.isActive('orderedList')) {
+    chain.toggleOrderedList()
+  }
+  // Klik lagi tombol yang sama saat sudah aktif = kembali ke angka desimal biasa
+  chain.updateAttributes('orderedList', { type: alreadyThisType ? null : type }).run()
+}
 
 // --- Table controls ---
 function insertTable() {
@@ -474,6 +496,8 @@ function handleCancel() {
           <div class="toolbar-group">
             <button type="button" class="btn-icon" :disabled="!editor" title="Daftar Simbol" :class="{ 'is-active': editor?.isActive('bulletList') }" @click="editor?.chain().focus().toggleBulletList().run()"><List :size="16" /></button>
             <button type="button" class="btn-icon" :disabled="!editor" title="Daftar Angka" :class="{ 'is-active': editor?.isActive('orderedList') }" @click="editor?.chain().focus().toggleOrderedList().run()"><ListOrdered :size="16" /></button>
+            <button type="button" class="btn-icon btn-text-icon" :disabled="!editor" title="Daftar Huruf Besar (A, B, C...)" :class="{ 'is-active': editor?.isActive('orderedList', { type: 'A' }) }" @click="setOrderedListType('A')">A</button>
+            <button type="button" class="btn-icon btn-text-icon" :disabled="!editor" title="Daftar Huruf Kecil (a, b, c...)" :class="{ 'is-active': editor?.isActive('orderedList', { type: 'a' }) }" @click="setOrderedListType('a')">a</button>
             <button type="button" class="btn-icon" :disabled="!editor" title="Kutipan" :class="{ 'is-active': editor?.isActive('blockquote') }" @click="editor?.chain().focus().toggleBlockquote().run()"><Quote :size="16" /></button>
           </div>
 
@@ -722,6 +746,13 @@ function handleCancel() {
   cursor: not-allowed;
 }
 
+.btn-icon.btn-text-icon {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
 .btn-danger {
   color: #ef4444;
 }
@@ -859,6 +890,15 @@ function handleCancel() {
 .tiptap-editor {
   min-height: 350px;
   padding: 1.25rem;
+  /* Solusi baru untuk "toolbar tidak terjangkau saat teks panjang":
+     BUKAN position:sticky (sempat menimbulkan editor jadi tidak
+     responsif terhadap klik/ketik di beberapa kondisi) — area teks
+     ini sendiri yang dibatasi tingginya dan discroll di dalam
+     kotaknya sendiri. Toolbar & seluruh editor-container jadi selalu
+     ada dalam batas tinggi yang wajar, tidak pernah ikut kescroll
+     jauh oleh halaman. */
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .tiptap-editor :deep(.ProseMirror) {

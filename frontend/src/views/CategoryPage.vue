@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch, nextTick } from 'vue'
 import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
 import TiptapRenderer from '../components/TiptapRenderer.vue'
+import TableOfContents from '../components/TableOfContents.vue'
 
 const props = defineProps({
   category: { type: String, required: true }
@@ -13,6 +14,40 @@ const props = defineProps({
 const docsStore = useDocsStore()
 const auth = useAuthStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
+
+// Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js).
+// Sebelumnya sidebar "Pada halaman ini" di sini selalu tampil kosong untuk
+// kategori tanpa subbab, karena cuma me-list cat.pages dan tidak pernah
+// membaca heading H1-H6 di dalam cat.content_html sama sekali.
+const pageHeadings = ref([])
+watch(() => props.category, () => { pageHeadings.value = [] })
+
+// Navigasi manual lewat JS untuk klik item TOC — supaya konsisten berhasil
+// walau elemen tujuannya baru saja selesai dirender (v-html) oleh
+// TiptapRenderer, bukan mengandalkan lompatan native browser murni yang
+// bisa gagal diam-diam dalam SPA. href tetap dipasang di <a> (supaya
+// klik-kanan copy link / buka tab baru tetap berfungsi normal).
+function scrollToHeading(id, event) {
+  event.preventDefault()
+  const el = document.getElementById(id)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  history.pushState(null, '', `#${id}`)
+}
+
+// Kalau halaman dibuka/di-refresh langsung dengan #hash sudah ada di URL,
+// browser mencoba lompat ke situ SEBELUM konten (v-html) selesai
+// dirender — elemen targetnya belum ada, jadi lompatan browser gagal
+// diam-diam. Di sini kita coba lagi begitu heading benar-benar siap.
+watch(pageHeadings, async (headings) => {
+  if (!headings.length || !window.location.hash) return
+  await nextTick()
+  setTimeout(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ block: 'start' })
+  }, 50)
+})
 
 const currentCategoryIndex = computed(() => {
   return docsStore.categories.findIndex((c) => c.slug === props.category)
@@ -101,6 +136,8 @@ function slugify(text) {
   color: var(--color-ink-soft);
 }
 .toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
+.toc li ul a { padding-left: 1rem; font-size: 0.8rem; }
+.toc li ul ul a { padding-left: 1.4rem; font-size: 0.75rem; opacity: 0.85; }
 
 @media (max-width: 1100px) { .toc { display: none; } }
 
@@ -165,6 +202,7 @@ function slugify(text) {
           v-if="cat.content_html && cat.content_html.trim() !== ''"
           :content="cat.content_html"
           class="single-page-content"
+          @headings="pageHeadings = $event"
         />
 
 
@@ -224,7 +262,25 @@ function slugify(text) {
         </nav>
       </div>
 
-      <aside class="toc">
+      <!--
+        Dulu bagian ini SELALU tampil (judul hardcoded, tanpa v-if) dan cuma
+        me-list cat.pages (subbab) — tidak pernah membaca heading H1-H6 di
+        cat.content_html. Makanya untuk kategori yang isinya 1 dokumen
+        panjang tanpa subbab (mis. ODM, Ruang Lingkup, TOMS Dictionary),
+        judul "Pada halaman ini" muncul tapi daftarnya selalu kosong.
+
+        Sekarang: kalau ada heading asli di kontennya, pakai komponen
+        TableOfContents yang sama dengan halaman dokumen biasa (DocPage) —
+        supaya tampilan, indentasi H1/H2/H3, status "aktif" saat scroll,
+        dan panel yang bisa di-scroll saat heading-nya banyak, semuanya
+        SAMA PERSIS antara halaman kategori dan halaman dokumen, tidak ada
+        lagi 2 implementasi terpisah yang gampang tidak sinkron.
+        Kalau tidak ada heading tapi ada subbab, tetap tampilkan daftar
+        subbab seperti semula (data & kebutuhannya beda, bukan heading).
+        Kalau dua-duanya kosong, aside disembunyikan sepenuhnya.
+      -->
+      <TableOfContents v-if="pageHeadings.length" :headings="pageHeadings" />
+      <aside v-else-if="cat.pages?.length" class="toc">
         <p class="toc-title">Pada halaman ini</p>
         <ul>
           <li v-for="page in cat.pages" :key="page.id">
