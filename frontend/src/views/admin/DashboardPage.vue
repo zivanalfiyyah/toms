@@ -35,24 +35,32 @@ const cards = [
 <style scoped>
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
 .stat-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-a);
+  padding: 1.35rem 1.4rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
-.stat-label { font-size: 0.8rem; color: var(--color-ink-soft); margin: 0 0 0.4rem; }
-.stat-value { font-size: 1.6rem; font-weight: 700; margin: 0; font-family: var(--font-display); }
+.stat-card:nth-child(2n) { box-shadow: var(--shadow-b); }
+.stat-card:nth-child(3n) { box-shadow: var(--shadow-c); }
+.stat-card:hover { transform: translateY(-3px); border-color: var(--color-accent-border); }
+.stat-label { font-size: 0.78rem; font-weight: 600; color: var(--color-ink-soft); margin: 0 0 0.5rem; }
+.stat-value {
+  font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin: 0; font-family: var(--font-display);
+  background: linear-gradient(90deg, var(--color-ink), var(--color-accent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 
 .recent {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.5rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 1.25rem 1.5rem;
 }
 .recent h2 { font-size: 1rem; margin: 0 0 1rem; }
 
@@ -69,8 +77,9 @@ const cards = [
 
 .empty { color: var(--color-ink-soft); font-size: 0.85rem; }
 .view-all { display: inline-block; margin-top: 0.75rem; font-size: 0.82rem; }
+
 .error {
-  color: #d33; background: rgba(211,51,51,0.06); border: 1px solid #d33;
-  border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.85rem; margin-bottom: 1rem;
+  color: #ef4444; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius); padding: 0.65rem 0.85rem; font-size: 0.82rem; margin-bottom: 0.9rem;
 }
 </style>

@@ -106,44 +106,83 @@ function statusLabel(status) {
 </template>
 
 <style scoped>
-.wrap { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
-.req-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.wrap { max-width: none; margin: 0; padding: 0; }
+.wrap h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 1.25rem; }
+
+/* Tabel jadi kartu: sudut membulat lewat sel pojok (tanpa wrapper baru) */
+.req-table {
+  width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.87rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+}
 .req-table th, .req-table td {
-  text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--color-border);
+  text-align: left; padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--color-border); vertical-align: middle;
 }
-.badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.78rem; }
-.badge.pending { background: rgba(230, 160, 20, 0.15); color: #b3790f; }
-.badge.invited { background: rgba(30, 160, 90, 0.15); color: #178a54; }
-.badge.rejected { background: rgba(211, 51, 51, 0.1); color: #d33; }
-.actions { display: flex; gap: 0.5rem; }
+.req-table th {
+  color: var(--color-ink-soft); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.06em;
+  text-transform: uppercase; background: var(--color-accent-soft);
+}
+.req-table thead tr:first-child th:first-child { border-top-left-radius: 15px; }
+.req-table thead tr:first-child th:last-child { border-top-right-radius: 15px; }
+.req-table tbody tr:last-child td { border-bottom: none; }
+.req-table tbody tr:last-child td:first-child { border-bottom-left-radius: 15px; }
+.req-table tbody tr:last-child td:last-child { border-bottom-right-radius: 15px; }
+.req-table tbody tr:hover td { background: var(--color-accent-soft); }
+
+.badge { display: inline-block; white-space: nowrap; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+.badge.pending { background: rgba(245, 158, 11, 0.14); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35); }
+.badge.invited { background: rgba(16, 185, 129, 0.13); color: #059669; border: 1px solid rgba(16, 185, 129, 0.35); }
+.badge.rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+[data-theme='dark'] .badge.pending { color: #fbbf24; }
+[data-theme='dark'] .badge.invited { color: #34d399; }
+
+/* sebelumnya display:flex pada <td> membuat garis baris terputus */
+.actions { white-space: nowrap; }
+.actions > * + * { margin-left: 0.5rem; }
 .btn-approve {
-  padding: 0.35rem 0.7rem; border: none; border-radius: var(--radius);
-  background: var(--color-accent); color: #fff; cursor: pointer; font-size: 0.82rem;
+  padding: 0.45rem 0.9rem; background: linear-gradient(90deg, #0284c7, #0ea5e9); color: #fff; border: none; border-radius: var(--radius);
+  box-shadow: var(--btn-glow); font-weight: 700; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; font-size: 0.78rem; white-space: nowrap;
 }
+.btn-approve:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-approve:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
 .btn-reject {
-  padding: 0.35rem 0.7rem; border: 1px solid #d33; border-radius: var(--radius);
-  background: transparent; color: #d33; cursor: pointer; font-size: 0.82rem;
+  padding: 0.45rem 0.9rem; border: 1px solid rgba(239, 68, 68, 0.5); border-radius: var(--radius);
+  background: transparent; color: #ef4444; cursor: pointer; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+  transition: background 0.15s ease;
 }
+.btn-reject:hover { background: rgba(239, 68, 68, 0.1); }
 .muted { color: var(--color-ink-soft); }
 .empty { text-align: center; color: var(--color-ink-soft); padding: 1.5rem; }
-.error { color: #d33; margin-bottom: 1rem; }
+.error { color: #ef4444; margin-bottom: 1rem; }
 
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-  display: flex; align-items: center; justify-content: center; z-index: 50;
+  position: fixed; inset: 0; background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem;
 }
 .modal {
-  background: var(--color-surface); border-radius: var(--radius);
-  padding: 1.5rem; width: 320px;
+  background: var(--color-surface); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl); padding: 1.75rem; width: 100%; max-width: 360px;
+  box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.45), var(--shadow-a);
 }
-.modal .hint { font-size: 0.82rem; color: var(--color-ink-soft); margin-bottom: 1rem; }
-.modal select {
-  width: 100%; padding: 0.5rem; border: 1px solid var(--color-border);
-  border-radius: var(--radius); margin-bottom: 1rem;
+[data-theme='dark'] .modal { border-color: var(--color-accent-border); }
+.modal h3 { margin: 0 0 1.1rem; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+.modal label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--color-ink-soft); margin: 0 0 0.35rem; }
+.modal input, .modal select {
+  width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 0.9rem;
+  border: 1px solid var(--color-border); border-radius: var(--radius);
+  background: var(--input-bg); color: var(--color-ink); font-size: 0.87rem; font-family: inherit;
 }
-.modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
+
+.modal .hint { font-size: 0.8rem; color: var(--color-ink-soft); margin: 0 0 1rem; }
 .btn-cancel {
-  padding: 0.4rem 0.9rem; border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: transparent; cursor: pointer;
+  padding: 0.45rem 1rem; border: 1px solid var(--glass-border); border-radius: var(--radius);
+  background: var(--glass-bg); color: var(--color-ink); cursor: pointer; font-size: 0.8rem; font-weight: 600;
+}
+.btn-cancel:hover { background: var(--color-accent-soft); color: var(--color-accent); }
+
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--color-accent-border); box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 </style>

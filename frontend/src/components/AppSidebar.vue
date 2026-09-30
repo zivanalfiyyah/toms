@@ -2,16 +2,13 @@
 import { computed, onMounted, ref, nextTick, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
-import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 import SidebarPageItem from './SidebarPageItem.vue'
 
 defineEmits(['navigate'])
 const docsStore = useDocsStore()
-const authStore = useAuthStore()
 const route = useRoute()
 
-const isAdmin = computed(() => authStore.canEdit)
 const sidebarEl = ref(null)
 
 onMounted(() => {
@@ -50,6 +47,19 @@ watch(
   <aside class="sidebar" ref="sidebarEl">
     <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
     <ul class="category-nav">
+      <li class="category-item toc-item">
+        <router-link
+          to="/daftar-isi"
+          class="category-link"
+          :class="{ 'is-active': route.name === 'toc' }"
+          @click="$emit('navigate')"
+        >
+          <span class="category-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+          </span>
+          Daftar Isi
+        </router-link>
+      </li>
       <li v-for="cat in docsStore.categories" :key="cat.id" class="category-item">
         <router-link
           :to="`/docs/${cat.slug}`"
@@ -72,41 +82,44 @@ watch(
         </ul>
       </li>
     </ul>
-
-    <template v-if="isAdmin">
-      <hr class="divider" />
-      <router-link to="/admin" class="category-link admin-link" @click="$emit('navigate')">
-        <span v-if="icons.kerangkaPenyelenggaraan" v-html="icons.kerangkaPenyelenggaraan" class="category-icon"></span>
-        Admin Panel
-      </router-link>
-    </template>
   </aside>
 </template>
 
 <style scoped>
 .sidebar {
-  width: 240px; flex-shrink: 0; padding: 1.75rem 1.25rem;
-  border-right: 1px solid var(--color-border); background: var(--color-surface);
-  position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto;
+  width: 256px; flex-shrink: 0; padding: 1rem;
+  margin: 1.5rem 0 1.5rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-a);
+  position: sticky; top: 88px; align-self: flex-start;
+  height: calc(100vh - 88px - 1.5rem); overflow-y: auto;
 }
 
 .category-nav { list-style: none; margin: 0 0 1.25rem; padding: 0; }
 .category-item { margin-bottom: 0.15rem; }
+.toc-item { padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px dashed var(--color-border); }
 .category-link {
   display: flex; align-items: center; gap: 0.6rem;
-  padding: 0.4rem 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
+  border: 1px solid transparent;
   color: var(--color-ink-soft);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-decoration: none;
 }
-.category-link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
-.category-link.is-active { color: var(--color-accent); font-weight: 600; }
+.category-link:hover { background: var(--color-accent-soft); color: var(--color-ink); text-decoration: none; }
+.category-link.is-active {
+  color: var(--color-accent); font-weight: 700;
+  background: var(--color-accent-soft); border-color: var(--color-accent-border);
+  box-shadow: var(--glow-active);
+}
 
-.category-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.category-icon { width: 15px; height: 15px; flex-shrink: 0; }
 .category-icon :deep(svg) { width: 100%; height: 100%; }
 
-.divider { border: none; border-top: 1px dashed var(--color-border); margin: 0 0 1.25rem; }
 
 .page-list {
   list-style: none;
@@ -116,10 +129,10 @@ watch(
 }
 .page-item { margin-bottom: 0.1rem; }
 .page-row { display: flex; align-items: center; }
-.link { display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: var(--radius); color: var(--color-ink); font-size: 0.83rem; flex: 1; min-width: 0; }
+.link { display: block; padding: 0.4rem 0.6rem 0.4rem 1.2rem; border-radius: var(--radius); color: var(--color-ink-soft); font-size: 0.78rem; flex: 1; min-width: 0; }
 .link:hover { background: var(--color-accent-soft); text-decoration: none; }
 .link.is-active {
-  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 600;
+  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700;
   border-left: 3px solid var(--color-accent); padding-left: calc(1.2rem - 3px);
 }
 
@@ -147,7 +160,9 @@ watch(
 
 @media (max-width: 860px) {
   .sidebar {
-    position: fixed; top: 58px; left: 0; bottom: 0; width: 260px; z-index: 30;
+    position: fixed; top: 64px; left: 0; bottom: 0; width: 260px; z-index: 30;
+    height: auto; margin: 0; align-self: auto; border-radius: 0;
+    background: var(--color-surface); border: none; border-right: 1px solid var(--glass-border);
     transform: translateX(-100%); transition: transform 0.2s ease; overflow-y: auto;
   }
   .sidebar.is-open { transform: translateX(0); }

@@ -49,9 +49,9 @@ function onGlobalKeydown(e) {
 
 
 <style scoped>
-.app-body { display: flex; position: relative; }
-.app-main { flex: 1; min-width: 0; padding: 2rem clamp(1.25rem, 4vw, 3rem); }
-.app-main.no-sidebar { max-width: 960px; margin: 0 auto; }
+.app-body { display: flex; position: relative; max-width: 1440px; margin: 0 auto; width: 100%; }
+.app-main { flex: 1; min-width: 0; padding: 1.5rem clamp(1rem, 2.5vw, 1.5rem) 3rem; }
+.app-main.no-sidebar { max-width: 1152px; margin: 0 auto; }
 </style>
 
 

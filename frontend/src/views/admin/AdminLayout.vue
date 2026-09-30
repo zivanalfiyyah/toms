@@ -61,93 +61,113 @@ async function handleLogout() {
 <style scoped>
 .admin-shell {
   display: flex;
+  gap: 1.25rem;
+  padding: 1rem;
   min-height: 100vh;
-  background: var(--color-bg);
+  background: transparent; /* glow latar dari main.css tampil */
 }
 
 .admin-sidebar {
-  width: 240px;
+  width: 248px;
   flex-shrink: 0;
   background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-a);
   display: flex;
   flex-direction: column;
   position: sticky;
-  top: 0;
-  height: 100vh;
+  top: 1rem;
+  align-self: flex-start;
+  height: calc(100vh - 2rem);
+  overflow: hidden;
 }
 
 .admin-brand {
-  padding: 1.25rem 1.5rem;
+  padding: 1.35rem 1.5rem;
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.05rem;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-ink);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid var(--glass-border);
 }
+.admin-brand span {
+  background: linear-gradient(90deg, #0284c7, #0ea5e9, #06b6d4);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+[data-theme='dark'] .admin-brand span { background-image: linear-gradient(90deg, #38bdf8, #7dd3fc, #67e8f9); }
 
-.admin-nav {
-  list-style: none;
-  margin: 0;
-  padding: 1rem 0.9rem;
-  flex: 1;
-}
+.admin-nav { list-style: none; margin: 0; padding: 1rem 0.85rem; flex: 1; overflow-y: auto; }
 
 .admin-nav-link {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.7rem;
+  gap: 0.65rem;
+  padding: 0.6rem 0.8rem;
   border-radius: var(--radius);
+  border: 1px solid transparent;
   color: var(--color-ink-soft);
-  font-size: 0.88rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   text-decoration: none;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.admin-nav-link:hover { background: var(--color-accent-soft); color: var(--color-accent); }
-.admin-nav-link.is-active { background: var(--color-accent-soft); color: var(--color-accent); font-weight: 600; }
+.admin-nav-link:hover { background: var(--color-accent-soft); color: var(--color-ink); text-decoration: none; }
+.admin-nav-link.is-active {
+  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700;
+  border-color: var(--color-accent-border); box-shadow: var(--glow-active);
+}
 
 .admin-nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
 .admin-nav-icon :deep(svg) { width: 100%; height: 100%; }
 
-.admin-back {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-.admin-back a { font-size: 0.82rem; color: var(--color-ink-soft); }
-.admin-back a:hover { color: var(--color-accent); }
+.admin-back { padding: 1rem 1.5rem; border-top: 1px solid var(--glass-border); }
+.admin-back a { font-size: 0.8rem; font-weight: 500; color: var(--color-ink-soft); }
+.admin-back a:hover { color: var(--color-accent); text-decoration: none; }
 
 .admin-content { flex: 1; min-width: 0; }
 
+/* Topbar melayang, kaca transparan seperti navbar dokumentasi */
 .admin-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  padding: 0.7rem 0.8rem 0.7rem 1.5rem;
+  background:
+    linear-gradient(90deg, rgba(14, 165, 233, 0.08), transparent 35%, transparent 65%, rgba(99, 102, 241, 0.07)),
+    var(--nav-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
   position: sticky;
-  top: 0;
+  top: 1rem;
   z-index: 10;
+  margin-bottom: 1.5rem;
 }
-.admin-topbar h1 { font-size: 1.1rem; margin: 0; font-family: var(--font-display); }
+.admin-topbar h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; font-family: var(--font-display); }
 .admin-topbar-right { display: flex; align-items: center; gap: 0.9rem; }
-.admin-user { font-size: 0.85rem; color: var(--color-ink-soft); }
+.admin-user { font-size: 0.82rem; font-weight: 500; color: var(--color-ink-soft); }
 .logout-btn {
-  padding: 0.4rem 0.85rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-bg);
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-bg);
   color: var(--color-ink);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.logout-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); border-color: var(--color-accent); }
+.logout-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); border-color: var(--color-accent-border); box-shadow: var(--glow-active); }
 
-.admin-main { padding: 2rem; }
+.admin-main { padding: 0 0.25rem 2rem; }
 
 @media (max-width: 860px) {
+  .admin-shell { padding: 0.75rem; }
   .admin-sidebar { display: none; }
-  .admin-main { padding: 1.25rem; }
+  .admin-topbar { top: 0.75rem; }
 }
 </style>

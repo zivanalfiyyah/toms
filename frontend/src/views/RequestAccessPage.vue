@@ -72,24 +72,37 @@ async function handleSubmit() {
 </template>
 
 <style scoped>
-.wrap { max-width: 480px; margin: 3rem auto; padding: 0 1.5rem; }
+.wrap {
+  max-width: 480px; margin: 3rem auto; padding: 2rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-card);
+}
+[data-theme='dark'] .wrap { border-color: var(--color-accent-border); }
+h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 1.4rem; }
 .field { margin-bottom: 1rem; }
-label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--color-ink-soft); }
+label { display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--color-ink-soft); }
 input, textarea {
-  width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--color-border);
-  border-radius: var(--radius); background: var(--color-bg); color: var(--color-ink);
-  font-family: inherit;
+  width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--color-border);
+  border-radius: var(--radius); background: var(--input-bg); color: var(--color-ink);
+  font-family: inherit; font-size: 0.9rem;
+}
+input:focus, textarea:focus { outline: none; border-color: var(--color-accent-border); box-shadow: 0 0 0 3px var(--color-accent-soft); }
+.btn-submit {
+  padding: 0.7rem 1.3rem; background: linear-gradient(90deg, #0284c7, #0ea5e9); color: #fff; border: none; border-radius: var(--radius);
+  box-shadow: var(--btn-glow); font-weight: 700; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; font-size: 0.88rem;
+}
+.btn-submit:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+.error {
+  color: #ef4444; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius); padding: 0.6rem 0.8rem; font-size: 0.82rem; margin-bottom: 1rem;
 }
 textarea { resize: vertical; }
-.btn-submit {
-  padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius);
-  background: var(--color-accent); color: #fff; font-weight: 600; cursor: pointer;
-}
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-secondary {
-  padding: 0.6rem 1.2rem; border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: transparent; cursor: pointer; margin-top: 1rem;
+  padding: 0.65rem 1.2rem; border: 1px solid var(--glass-border); border-radius: var(--radius);
+  background: var(--glass-bg); color: var(--color-ink); font-weight: 600; cursor: pointer; margin-top: 1rem;
 }
-.error { color: #d33; margin-bottom: 1rem; }
+.btn-secondary:hover { background: var(--color-accent-soft); color: var(--color-accent); }
 .success { text-align: center; }
 </style>

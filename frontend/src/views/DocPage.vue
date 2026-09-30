@@ -16,6 +16,10 @@ const props = defineProps({
 const docsStore = useDocsStore()
 const auth = useAuthStore()
 const copied = ref(false)
+// Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js),
+// bukan lagi dibaca ulang dari docData.content — supaya TOC selalu sinkron
+// dengan apa yang sebenarnya dirender.
+const pageHeadings = ref([])
 
 // Full path segments joined, used for building nested links
 const basePath = computed(() => `/docs/${props.category}/${props.slugs.join('/')}`)
@@ -27,6 +31,7 @@ function load() {
   // The store/backend needs to accept an arbitrary-depth slug array and
   // resolve it by walking parent_id down the chain (or a single query
   // that matches the last slug + validates the ancestor chain).
+  pageHeadings.value = []
   docsStore.fetchPageByPath(props.category, props.slugs)
 }
 onMounted(load)
@@ -83,7 +88,11 @@ async function copyPage() {
           </button>
         </div>
 
-        <TiptapRenderer v-if="docData.content_html" :content="docData.content_html" />
+        <TiptapRenderer
+          v-if="docData.content_html"
+          :content="docData.content_html"
+          @headings="pageHeadings = $event"
+        />
 
         <EditPageLink :to="`${basePath}/edit`" />
 
@@ -129,20 +138,36 @@ async function copyPage() {
       <p v-else>Halaman tidak ditemukan.</p>
     </div>
 
-    <TableOfContents v-if="docData" :content="docData.content" />
+    <TableOfContents v-if="docData" :headings="pageHeadings" />
   </div>
 </template>
 
 <style scoped>
-.doc-page { display: flex; gap: 2rem; }
-.doc-content { flex: 1; min-width: 0; }
-.title-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.title-row h1 { margin: 0; }
+.doc-page { display: flex; gap: 1.5rem; align-items: flex-start; }
+.doc-content {
+  flex: 1;
+  min-width: 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
+}
+.doc-content h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 0.75rem; }
+.doc-content h2 { font-weight: 700; }
+
+.title-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-bottom: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border);
+}
+.title-row h1 { margin: 0 !important; }
 .copy-btn {
   display: flex; align-items: center; gap: 0.4rem;
-  background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: var(--radius); padding: 0.4rem 0.8rem;
-  font-size: 0.8rem; color: var(--color-ink-soft); cursor: pointer; flex-shrink: 0;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 0.45rem 0.9rem;
+  font-size: 0.75rem; font-weight: 600; color: var(--color-ink-soft); cursor: pointer; flex-shrink: 0;
 }
 .copy-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
 .copy-btn span { width: 14px; height: 14px; display: block; }
@@ -169,15 +194,17 @@ async function copyPage() {
   gap: 1rem;
   margin-top: 3rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--glass-border);
 }
 .pager-card {
   display: flex; flex-direction: column; gap: 0.3rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
-.pager-card:hover { border-color: var(--color-accent); text-decoration: none; }
+.pager-card:hover { border-color: var(--color-accent); text-decoration: none; transform: translateY(-2px); }
 .pager-card.next { text-align: right; align-items: flex-end; }
 .pager-label { font-size: 0.75rem; color: var(--color-ink-soft); }
 .pager-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
@@ -189,4 +216,4 @@ async function copyPage() {
   color: #d33;
   background: rgba(211, 51, 51, 0.06);
 }
-</style>
+</style>

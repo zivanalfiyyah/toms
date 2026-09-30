@@ -8,6 +8,7 @@ export const useThemeStore = defineStore('theme', {
         init() {
             const saved = localStorage.getItem('toms-theme')
             this.dark =  saved === 'dark'
+            this.apply()
         },
         
         toggle() {

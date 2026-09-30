@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch, nextTick } from 'vue'
 import { useDocsStore } from '../stores/docs'
 import { useAuthStore } from '../stores/auth'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
 import TiptapRenderer from '../components/TiptapRenderer.vue'
+import TableOfContents from '../components/TableOfContents.vue'
 
 const props = defineProps({
   category: { type: String, required: true }
@@ -13,6 +14,40 @@ const props = defineProps({
 const docsStore = useDocsStore()
 const auth = useAuthStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
+
+// Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js).
+// Sebelumnya sidebar "Pada halaman ini" di sini selalu tampil kosong untuk
+// kategori tanpa subbab, karena cuma me-list cat.pages dan tidak pernah
+// membaca heading H1-H6 di dalam cat.content_html sama sekali.
+const pageHeadings = ref([])
+watch(() => props.category, () => { pageHeadings.value = [] })
+
+// Navigasi manual lewat JS untuk klik item TOC — supaya konsisten berhasil
+// walau elemen tujuannya baru saja selesai dirender (v-html) oleh
+// TiptapRenderer, bukan mengandalkan lompatan native browser murni yang
+// bisa gagal diam-diam dalam SPA. href tetap dipasang di <a> (supaya
+// klik-kanan copy link / buka tab baru tetap berfungsi normal).
+function scrollToHeading(id, event) {
+  event.preventDefault()
+  const el = document.getElementById(id)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  history.pushState(null, '', `#${id}`)
+}
+
+// Kalau halaman dibuka/di-refresh langsung dengan #hash sudah ada di URL,
+// browser mencoba lompat ke situ SEBELUM konten (v-html) selesai
+// dirender — elemen targetnya belum ada, jadi lompatan browser gagal
+// diam-diam. Di sini kita coba lagi begitu heading benar-benar siap.
+watch(pageHeadings, async (headings) => {
+  if (!headings.length || !window.location.hash) return
+  await nextTick()
+  setTimeout(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1))
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ block: 'start' })
+  }, 50)
+})
 
 const currentCategoryIndex = computed(() => {
   return docsStore.categories.findIndex((c) => c.slug === props.category)
@@ -38,10 +73,10 @@ function slugify(text) {
 </script>
 
 <style scoped>
-.breadcrumb { font-family: var(--font-mono); font-size: 0.8rem; color: var(--color-ink-soft); margin: 0 0 1.25rem; }
+.breadcrumb { font-family: var(--font-body); font-size: 0.75rem; color: var(--color-ink-soft); margin: 0 0 1rem; }
 .breadcrumb .sep { margin: 0 0.35rem; color: var(--color-border); }
-.breadcrumb .current { color: var(--color-accent); }
-.lead { color: var(--color-ink-soft); margin: 0.5rem 0 2rem; }
+.breadcrumb .current { color: var(--color-accent); font-weight: 600; }
+.lead { color: var(--color-ink-soft); font-size: 0.9rem; margin: 0 0 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); }
 .subbab-title { font-size: 1.1rem; margin-bottom: 0.75rem; }
 .subbab-list { list-style: none; padding: 0; margin: 0; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
@@ -66,29 +101,48 @@ function slugify(text) {
 
 .category-page {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  align-items: flex-start;
 }
 .category-content {
   flex: 1;
   min-width: 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-card);
 }
+.category-content h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 0.75rem; }
+.category-content h2 { font-weight: 700; }
+
 
 .toc {
-  width: 200px;
+  width: 224px;
   flex-shrink: 0;
-  padding: 1.75rem 0.5rem;
+  padding: 1rem;
   position: sticky;
-  top: 4.5rem;
+  top: 5rem;
   align-self: flex-start;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-b);
 }
 .toc-title {
   font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-ink-soft);
-  margin-bottom: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--glass-border);
 }
 .toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--color-border); }
 .toc li { margin-bottom: 0.35rem; }
@@ -101,6 +155,8 @@ function slugify(text) {
   color: var(--color-ink-soft);
 }
 .toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
+.toc li ul a { padding-left: 1rem; font-size: 0.8rem; }
+.toc li ul ul a { padding-left: 1.4rem; font-size: 0.75rem; opacity: 0.85; }
 
 @media (max-width: 1100px) { .toc { display: none; } }
 
@@ -110,19 +166,22 @@ function slugify(text) {
   gap: 1rem;
   margin-top: 3rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--glass-border);
 }
 .pager-card {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .pager-card:hover {
   border-color: var(--color-accent);
   text-decoration: none;
+  transform: translateY(-2px);
 }
 .pager-card.next {
   text-align: right;
@@ -165,6 +224,7 @@ function slugify(text) {
           v-if="cat.content_html && cat.content_html.trim() !== ''"
           :content="cat.content_html"
           class="single-page-content"
+          @headings="pageHeadings = $event"
         />
 
 
@@ -224,7 +284,25 @@ function slugify(text) {
         </nav>
       </div>
 
-      <aside class="toc">
+      <!--
+        Dulu bagian ini SELALU tampil (judul hardcoded, tanpa v-if) dan cuma
+        me-list cat.pages (subbab) — tidak pernah membaca heading H1-H6 di
+        cat.content_html. Makanya untuk kategori yang isinya 1 dokumen
+        panjang tanpa subbab (mis. ODM, Ruang Lingkup, TOMS Dictionary),
+        judul "Pada halaman ini" muncul tapi daftarnya selalu kosong.
+
+        Sekarang: kalau ada heading asli di kontennya, pakai komponen
+        TableOfContents yang sama dengan halaman dokumen biasa (DocPage) —
+        supaya tampilan, indentasi H1/H2/H3, status "aktif" saat scroll,
+        dan panel yang bisa di-scroll saat heading-nya banyak, semuanya
+        SAMA PERSIS antara halaman kategori dan halaman dokumen, tidak ada
+        lagi 2 implementasi terpisah yang gampang tidak sinkron.
+        Kalau tidak ada heading tapi ada subbab, tetap tampilkan daftar
+        subbab seperti semula (data & kebutuhannya beda, bukan heading).
+        Kalau dua-duanya kosong, aside disembunyikan sepenuhnya.
+      -->
+      <TableOfContents v-if="pageHeadings.length" :headings="pageHeadings" />
+      <aside v-else-if="cat.pages?.length" class="toc">
         <p class="toc-title">Pada halaman ini</p>
         <ul>
           <li v-for="page in cat.pages" :key="page.id">
