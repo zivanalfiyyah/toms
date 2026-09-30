@@ -3,10 +3,10 @@ defineProps({ segments: { type: Array, required: true } })
 </script>
 
 <style scoped>
-.breadcrumb { font-family: var(--font-mono); font-size: 0.8rem; color: var(--color-ink-soft); margin: 0 0 1.25rem; }
+.breadcrumb { font-family: var(--font-body); font-size: 0.75rem; color: var(--color-ink-soft); margin: 0 0 1rem; }
 .breadcrumb a { color: var(--color-ink-soft); }
 .breadcrumb .sep { margin: 0 0.35rem; color: var(--color-border); }
-.breadcrumb .current { color: var(--color-accent); }
+.breadcrumb .current { color: var(--color-accent); font-weight: 600; }
 </style>
 
 <template>

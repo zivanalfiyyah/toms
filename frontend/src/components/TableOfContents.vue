@@ -152,32 +152,38 @@ watch(
 
 <style scoped>
 .toc {
-  width: 210px;
+  width: 224px;
   flex-shrink: 0;
-  padding: 1.5rem 0.5rem;
+  padding: 1rem;
   position: sticky;
-  top: 4.5rem;
+  top: 5rem;
   align-self: flex-start;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-b);
+  font-family: var(--font-body);
   /* Batasi tinggi TOC ke sisa ruang viewport (dikurangi offset sticky-nya
      dan sedikit padding bawah) supaya kalau heading-nya sangat banyak,
      TOC tidak mendorong/melewati batas layar — cukup list-nya sendiri
      yang scroll (lihat .toc-tree di bawah), judul tetap diam di atas. */
-  max-height: calc(100vh - 4.5rem - 1.5rem);
+  max-height: calc(100vh - 5rem - 1.5rem);
   display: flex;
   flex-direction: column;
 }
 
 /* 1. Judul + Garis Pembatas Atas */
 .toc-title {
-  font-size: 0.725rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #374151;
-  margin: 0 0 0.85rem 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb; /* Garis horizontal atas */
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0; /* Judul tidak boleh ikut mengecil/kepotong saat list di bawahnya scroll */
 }
 
@@ -191,14 +197,14 @@ watch(
 }
 
 .toc-tree {
-  border-left: 1px solid #e5e7eb; /* Garis vertikal abu-abu lurus */
+  border-left: 1px solid var(--color-border);
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* Perlu supaya flex child ini benar-benar mau menyusut & scroll, bukan memaksa .toc melebihi max-height-nya */
 
   /* Scrollbar tipis & halus (Firefox) */
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-color: var(--color-border) transparent;
 }
 
 /* Scrollbar tipis & halus (Chrome/Edge/Safari) */
@@ -209,11 +215,11 @@ watch(
   background: transparent;
 }
 .toc-tree::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
+  background-color: var(--color-border);
   border-radius: 3px;
 }
 .toc-tree::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
+  background-color: var(--color-ink-soft);
 }
 
 .toc-tree li {
@@ -230,7 +236,7 @@ watch(
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: #6b7280;
+  color: var(--color-ink-soft);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
@@ -240,11 +246,11 @@ watch(
 }
 
 .toc-tree a:hover {
-  color: #0d9488;
+  color: var(--color-accent);
 }
 
 .toc-tree a.active {
-  color: #0d9488;
+  color: var(--color-accent);
   font-weight: 700;
 }
 
@@ -253,12 +259,13 @@ watch(
   padding-left: 1.15rem; /* Menjorok ke dalam (dikurangi dari 1.6rem → 1.35rem → 1.15rem) */
   font-size: 0.68rem;
   font-weight: 500;
-  color: #9ca3af;
+  color: var(--color-ink-soft);
+  opacity: 0.85;
   text-transform: uppercase;
 }
 
 .toc-tree .sub a.active {
-  color: #0d9488;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -269,11 +276,12 @@ watch(
   padding-left: 1.5rem; /* dikurangi dari 2.35rem → 1.8rem → 1.5rem */
   font-size: 0.64rem;
   font-weight: 400;
-  color: #b0b6c0;
+  color: var(--color-ink-soft);
+  opacity: 0.7;
 }
 
 .toc-tree .sub-sub a.active {
-  color: #0d9488;
+  color: var(--color-accent);
   font-weight: 600;
 }
 

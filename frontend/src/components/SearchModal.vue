@@ -131,6 +131,10 @@ function formatSnippet(text) {
   overflow: hidden;
   border: 1px solid var(--color-border);
 }
+[data-theme='dark'] .box {
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 60px -10px rgba(56, 189, 248, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
+}
 .box-header {
   display: flex; align-items: center; gap: 0.6rem;
   padding: 0 1rem;

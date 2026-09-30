@@ -579,10 +579,16 @@ function handleCancel() {
 <style scoped>
 .edit-wrap {
   max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
+  margin: 1rem auto 2rem;
+  padding: 2rem;
   font-family: inherit;
-  color: #334155;
+  color: var(--color-ink);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .page-header {
@@ -590,28 +596,29 @@ function handleCancel() {
 }
 .page-header h2 {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 800;
+  color: var(--color-ink);
   margin: 0 0 0.25rem 0;
+  letter-spacing: -0.03em;
 }
 .sub-title {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-ink-soft);
   margin: 0;
 }
 
 .loading-state {
   padding: 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--color-ink-soft);
 }
 
 .error-banner {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
 }
@@ -630,7 +637,7 @@ function handleCancel() {
   font-size: 0.8125rem;
   font-weight: 600;
   margin-bottom: 0.375rem;
-  color: #475569;
+  color: var(--color-ink-soft);
 }
 
 .field input[type="text"],
@@ -639,10 +646,10 @@ function handleCancel() {
 .field textarea {
   width: 100%;
   padding: 0.55rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--color-ink);
   font-size: 0.875rem;
   font-family: inherit;
   outline: none;
@@ -654,17 +661,17 @@ function handleCancel() {
 .field input[type="number"]:focus,
 .field select:focus,
 .field textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--color-accent-border);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 .import-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
+  background: var(--color-accent-soft);
+  border: 1px dashed var(--color-accent-border);
+  border-radius: var(--radius-lg);
   padding: 0.75rem 1rem;
   margin-bottom: 1.25rem;
   flex-wrap: wrap;
@@ -674,12 +681,12 @@ function handleCancel() {
 .import-info strong {
   display: block;
   font-size: 0.875rem;
-  color: #1e293b;
+  color: var(--color-ink);
 }
 
 .import-info span {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-ink-soft);
 }
 
 .btn-secondary {
@@ -687,10 +694,10 @@ function handleCancel() {
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.85rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-bg);
+  color: var(--color-ink);
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -698,16 +705,17 @@ function handleCancel() {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent);
 }
 
 .editor-container {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  background: #ffffff;
+  box-shadow: var(--shadow-card);
+  background: var(--color-surface);
 }
 
 .toolbar {
@@ -715,8 +723,8 @@ function handleCancel() {
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--well-bg);
+  border-bottom: 1px solid var(--color-border);
   flex-wrap: wrap;
 }
 
@@ -729,7 +737,7 @@ function handleCancel() {
 .toolbar-divider {
   width: 1px;
   height: 20px;
-  background: #cbd5e1;
+  background: var(--color-border);
   margin: 0 0.25rem;
 }
 
@@ -740,21 +748,22 @@ function handleCancel() {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
-  color: #475569;
+  color: var(--color-ink-soft);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
 .btn-icon:hover:not(:disabled) {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
 .btn-icon.is-active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-border);
 }
 
 .btn-icon:disabled {
@@ -774,16 +783,16 @@ function handleCancel() {
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #fef2f2;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .toolbar-select {
   padding: 0.3rem 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #334155;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--color-ink);
   font-size: 0.8125rem;
   outline: none;
 }
@@ -793,8 +802,8 @@ function handleCancel() {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: #f0f9ff;
-  border-bottom: 1px solid #bae6fd;
+  background: var(--color-accent-soft);
+  border-bottom: 1px solid var(--color-accent-border);
   font-size: 0.8125rem;
 }
 
@@ -803,7 +812,7 @@ function handleCancel() {
   align-items: center;
   gap: 0.35rem;
   font-weight: 600;
-  color: #0369a1;
+  color: var(--color-accent);
   white-space: nowrap;
 }
 
@@ -819,42 +828,42 @@ function handleCancel() {
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  border: 1px solid #93c5fd;
-  border-radius: 4px;
-  background: #ffffff;
-  color: #1e40af;
+  border: 1px solid var(--color-accent-border);
+  border-radius: 6px;
+  background: var(--glass-bg);
+  color: var(--color-accent);
   font-size: 0.75rem;
   cursor: pointer;
 }
 
 .table-actions button:hover {
-  background: #dbeafe;
+  background: var(--color-accent-soft);
 }
 
 .table-actions button.is-active {
-  background: #2563eb;
+  background: #0284c7;
   color: #ffffff;
 }
 
 .sub-divider {
   width: 1px;
   height: 14px;
-  background: #93c5fd;
+  background: var(--color-accent-border);
   margin: 0 0.15rem;
 }
 
 .btn-text-danger {
-  border-color: #fca5a5 !important;
-  color: #b91c1c !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #ef4444 !important;
 }
 
 .btn-text-danger:hover {
-  background: #fee2e2 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
 }
 
 .html-source-panel {
   padding: 0.75rem;
-  background: #0f172a;
+  background: var(--color-code-bg);
 }
 
 .panel-header {
@@ -885,10 +894,10 @@ function handleCancel() {
 
 .btn-primary-sm {
   padding: 0.35rem 0.75rem;
-  background: #2563eb;
+  background: #0284c7;
   color: #ffffff;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px;
   font-size: 0.8125rem;
   cursor: pointer;
 }
@@ -915,6 +924,8 @@ function handleCancel() {
      jauh oleh halaman. */
   max-height: 60vh;
   overflow-y: auto;
+  color: var(--color-ink);
+  caret-color: var(--color-accent);
 }
 
 .tiptap-editor :deep(.ProseMirror) {
@@ -930,20 +941,20 @@ function handleCancel() {
 
 .tiptap-editor :deep(td),
 .tiptap-editor :deep(th) {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border);
   padding: 8px 10px;
   vertical-align: top;
 }
 
 .tiptap-editor :deep(th) {
-  background-color: #f8fafc;
+  background-color: var(--color-accent-soft);
   font-weight: 600;
 }
 
 .tiptap-editor :deep(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 0;
 }
 
 .actions {
@@ -958,22 +969,24 @@ function handleCancel() {
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, #0284c7, #0ea5e9);
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
   transition: background 0.2s;
+  box-shadow: var(--btn-glow);
 }
 
 .btn-save:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: linear-gradient(90deg, #0369a1, #0284c7);
 }
 
 .btn-save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn-cancel {
@@ -981,10 +994,10 @@ function handleCancel() {
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #475569;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  color: var(--color-ink);
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
@@ -992,6 +1005,7 @@ function handleCancel() {
 }
 
 .btn-cancel:hover {
-  background: #f1f5f9;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 </style>

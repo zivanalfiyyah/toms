@@ -37,52 +37,60 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
+  background: transparent; /* glow latar dari main.css tampil */
   padding: 1.5rem;
 }
 .login-wrap {
   width: 100%;
-  max-width: 360px;
-  padding: 2rem;
-  border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: var(--color-surface);
+  max-width: 400px;
+  padding: 2.25rem 2rem 2rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
 }
-h1 { font-size: 1.3rem; margin: 0 0 1.5rem; }
-label { display: block; font-size: 0.85rem; margin: 0 0 0.3rem; color: var(--color-ink-soft); }
+[data-theme='dark'] .login-wrap { border-color: var(--color-accent-border); }
+h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; text-align: center; margin: 0 0 1.6rem; }
+label { display: block; font-size: 0.78rem; font-weight: 600; margin: 0 0 0.35rem; color: var(--color-ink-soft); }
 input {
-  width: 100%; padding: 0.55rem 0.7rem; margin-bottom: 1rem;
+  width: 100%; padding: 0.7rem 0.9rem; margin-bottom: 1rem;
   border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: var(--color-bg); color: var(--color-ink); font-size: 0.9rem;
+  background: var(--input-bg); color: var(--color-ink); font-size: 0.9rem; font-family: inherit;
 }
+input:focus { outline: none; border-color: var(--color-accent-border); box-shadow: 0 0 0 3px var(--color-accent-soft); }
 button {
-  width: 100%; padding: 0.6rem; border: none; border-radius: var(--radius);
-  background: var(--color-accent); color: #fff; font-weight: 600; cursor: pointer;
+  width: 100%; padding: 0.75rem; background: linear-gradient(90deg, #0284c7, #0ea5e9); color: #fff; border: none; border-radius: var(--radius);
+  box-shadow: var(--btn-glow); font-weight: 700; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; font-size: 0.88rem; margin-top: 0.25rem;
 }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #d33; font-size: 0.85rem; margin-bottom: 1rem; }
+button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+button:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+.error {
+  color: #ef4444; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius); padding: 0.6rem 0.8rem; font-size: 0.82rem; margin-bottom: 1rem;
+}
 .notice {
   color: var(--color-accent);
   background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border);
   border-radius: var(--radius);
-  font-size: 0.85rem;
-  padding: 0.6rem 0.8rem;
-  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1.1rem;
 }
 .request-access-link {
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--color-ink-soft);
-  margin-top: 1.2rem;
+  margin: 1.4rem 0 0;
 }
-.request-access-link a {
-  color: var(--color-accent);
-  font-weight: 600;
-}
+.request-access-link a { color: var(--color-accent); font-weight: 700; }
 </style>
 
 <template>
   <div class="login-page">
     <div class="login-wrap">
+      <img src="/toms-logo-header.png" alt="TOMS" class="auth-logo" />
       <h1>Login TOMS</h1>
       <p v-if="noticeMessage" class="notice">{{ noticeMessage }}</p>
       <form @submit.prevent="handleSubmit">

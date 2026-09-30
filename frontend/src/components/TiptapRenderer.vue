@@ -107,8 +107,6 @@ watch(
   border-collapse: collapse;
   margin: 1.5rem 0;
   background-color: transparent;
-  border-radius: 8px; 
-  overflow: hidden;
 }
 
 .tiptap-content :deep(th),
@@ -140,5 +138,6 @@ watch(
   display: block !important;
   margin: 1.5rem auto !important;
   object-fit: contain !important;
+  border-radius: 0 !important;
 }
 </style>

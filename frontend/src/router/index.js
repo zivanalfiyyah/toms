@@ -6,6 +6,7 @@ import LoginPage from '../views/LoginPage.vue'
 import EditPage from '../views/EditPage.vue'
 import CategoryEditPage from '../views/CategoryEditPage.vue'
 import PageIndexPage from '../views/PageIndexPage.vue'
+import TocPage from '../views/TocPage.vue'
 import AdminLayout from '../views/admin/AdminLayout.vue'
 import AdminDashboard from '../views/admin/DashboardPage.vue'
 import AdminUsers from '../views/admin/UsersPage.vue'
@@ -21,6 +22,7 @@ const routes = [
   { path: '/login', name: 'login', component: LoginPage },
   { path: '/request-access', name: 'request-access', component: RequestAccessPage },
   { path: '/accept-invite/:token', name: 'accept-invite', component: AcceptInvitePage, props: true },
+  { path: '/daftar-isi', name: 'toc', component: TocPage },
   { path: '/docs/:category', name: 'category-page', component: CategoryPage, props: true },
 
 
