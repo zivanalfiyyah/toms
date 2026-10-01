@@ -167,38 +167,36 @@ watch(
 
 <style scoped>
 .toc {
-  width: 224px;
+  width: 225px;
   flex-shrink: 0;
-  padding: 1rem;
+  padding: 16px 15px;
   position: sticky;
-  top: 5rem;
+  top: calc(var(--header-h) + 1.5rem);
   align-self: flex-start;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 17px;
   box-shadow: var(--shadow-b);
   font-family: var(--font-body);
   /* Batasi tinggi TOC ke sisa ruang viewport (dikurangi offset sticky-nya
      dan sedikit padding bawah) supaya kalau heading-nya sangat banyak,
      TOC tidak mendorong/melewati batas layar — cukup list-nya sendiri
      yang scroll (lihat .toc-tree di bawah), judul tetap diam di atas. */
-  max-height: calc(100vh - 5rem - 1.5rem);
+  max-height: calc(100vh - var(--header-h) - 3rem);
   display: flex;
   flex-direction: column;
 }
 
 /* 1. Judul + Garis Pembatas Atas */
 .toc-title {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.15px;
   color: var(--color-ink);
-  margin: 0 0 0.75rem 0;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--glass-border);
+  margin: 0 0 0.5rem 0;
+  padding: 3px 0 14px;
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0; /* Judul tidak boleh ikut mengecil/kepotong saat list di bawahnya scroll */
 }
 
@@ -212,7 +210,6 @@ watch(
 }
 
 .toc-tree {
-  border-left: 1px solid var(--color-border);
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0; /* Perlu supaya flex child ini benar-benar mau menyusut & scroll, bukan memaksa .toc melebihi max-height-nya */
@@ -245,12 +242,12 @@ watch(
 
 /* 3. Link Menu Utama */
 .toc-tree a {
+  --indent: 0px;
+  position: relative;
   display: block;
-  padding: 0.3rem 0 0.3rem 0.85rem;
-  font-size: 0.725rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  padding: 8px 0 8px calc(18px + var(--indent));
+  font-size: 11px;
+  font-weight: 500;
   color: var(--color-ink-soft);
   text-decoration: none;
   white-space: nowrap;
@@ -260,39 +257,55 @@ watch(
   background: transparent;
 }
 
+/* Titik penanda di kiri tiap judul; terisi saat judul sedang aktif */
+.toc-tree a::before {
+  content: '';
+  position: absolute;
+  left: var(--indent);
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateY(-50%);
+  border: 2px solid #cfdbe5;
+  border-radius: 50%;
+}
+[data-theme='dark'] .toc-tree a::before { border-color: #3a566d; }
+
 .toc-tree a:hover {
   color: var(--color-accent);
 }
 
 .toc-tree a.active {
   color: var(--color-accent);
-  font-weight: 700;
+  font-weight: 800;
+}
+.toc-tree a.active::before {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-surface);
 }
 
 /* 4. Sub Menu / Anak Menu (H2 di bawah H1) */
 .toc-tree .sub a {
-  padding-left: 1.15rem; /* Menjorok ke dalam (dikurangi dari 1.6rem → 1.35rem → 1.15rem) */
-  font-size: 0.68rem;
+  --indent: 12px; /* menjorok ke dalam */
+  font-size: 11px;
   font-weight: 500;
   color: var(--color-ink-soft);
-  opacity: 0.85;
-  text-transform: uppercase;
 }
 
 .toc-tree .sub a.active {
   color: var(--color-accent);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* 5. Sub-sub Menu (H3 di bawah H2) — menjorok sedikit lebih dalam lagi,
    TAPI tidak sedrastis sebelumnya (2.35rem) supaya sisa ruang teks di
    sidebar yang sempit tidak terlalu terpotong */
 .toc-tree .sub-sub a {
-  padding-left: 1.5rem; /* dikurangi dari 2.35rem → 1.8rem → 1.5rem */
-  font-size: 0.64rem;
+  --indent: 24px;
+  font-size: 10.5px;
   font-weight: 400;
   color: var(--color-ink-soft);
-  opacity: 0.7;
 }
 
 .toc-tree .sub-sub a.active {

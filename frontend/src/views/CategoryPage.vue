@@ -78,11 +78,13 @@ function slugify(text) {
 </script>
 
 <style scoped>
-.breadcrumb { font-family: var(--font-body); font-size: 0.75rem; color: var(--color-ink-soft); margin: 0 0 1rem; }
-.breadcrumb .sep { margin: 0 0.35rem; color: var(--color-border); }
-.breadcrumb .current { color: var(--color-accent); font-weight: 600; }
-.lead { color: var(--color-ink-soft); font-size: 0.9rem; margin: 0 0 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); }
-.subbab-title { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.breadcrumb { font-family: var(--font-body); font-size: 11px; color: var(--color-ink-soft); margin: 0 0 1.5rem; }
+.breadcrumb a { color: var(--color-ink-soft); }
+.breadcrumb a:hover { color: var(--color-accent); }
+.breadcrumb .sep { margin: 0 0.5rem; color: var(--color-ink-soft); opacity: 0.6; }
+.breadcrumb .current { color: var(--color-accent); font-weight: 700; }
+.lead { color: var(--color-ink-soft); font-size: 13px; line-height: 1.7; margin: 0 0 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
+.subbab-title { font-size: 22px; letter-spacing: -0.45px; margin: 0 0 17px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
 .subbab-list { list-style: none; padding: 0; margin: 0; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
 .subbab-list a { font-weight: 600; }
@@ -106,36 +108,32 @@ function slugify(text) {
 
 .category-page {
   display: flex;
-  gap: 1.5rem;
+  gap: 25px;
   align-items: flex-start;
 }
 .category-content {
   flex: 1;
   min-width: 0;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  padding: clamp(1.25rem, 3vw, 2.5rem);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 29px clamp(1.25rem, 3vw, 2.5rem) 58px;
   box-shadow: var(--shadow-card);
 }
-.category-content h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 0.75rem; }
+.category-content h1 { font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; margin: 0 0 0.75rem; color: var(--color-ink); }
 .category-content h2 { font-weight: 700; }
 
 
 .toc {
-  width: 224px;
+  width: 225px;
   flex-shrink: 0;
-  padding: 1rem;
+  padding: 16px 15px;
   position: sticky;
-  top: 5rem;
+  top: calc(var(--header-h) + 1.5rem);
   align-self: flex-start;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 17px;
   box-shadow: var(--shadow-b);
 }
 .toc-title {
@@ -147,7 +145,7 @@ function slugify(text) {
   color: var(--color-ink);
   margin: 0 0 0.75rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--color-border);
 }
 .toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--color-border); }
 .toc li { margin-bottom: 0.35rem; }
@@ -173,8 +171,8 @@ function slugify(text) {
   .category-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
   .category-content {
     position: sticky;
-    top: 5.5rem;
-    max-height: calc(100vh - 5.5rem - 1.5rem);
+    top: calc(var(--header-h) + 1.5rem);
+    max-height: calc(100vh - var(--header-h) - 3rem);
     overflow-y: auto;
     scroll-behavior: smooth;
   }
@@ -187,22 +185,23 @@ function slugify(text) {
   gap: 1rem;
   margin-top: 3rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid var(--color-border);
 }
 .pager-card {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .pager-card:hover {
-  border-color: var(--color-accent);
+  border-color: #a8d8f3;
   text-decoration: none;
   transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(30, 73, 106, 0.08);
 }
 .pager-card.next {
   text-align: right;
