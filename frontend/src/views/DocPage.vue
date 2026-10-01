@@ -20,6 +20,8 @@ const copied = ref(false)
 // bukan lagi dibaca ulang dari docData.content — supaya TOC selalu sinkron
 // dengan apa yang sebenarnya dirender.
 const pageHeadings = ref([])
+// Kartu isi (bergulir sendiri di desktop). Dikembalikan ke atas saat pindah halaman.
+const contentEl = ref(null)
 
 // Full path segments joined, used for building nested links
 const basePath = computed(() => `/docs/${props.category}/${props.slugs.join('/')}`)
@@ -32,6 +34,7 @@ function load() {
   // resolve it by walking parent_id down the chain (or a single query
   // that matches the last slug + validates the ancestor chain).
   pageHeadings.value = []
+  contentEl.value?.scrollTo({ top: 0, behavior: 'instant' })
   docsStore.fetchPageByPath(props.category, props.slugs)
 }
 onMounted(load)
@@ -74,7 +77,7 @@ async function copyPage() {
 
 <template>
   <div class="doc-page">
-    <div class="doc-content">
+    <div ref="contentEl" class="doc-content" tabindex="-1">
       <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
       <div v-else-if="docsStore.loading">Memuat...</div>
       <template v-else-if="docData">
@@ -144,6 +147,20 @@ async function copyPage() {
 
 <style scoped>
 .doc-page { display: flex; gap: 1.5rem; align-items: flex-start; }
+.doc-content:focus { outline: none; }
+
+/* Desktop: kartu isi tetap di tempat seperti sidebar; hanya teks di dalamnya yang bergulir.
+   Mobile (<= 860px) tidak berubah: seluruh halaman bergulir. */
+@media (min-width: 861px) {
+  .doc-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
+  .doc-content {
+    position: sticky;
+    top: 5.5rem;
+    max-height: calc(100vh - 5.5rem - 1.5rem);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+}
 .doc-content {
   flex: 1;
   min-width: 0;
@@ -215,5 +232,10 @@ async function copyPage() {
   border-radius: var(--radius);
   color: #d33;
   background: rgba(211, 51, 51, 0.06);
+}
+
+/* Desktop: tujuan scroll berada di dalam kartu, jadi jaraknya tidak perlu setinggi navbar. */
+@media (min-width: 861px) {
+  .subbab-list li { scroll-margin-top: 1rem; }
 }
 </style>

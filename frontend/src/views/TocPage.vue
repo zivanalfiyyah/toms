@@ -1,19 +1,31 @@
 <script setup>
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useDocsStore } from '../stores/docs'
+import { useTocStore } from '../stores/toc'
 import { icons } from '../icons'
 import TocNode from '../components/TocNode.vue'
 
 const docsStore = useDocsStore()
+const toc = useTocStore()
 
-onMounted(() => {
-  if (!docsStore.categories.length) docsStore.fetchCategories()
+onMounted(async () => {
+  if (!docsStore.categories.length) await docsStore.fetchCategories()
+  // Muat seluruh level (tak terbatas) di belakang layar; daftar tampil bertahap.
+  toc.load(docsStore.categories)
 })
+
+function reload() {
+  toc.load(docsStore.categories, { force: true })
+}
 
 // Kunci: `c-<id>` untuk kategori, `p-<id>` untuk halaman yang punya subbab.
 const open = reactive({})
 
+// Saat "Buka Semua" aktif, halaman yang baru selesai dimuat ikut terbuka.
+const autoOpen = ref(false)
+
 function toggle(key) {
+  autoOpen.value = false
   open[key] = !open[key]
 }
 
@@ -32,22 +44,29 @@ function collectPageKeys(pages, keys) {
   }
 }
 
-function toggleAll(state) {
-  if (!state) {
-    Object.keys(open).forEach((k) => { open[k] = false })
-    return
-  }
+function expandAll() {
   const keys = []
-  for (const cat of docsStore.categories) {
+  for (const cat of toc.tree) {
     keys.push(`c-${cat.id}`)
     collectPageKeys(cat.pages, keys)
   }
   keys.forEach((k) => { open[k] = true })
 }
 
+function toggleAll(state) {
+  autoOpen.value = state
+  if (state) expandAll()
+  else Object.keys(open).forEach((k) => { open[k] = false })
+}
+
 const totalTopics = computed(() =>
-  docsStore.categories.reduce((sum, cat) => sum + 1 + countPages(cat.pages), 0)
+  toc.tree.reduce((sum, cat) => sum + 1 + countPages(cat.pages), 0)
 )
+
+// Level yang baru dimuat ikut terbuka bila "Buka Semua" sedang aktif.
+watch(totalTopics, () => {
+  if (autoOpen.value) expandAll()
+})
 </script>
 
 <template>
@@ -69,16 +88,24 @@ const totalTopics = computed(() =>
           <button type="button" class="btn" @click="toggleAll(true)">Buka Semua</button>
           <button type="button" class="btn" @click="toggleAll(false)">Tutup Semua</button>
         </div>
-        <span class="total">Total {{ totalTopics }} Topik Terdata</span>
+        <span class="total">Total {{ totalTopics }} Topik Terdata<template v-if="toc.pending > 0"> · memuat…</template></span>
       </div>
     </header>
 
+    <p v-if="toc.pending > 0" class="crawl-note">
+      <span class="crawl-dot"></span>Memuat level yang lebih dalam… {{ toc.pending }} halaman tersisa
+    </p>
+    <p v-else-if="toc.failed > 0" class="crawl-note is-warn">
+      {{ toc.failed }} halaman gagal dimuat sub-babnya.
+      <button type="button" class="link-btn" @click="reload">Muat ulang</button>
+    </p>
+
     <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
-    <p v-else-if="docsStore.loading && !docsStore.categories.length" class="state">Memuat daftar isi…</p>
+    <p v-else-if="docsStore.loading && !toc.tree.length" class="state">Memuat daftar isi…</p>
 
     <div v-else class="bab-list">
       <section
-        v-for="cat in docsStore.categories"
+        v-for="cat in toc.tree"
         :key="cat.id"
         class="bab"
         :class="{ 'is-open': open[`c-${cat.id}`] }"
@@ -205,6 +232,17 @@ const totalTopics = computed(() =>
 .empty { margin: 0; font-size: 0.85rem; color: var(--color-ink-soft); }
 
 .state { color: var(--color-ink-soft); }
+
+.crawl-note {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin: 0 0 1rem; padding: 0.55rem 0.9rem; font-size: 0.78rem;
+  color: var(--color-ink-soft); background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border); border-radius: var(--radius);
+}
+.crawl-note.is-warn { color: #d97706; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.35); }
+.crawl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); animation: crawl-pulse 1.2s ease-in-out infinite; }
+@keyframes crawl-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.link-btn { background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-weight: 600; color: var(--color-accent); text-decoration: underline; }
 .fetch-error {
   padding: 1rem 1.2rem; border: 1px solid #d33; border-radius: var(--radius);
   color: #d33; background: rgba(211, 51, 51, 0.06);

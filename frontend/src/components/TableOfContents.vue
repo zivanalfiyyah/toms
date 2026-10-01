@@ -98,15 +98,27 @@ function scrollToInitialHashIfAny() {
   }
 }
 
+// Desktop: isi dokumen bergulir di dalam kartunya sendiri (.doc-content / .category-content).
+// Mobile: halaman utama yang bergulir, jadi tidak ada scroller khusus (null).
+function getScroller() {
+  const el = document.querySelector('.doc-content, .category-content')
+  if (!el) return null
+  const overflowY = getComputedStyle(el).overflowY
+  return overflowY === 'auto' || overflowY === 'scroll' ? el : null
+}
+
 function updateActive() {
   const ids = getAllIds()
   let current = null
+  // Ambang dihitung dari tepi atas kartu (desktop) atau layar (mobile).
+  const scroller = getScroller()
+  const threshold = scroller ? scroller.getBoundingClientRect().top + 48 : 120
 
   for (const id of ids) {
     const el = document.getElementById(id)
     if (!el) continue
     const top = el.getBoundingClientRect().top
-    if (top <= 120) {
+    if (top <= threshold) {
       current = id
     } else {
       break
@@ -122,18 +134,21 @@ function updateActive() {
   }
 }
 
-function onScroll() {
+function onScroll(event) {
+  // Event scroll dari elemen lain (sidebar, daftar TOC) tidak relevan.
+  if (event && event.target !== document && event.target !== getScroller()) return
   if (ticking) return
   ticking = true
   requestAnimationFrame(updateActive)
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true })
+  // capture: scroll pada elemen tidak bubble ke window, jadi harus ditangkap di fase capture.
+  window.addEventListener('scroll', onScroll, { passive: true, capture: true })
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('scroll', onScroll, { capture: true })
 })
 
 watch(

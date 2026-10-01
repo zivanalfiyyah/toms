@@ -166,3 +166,17 @@ select optgroup {
   background-color: var(--color-surface);
   color: var(--color-ink);
 }
+
+/* Sorotan sementara saat membuka hasil pencarian di panel admin */
+[data-focus-key] { scroll-margin-top: 7rem; }
+@keyframes admin-focus-flash {
+  0%, 55% {
+    background: var(--color-accent-soft);
+    box-shadow: 0 0 0 2px var(--color-accent), 0 0 24px -4px var(--color-accent);
+  }
+  100% {
+    background: transparent;
+    box-shadow: 0 0 0 2px transparent, 0 0 0 0 transparent;
+  }
+}
+.admin-focus-flash { animation: admin-focus-flash 3s ease-out; }

@@ -98,6 +98,17 @@ watch(
 .tiptap-content :deep(h6) {
   scroll-margin-top: 5.5rem;
 }
+/* Desktop: judul tujuan scroll berada di dalam kartu, jadi tidak perlu jarak setinggi navbar. */
+@media (min-width: 861px) {
+  .tiptap-content :deep(h1),
+  .tiptap-content :deep(h2),
+  .tiptap-content :deep(h3),
+  .tiptap-content :deep(h4),
+  .tiptap-content :deep(h5),
+  .tiptap-content :deep(h6) {
+    scroll-margin-top: 1rem;
+  }
+}
 .tiptap-content :deep(h2) { font-size: 1.4rem; margin-top: 2rem; }
 .tiptap-content :deep(h3) { font-size: 1.15rem; margin-top: 1.5rem; }
 .tiptap-content :deep(p) { line-height: 1.7; margin: 0.9rem 0; color: var(--color-ink); }

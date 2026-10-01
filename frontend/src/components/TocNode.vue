@@ -17,6 +17,8 @@ const to = computed(() => `/docs/${props.category.slug}/${slugs.value.join('/')}
 const key = computed(() => `p-${props.page.id}`)
 const hasChildren = computed(() => !!props.page.children?.length)
 const isOpen = computed(() => !!props.open[key.value])
+// children === undefined berarti sub-bab halaman ini masih dimuat di belakang layar
+const isLoading = computed(() => props.page.children === undefined)
 </script>
 
 <template>
@@ -39,6 +41,7 @@ const isOpen = computed(() => !!props.open[key.value])
         <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" /><path d="M14 3v5h5M9 13h6M9 17h6" />
       </svg>
       <span class="title">{{ page.title }}</span>
+      <span v-if="isLoading" class="loading-dot" title="Memuat sub-bab…"></span>
       <span v-if="hasChildren" class="count">{{ page.children.length }} sub-bab</span>
 
       <router-link :to="to" class="open-btn">
@@ -73,6 +76,11 @@ const isOpen = computed(() => !!props.open[key.value])
   margin-bottom: 0.5rem;
 }
 .row:hover { border-color: var(--color-accent-border); box-shadow: var(--glow-active); }
+.loading-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: var(--color-accent); animation: toc-pulse 1.2s ease-in-out infinite;
+}
+@keyframes toc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 .chev, .chev-spacer { width: 20px; height: 20px; flex-shrink: 0; }
 .chev {
   display: flex; align-items: center; justify-content: center;

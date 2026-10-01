@@ -20,7 +20,12 @@ const cat = computed(() => docsStore.categoryBySlug(props.category))
 // kategori tanpa subbab, karena cuma me-list cat.pages dan tidak pernah
 // membaca heading H1-H6 di dalam cat.content_html sama sekali.
 const pageHeadings = ref([])
-watch(() => props.category, () => { pageHeadings.value = [] })
+// Kartu isi (bergulir sendiri di desktop). Dikembalikan ke atas saat pindah kategori.
+const contentEl = ref(null)
+watch(() => props.category, () => {
+  pageHeadings.value = []
+  contentEl.value?.scrollTo({ top: 0, behavior: 'instant' })
+})
 
 // Navigasi manual lewat JS untuk klik item TOC — supaya konsisten berhasil
 // walau elemen tujuannya baru saja selesai dirender (v-html) oleh
@@ -160,6 +165,22 @@ function slugify(text) {
 
 @media (max-width: 1100px) { .toc { display: none; } }
 
+.category-content:focus { outline: none; }
+
+/* Desktop: kartu isi tetap di tempat seperti sidebar; hanya teks di dalamnya yang bergulir.
+   Mobile (<= 860px) tidak berubah: seluruh halaman bergulir. */
+@media (min-width: 861px) {
+  .category-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
+  .category-content {
+    position: sticky;
+    top: 5.5rem;
+    max-height: calc(100vh - 5.5rem - 1.5rem);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+  .subbab-list li { scroll-margin-top: 1rem; }
+}
+
 .pager {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -211,7 +232,7 @@ function slugify(text) {
     <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
     <div v-else-if="!cat">Kategori tidak ditemukan.</div>
     <template v-else>
-      <div class="category-content">
+      <div ref="contentEl" class="category-content" tabindex="-1">
         <p class="breadcrumb">
           <router-link to="/">docs</router-link>
           <span class="sep">/</span>
