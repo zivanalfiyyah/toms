@@ -1,6 +1,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { extractHeadings } from '../utils/headings'
+import { markCallouts } from '../utils/callouts'
 
 const props = defineProps({
   content: { 
@@ -73,7 +74,8 @@ const parsed = computed(() => {
   }
 })
 
-const html = computed(() => parsed.value.html)
+// Kotak biru hanya untuk kutipan yang bertanda ("Catatan:", "Penting:", dst); lihat utils/callouts.js
+const html = computed(() => markCallouts(parsed.value.html))
 
 // Beritahu parent setiap kali daftar heading berubah (ganti halaman,
 // konten baru disimpan, dsb).
@@ -118,13 +120,22 @@ watch(
 .tiptap-content :deep(p) { font-size: 14px; line-height: 1.92; margin: 0 0 16px; color: var(--color-text); }
 .tiptap-content :deep(li) { font-size: 14px; line-height: 1.8; color: var(--color-text); }
 
-/* Kutipan tampil sebagai kotak catatan (callout) */
+/* Kutipan biasa: netral (garis abu di kiri), BUKAN kotak biru */
 .tiptap-content :deep(blockquote) {
+  margin: 22px 0; padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-ink-soft);
+}
+.tiptap-content :deep(blockquote p) { margin: 0 0 8px; font-size: 14px; line-height: 1.8; color: inherit; }
+.tiptap-content :deep(blockquote p:last-child) { margin-bottom: 0; }
+
+/* Kotak biru (callout): hanya kutipan yang diawali tanda "Catatan:", "Penting:", dst */
+.tiptap-content :deep(blockquote.callout) {
   margin: 24px 0; padding: 15px 17px;
   border-left: 3px solid #168fd2; border-radius: 0 9px 9px 0;
   background: var(--color-accent-soft); color: var(--color-text);
 }
-.tiptap-content :deep(blockquote p) { margin: 0; font-size: 13px; line-height: 1.75; }
+.tiptap-content :deep(blockquote.callout p) { font-size: 13px; line-height: 1.75; }
 
 .tiptap-content :deep(table) {
   width: 100%;

@@ -37,14 +37,25 @@
 
   --header-h: 72px;
 
+  /* Latar mengikuti referensi foto: dasar putih kebiruan, bentuk membulat pastel di kiri,
+     lengkung biru + foto bus di kanan bawah. Aset ada di public/bg/. */
   --glow:
-    radial-gradient(circle at 8% 5%, rgba(54, 177, 235, 0.10), transparent 25%),
-    linear-gradient(180deg, #eaf7fd 0, #f4f8fb 260px, #f4f8fb 100%);
+    radial-gradient(800px circle at 15% 0%, rgba(120, 170, 240, 0.2), transparent 60%),
+    radial-gradient(900px circle at 100% 100%, rgba(150, 195, 245, 0.26), transparent 60%),
+    linear-gradient(180deg, #eaf4fc 0%, #f4f8fb 55%, #eef5fb 100%);
+  --bg-art:
+    url('/bg/light-left.svg') left top / min(34vw, 520px) auto no-repeat,
+    url('/bg/light-right.svg') right bottom / min(60vw, 900px) auto no-repeat;
+  --bus-img: url('/bg/bus-light.jpg');
+  --bus-mask: url('/bg/wave-mask.svg');
+  --bus-ratio: 332 / 255;
+  --bus-width: min(36vw, 560px);
+  --bus-opacity: 0.95;
 }
 
 [data-theme='dark'] {
-  --color-bg: #0e1926;
-  --color-surface: #142536;
+  --color-bg: #061327;
+  --color-surface: #0c1d38;
   --color-ink: #e9f3fd;
   --color-ink-soft: #9cafc1;
   --color-text: #bfcedb;
@@ -56,9 +67,9 @@
   --color-code-bg: #0A0C12;
   --color-code-text: #C6CCDA;
 
-  --glass-bg: #142536;
-  --glass-border: #2a4054;
-  --nav-bg: #132435;
+  --glass-bg: rgba(13, 33, 64, 0.8);
+  --glass-border: rgba(110, 165, 235, 0.2);
+  --nav-bg: rgba(7, 20, 41, 0.88);
 
   --shadow-card: 0 15px 35px rgba(0, 0, 0, 0.25);
   --shadow-a: 0 15px 35px rgba(0, 0, 0, 0.25);
@@ -71,9 +82,17 @@
   --well-bg: #10202f;
   --well-shadow: none;
 
+  /* Latar gelap: navy pekat, garis cahaya biru, foto bus malam di kanan bawah */
   --glow:
-    radial-gradient(circle at 8% 5%, rgba(25, 128, 190, 0.15), transparent 25%),
-    linear-gradient(180deg, #122638 0, #0e1926 260px, #0e1926 100%);
+    radial-gradient(900px circle at 85% 100%, rgba(30, 100, 200, 0.28), transparent 60%),
+    radial-gradient(700px circle at 10% 8%, rgba(20, 80, 160, 0.25), transparent 60%),
+    linear-gradient(180deg, #071327 0%, #08203f 100%);
+  --bg-art: url('/bg/dark-lines.svg') center / cover no-repeat;
+  --bus-img: url('/bg/bus-dark.jpg');
+  --bus-mask: radial-gradient(ellipse 85% 95% at 88% 100%, #000 38%, transparent 80%);
+  --bus-ratio: 435 / 244;
+  --bus-width: min(46vw, 760px);
+  --bus-opacity: 0.9;
 }
 
 * { box-sizing: border-box; }
@@ -103,7 +122,30 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: var(--glow);
+  background: var(--bg-art), var(--glow);
+}
+
+/* Foto bus di kanan bawah (terang: dibingkai lengkungan; gelap: memudar halus) */
+body::after {
+  content: '';
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  width: var(--bus-width);
+  aspect-ratio: var(--bus-ratio);
+  background: var(--bus-img) center / cover no-repeat;
+  opacity: var(--bus-opacity);
+  -webkit-mask-image: var(--bus-mask);
+  mask-image: var(--bus-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+@media (max-width: 640px) {
+  body::after { opacity: 0.45; width: min(80vw, 420px); }
 }
 
 html, body {

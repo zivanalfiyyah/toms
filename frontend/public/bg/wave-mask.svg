@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 332 255" preserveAspectRatio="none">
+  <defs><filter id="soft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>
+  <!-- bentuk gelombang: foto hanya tampil di dalam lengkungan ini -->
+  <path d="M10,262 C14,176 38,108 96,66 C156,24 238,20 340,-6 L340,262 Z" fill="#000" filter="url(#soft)"/>
+</svg>
