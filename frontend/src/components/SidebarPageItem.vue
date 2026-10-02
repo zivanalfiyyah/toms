@@ -95,10 +95,10 @@ function toggle() {
 .page-item { margin-bottom: 0.1rem; }
 .page-row { display: flex; align-items: center; }
 .link {
-  display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: var(--radius);
-  color: var(--color-ink-soft); font-size: 0.78rem; flex: 1; min-width: 0;
+  display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: 9px;
+  color: var(--color-ink-soft); font-size: 12px; line-height: 1.45; flex: 1; min-width: 0;
 }
-.link:hover { background: var(--color-accent-soft); text-decoration: none; }
+.link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
 .link.is-active {
   background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700;
   border-left: 3px solid var(--color-accent);

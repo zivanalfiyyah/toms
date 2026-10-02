@@ -1,73 +1,64 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
+import { useTocStore } from '../stores/toc'
 import { icons } from '../icons'
+import { buildIndex, searchIndex, highlightParts } from '../utils/searchIndex'
 
 const emit = defineEmits(['close'])
 const docsStore = useDocsStore()
+const toc = useTocStore()
 const router = useRouter()
 
 const query = ref('')
 const inputEl = ref(null)
+const listEl = ref(null)
 const selectedIndex = ref(0)
 
-onMounted(() => inputEl.value?.focus())
+onMounted(async () => {
+    inputEl.value?.focus()
+    if (!docsStore.categories.length) await docsStore.fetchCategories()
+    // Muat seluruh level halaman (tak terbatas) di belakang layar; hasil
+    // pencarian ikut bertambah saat level yang lebih dalam selesai dimuat.
+    toc.load(docsStore.categories, { ttl: 5 * 60 * 1000 })
+})
+
+// Kategori + semua halaman di semua level, diratakan untuk pencarian judul.
+const index = computed(() => buildIndex(toc.tree))
+const results = computed(() => searchIndex(index.value, query.value))
 
 function onInput() {
     selectedIndex.value = 0
-    docsStore.search(query.value)
-}
-
-function getPath(r) {
-    if (r.path) return r.path;
-
-    // flatPages (sumber docsStore.searchResults) mengirim categorySlug +
-    // fullPath (rangkaian slug lengkap dari root sampai halaman ini).
-    // Field pageSlug/parent di bawah tidak pernah dikirim oleh docs.js —
-    // sebelumnya bikin link ke halaman bertingkat (subbab dari subbab) salah.
-    if (r.categorySlug && r.fullPath) return `${r.categorySlug}/${r.fullPath}`;
-
-    const category = r.categorySlug || r.category?.slug || '';
-    const parent = r.pageSlug || r.parent?.slug || '';
-    const slug = r.slug || '';
-
-    if (category && parent && slug) return `${category}/${parent}/${slug}`;
-    if (category && slug) return `${category}/${slug}`;
-    if (parent && slug) return `${parent}/${slug}`;
-    return slug;
 }
 
 function onEnter() {
-    if (docsStore.searchResults.length > 0) {
-        const target = docsStore.searchResults[selectedIndex.value] || docsStore.searchResults[0];
+    if (results.value.length > 0) {
+        const target = results.value[selectedIndex.value] || results.value[0]
         if (target) {
-            router.push(`/docs/${getPath(target)}`);
-            emit('close');
+            router.push(`/docs/${target.path}`)
+            emit('close')
         }
     }
 }
 
 function onArrowDown() {
-    if (selectedIndex.value < docsStore.searchResults.length - 1) {
-        selectedIndex.value++;
+    if (selectedIndex.value < results.value.length - 1) {
+        selectedIndex.value++
     }
 }
 
 function onArrowUp() {
     if (selectedIndex.value > 0) {
-        selectedIndex.value--;
+        selectedIndex.value--
     }
 }
 
-function formatSnippet(text) {
-    if (!text) return '';
-    const clean = text
-        .replace(/<[^>]*>?/gm, '') 
-        .replace(/\s+/g, ' ')      
-        .trim();
-    return clean.length > 60 ? clean.substring(0, 60) + '...' : clean;
-}
+// Pastikan hasil yang dipilih lewat panah selalu terlihat di dalam daftar.
+watch(selectedIndex, async () => {
+    await nextTick()
+    listEl.value?.querySelector('a.active')?.scrollIntoView({ block: 'nearest' })
+})
 </script>
 
 <template>
@@ -79,7 +70,7 @@ function formatSnippet(text) {
                     ref="inputEl"
                     v-model="query"
                     type="text"
-                    placeholder="Cari judul atau isi..."
+                    placeholder="Cari judul kategori atau halaman..."
                     @input="onInput"
                     @keydown.enter="onEnter"
                     @keydown.down.prevent="onArrowDown"
@@ -88,19 +79,29 @@ function formatSnippet(text) {
                 />
             </div>
 
-            <ul v-if="docsStore.searchResults.length">
-                <li v-for="(r, index) in docsStore.searchResults" :key="r.id || index">
-                    <router-link 
-                        :to="`/docs/${getPath(r)}`" 
+            <ul v-if="results.length" ref="listEl">
+                <li v-for="(r, index) in results" :key="r.key">
+                    <router-link
+                        :to="`/docs/${r.path}`"
                         :class="{ active: selectedIndex === index }"
                         @mouseenter="selectedIndex = index"
                         @click="$emit('close')"
                     >
-                        <p class="title">{{ r.title }}</p>
-                        <p class="snippet">{{ formatSnippet(r.snippet || r.content_text) }}</p>
+                        <p class="title">
+                            <template v-for="(part, i) in highlightParts(r.title, query)" :key="i">
+                                <mark v-if="part.hit">{{ part.text }}</mark>
+                                <template v-else>{{ part.text }}</template>
+                            </template>
+                        </p>
+                        <p class="meta">
+                            <span class="type">{{ r.type }}</span>
+                            <span v-if="r.trail" class="trail">{{ r.trail }}</span>
+                        </p>
                     </router-link>
                 </li>
             </ul>
+
+            <p v-else-if="query.trim() && !toc.tree.length" class="empty">Memuat data pencarian…</p>
 
             <p v-else-if="query.trim()" class="empty">
                 Tidak ada hasil untuk "<strong>{{ query }}</strong>".
@@ -109,6 +110,10 @@ function formatSnippet(text) {
             <div v-else class="initial-hint">
                 Ketik kata kunci untuk mulai mencari...
             </div>
+
+            <p v-if="query.trim() && toc.tree.length && toc.pending > 0" class="loading-note">
+                Masih memuat level yang lebih dalam… hasil bisa bertambah.
+            </p>
         </div>
     </div>
 </template>
@@ -157,14 +162,14 @@ function formatSnippet(text) {
 
 .title { font-weight: 600; margin: 0; font-size: 0.88rem; }
 
-.snippet { 
-  margin: 0.1rem 0 0; 
-  font-size: 0.78rem; 
-  color: var(--color-ink-soft); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis;
+.meta { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0 0; font-size: 0.72rem; min-width: 0; }
+.type {
+  flex-shrink: 0; padding: 0.05rem 0.5rem; border-radius: 999px; font-weight: 600;
+  color: var(--color-accent); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border);
 }
+.trail { flex: 1; min-width: 0; color: var(--color-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title mark { background: rgba(14, 165, 233, 0.22); color: inherit; border-radius: 3px; padding: 0 1px; }
+.loading-note { margin: 0; padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--color-ink-soft); border-top: 1px solid var(--color-border); text-align: center; }
 
 .empty { padding: 1rem; color: var(--color-ink-soft); margin: 0; text-align: center; font-size: 0.875rem; }
 .initial-hint {

@@ -1,6 +1,8 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAdminStore } from '../../stores/admin'
+import { revealByKey } from '../../utils/focusReveal'
 import AdminPageTreeItem from '../../components/admin/AdminPageTreeItem.vue'
 
 const admin = useAdminStore()
@@ -8,6 +10,26 @@ const admin = useAdminStore()
 onMounted(() => {
   admin.fetchCategories()
 })
+
+// Dari pencarian panel admin: /admin/categories?focus=c-<id> (kategori) atau p-<id> (halaman).
+// Gulir ke barisnya dan sorot sebentar, lalu hapus query supaya refresh tidak mengulang.
+const route = useRoute()
+const router = useRouter()
+let cancelReveal = null
+watch(
+  () => route.query.focus,
+  (key) => {
+    cancelReveal?.()
+    cancelReveal = null
+    if (!key) return
+    cancelReveal = revealByKey(String(key), () => {
+      const { focus, ...rest } = route.query
+      router.replace({ query: rest })
+    })
+  },
+  { immediate: true }
+)
+onBeforeUnmount(() => cancelReveal?.())
 
 // ---- Category form ----
 const showCatForm = ref(false)
@@ -162,7 +184,12 @@ async function removePage(page) {
     <p v-if="admin.error" class="error">{{ admin.error }}</p>
     <p v-if="admin.categoriesLoading">Memuat...</p>
 
-    <div v-for="(cat, catIdx) in admin.categories" :key="cat.id" class="category-block">
+    <div
+      v-for="(cat, catIdx) in admin.categories"
+      :key="cat.id"
+      class="category-block"
+      :data-focus-key="`c-${cat.id}`"
+    >
       <div class="category-head">
         <h3>{{ cat.name }} <span class="slug">/{{ cat.slug }}</span></h3>
         <div class="actions">

@@ -20,6 +20,8 @@ const copied = ref(false)
 // bukan lagi dibaca ulang dari docData.content — supaya TOC selalu sinkron
 // dengan apa yang sebenarnya dirender.
 const pageHeadings = ref([])
+// Kartu isi (bergulir sendiri di desktop). Dikembalikan ke atas saat pindah halaman.
+const contentEl = ref(null)
 
 // Full path segments joined, used for building nested links
 const basePath = computed(() => `/docs/${props.category}/${props.slugs.join('/')}`)
@@ -32,6 +34,7 @@ function load() {
   // resolve it by walking parent_id down the chain (or a single query
   // that matches the last slug + validates the ancestor chain).
   pageHeadings.value = []
+  contentEl.value?.scrollTo({ top: 0, behavior: 'instant' })
   docsStore.fetchPageByPath(props.category, props.slugs)
 }
 onMounted(load)
@@ -74,7 +77,7 @@ async function copyPage() {
 
 <template>
   <div class="doc-page">
-    <div class="doc-content">
+    <div ref="contentEl" class="doc-content" tabindex="-1">
       <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
       <div v-else-if="docsStore.loading">Memuat...</div>
       <template v-else-if="docData">
@@ -143,37 +146,51 @@ async function copyPage() {
 </template>
 
 <style scoped>
-.doc-page { display: flex; gap: 1.5rem; align-items: flex-start; }
+.doc-page { display: flex; gap: 25px; align-items: flex-start; }
+.doc-content:focus { outline: none; }
+
+/* Desktop: kartu isi tetap di tempat seperti sidebar; hanya teks di dalamnya yang bergulir.
+   Mobile (<= 860px) tidak berubah: seluruh halaman bergulir. */
+@media (min-width: 861px) {
+  .doc-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
+  .doc-content {
+    position: sticky;
+    top: calc(var(--header-h) + 1.5rem);
+    max-height: calc(100vh - var(--header-h) - 3rem);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+}
 .doc-content {
   flex: 1;
   min-width: 0;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  padding: clamp(1.25rem, 3vw, 2.5rem);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 29px clamp(1.25rem, 3vw, 2.5rem) 58px;
   box-shadow: var(--shadow-card);
 }
-.doc-content h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.03em; margin: 0 0 0.75rem; }
+.doc-content h1 { font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; margin: 0; color: var(--color-ink); }
 .doc-content h2 { font-weight: 700; }
 
+/* Kepala artikel: breadcrumb di atas, judul besar, garis pemisah ke isi */
 .title-row {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding-bottom: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 1.5rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--color-border);
 }
 .title-row h1 { margin: 0 !important; }
 .copy-btn {
   display: flex; align-items: center; gap: 0.4rem;
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  border-radius: var(--radius); padding: 0.45rem 0.9rem;
-  font-size: 0.75rem; font-weight: 600; color: var(--color-ink-soft); cursor: pointer; flex-shrink: 0;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 10px; padding: 0.5rem 0.9rem;
+  font-size: 11px; font-weight: 700; color: var(--color-ink-soft); cursor: pointer; flex-shrink: 0;
+  transition: 0.18s ease;
 }
-.copy-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.copy-btn:hover { border-color: #a8d7f3; background: var(--color-bg); color: var(--color-accent); }
 .copy-btn span { width: 14px; height: 14px; display: block; }
 .copy-btn :deep(svg) { width: 100%; height: 100%; }
 
-.subbab-title { font-size: 1.1rem; margin-bottom: 0.75rem; }
+.subbab-title { font-size: 22px; letter-spacing: -0.45px; margin: 0 0 17px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
 .subbab-list { list-style: none; padding: 0; margin: 0 0 2rem; }
 .subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
 .subbab-list a { font-weight: 600; }
@@ -194,17 +211,17 @@ async function copyPage() {
   gap: 1rem;
   margin-top: 3rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid var(--color-border);
 }
 .pager-card {
   display: flex; flex-direction: column; gap: 0.3rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.pager-card:hover { border-color: var(--color-accent); text-decoration: none; transform: translateY(-2px); }
+.pager-card:hover { border-color: #a8d8f3; text-decoration: none; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(30, 73, 106, 0.08); }
 .pager-card.next { text-align: right; align-items: flex-end; }
 .pager-label { font-size: 0.75rem; color: var(--color-ink-soft); }
 .pager-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
@@ -215,5 +232,10 @@ async function copyPage() {
   border-radius: var(--radius);
   color: #d33;
   background: rgba(211, 51, 51, 0.06);
+}
+
+/* Desktop: tujuan scroll berada di dalam kartu, jadi jaraknya tidak perlu setinggi navbar. */
+@media (min-width: 861px) {
+  .subbab-list li { scroll-margin-top: 1rem; }
 }
 </style>

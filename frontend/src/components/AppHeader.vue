@@ -15,6 +15,11 @@
       </router-link>
     </div>
 
+    <nav class="top-nav" aria-label="Navigasi utama">
+      <router-link to="/" class="nav-link" :class="{ active: route.name === 'home' }">Beranda</router-link>
+      <router-link to="/daftar-isi" class="nav-link" :class="{ active: isDocsArea }">Dokumentasi</router-link>
+    </nav>
+
     <button
       class="search-btn"
       :class="{ 'hide-on-mobile-home': !showSidebar }"
@@ -41,11 +46,17 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import ThemeToggle from './ThemeToggle.vue'
 import { icons } from '../icons'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
+const route = useRoute()
+
+// Menu "Dokumentasi" menyala di Daftar Isi dan semua halaman /docs/...
+const isDocsArea = computed(() => route.name === 'toc' || route.path.startsWith('/docs'))
 
 defineProps({
   showSidebar: { type: Boolean, default: true }
@@ -55,39 +66,22 @@ defineEmits(['open-search', 'toggle-sidebar'])
 </script>
 
 <style scoped>
+/* Navbar penuh selebar layar, putih solid, garis bawah + bayangan halus (gaya aplikasi dokumentasi) */
 .header {
-  --pill-x: max(1.5rem, calc((100vw - 1440px) / 2 + 1.5rem)); /* sejajar dengan tepi sidebar */
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 calc(var(--pill-x) + 0.7rem);
-  background: transparent;
+  gap: 22px;
+  height: var(--header-h);
+  padding: 0 30px;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 3px 16px rgba(28, 58, 84, 0.075);
   position: sticky;
   top: 0;
   z-index: 40;
 }
 
-/* Navbar melayang berbentuk pil: kaca transparan + garis cahaya tipis */
-.header::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: 4px var(--pill-x);
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, rgba(14, 165, 233, 0.08), transparent 35%, transparent 65%, rgba(99, 102, 241, 0.07)),
-    var(--nav-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 10px 30px -14px rgba(2, 132, 199, 0.35),
-    0 2px 8px rgba(15, 23, 42, 0.06);
-}
-
-.header-left { display: flex; align-items: center; gap: 0.9rem; }
+.header-left { display: flex; align-items: center; gap: 0.9rem; width: 190px; flex: 0 0 190px; }
 
 .hamburger {
   display: none;
@@ -100,71 +94,86 @@ defineEmits(['open-search', 'toggle-sidebar'])
 }
 
 .hamburger span { width: 20px; height: 2px; background: var(--color-ink-soft); border-radius: 2px; }
-.brand { display: flex; align-items: center; gap: 0.6rem; }
-
-.brand { transition: transform 0.2s ease; }
-.brand:hover { transform: scale(1.03); }
+.brand { display: flex; align-items: center; gap: 0.6rem; transition: transform 0.2s ease; }
+.brand:hover { transform: scale(1.02); }
 .brand-logo {
-  height: 32px;
+  height: 34px;
   width: auto;
   display: block;
-  /* Mode terang: logo asli (navy + emas) dengan bayangan biru tipis agar menonjol */
-  filter: drop-shadow(0 2px 6px rgba(2, 132, 199, 0.28));
 }
 
-.search-btn {
+/* Menu utama */
+.top-nav { display: flex; align-items: center; gap: 2px; height: 100%; }
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--color-ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  transition: 0.18s ease;
+}
+.nav-link:hover { color: var(--color-accent); background: var(--color-bg); text-decoration: none; }
+.nav-link.active { color: var(--color-accent); background: var(--color-accent-soft); }
+.nav-link.active::after {
+  content: '';
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 420px;
+  left: 12px; right: 12px; bottom: 2px;
+  height: 2px;
+  border-radius: 5px;
+  background: var(--color-accent-strong);
+}
+
+/* Kotak pencarian (tetap tombol yang membuka SearchModal) */
+.search-btn {
+  margin-left: auto;
+  width: min(365px, 31vw);
   height: 40px;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 999px;
-  padding: 0 0.5rem 0 1rem;
+  gap: 9px;
+  background: var(--input-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  padding: 0 10px 0 14px;
   color: var(--color-ink-soft);
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(15, 23, 42, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .search-btn:hover {
-  border-color: var(--color-accent-border);
+  border-color: #92cdec;
   background: var(--color-surface);
-  box-shadow: 0 0 0 3px var(--color-accent-soft), 0 10px 24px -12px rgba(2, 132, 199, 0.45);
+  box-shadow: 0 0 0 3px rgba(8, 127, 201, 0.07);
 }
 .search-btn .icon { width: 16px; height: 16px; flex-shrink: 0; transition: color 0.2s ease; }
 .search-btn:hover .icon { color: var(--color-accent); }
 .search-btn .icon :deep(svg) { width: 100%; height: 100%; }
-.search-btn .label { flex: 1; text-align: left; font-size: 0.8rem; font-weight: 500; }
+.search-btn .label { flex: 1; text-align: left; font-size: 12px; font-weight: 500; }
 .search-btn kbd {
-  font-family: var(--font-mono);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent-border);
-  border-radius: 999px; padding: 3px 10px; font-size: 0.65rem; font-weight: 600;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-ink-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 6px; padding: 3px 7px; font-size: 9px; font-weight: 800; white-space: nowrap;
 }
 
-.header-right { display: flex; align-items: center; gap: 0.5rem; }
+.header-right { display: flex; align-items: center; gap: 8px; }
 
 .admin-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  width: 38px; height: 38px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   border-radius: 50%;
   cursor: pointer;
   color: var(--color-ink-soft);
+  transition: 0.18s ease;
 }
-.admin-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.admin-btn:hover { color: var(--color-accent); border-color: #a8d7f3; background: var(--color-bg); }
 .admin-btn { position: relative; }
 .admin-btn span { width: 18px; height: 18px; display: block; }
 /* Titik hijau = sudah login, tombol menuju Panel Admin */
@@ -175,35 +184,27 @@ defineEmits(['open-search', 'toggle-sidebar'])
 }
 .admin-btn :deep(svg) { width: 100%; height: 100%; }
 
-/* Mode gelap: logo dibalik jadi terang (warna emas dijaga) + cahaya biru; navbar bercahaya */
+/* Mode gelap: logo dibalik jadi terang (warna emas dijaga) */
 [data-theme='dark'] .brand-logo {
-  filter: invert(1) hue-rotate(180deg) saturate(1.35) brightness(1.2) drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
+  filter: invert(1) hue-rotate(180deg) saturate(1.35) brightness(1.2);
 }
-[data-theme='dark'] .header::before {
-  border-color: rgba(56, 189, 248, 0.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 0 40px -8px rgba(56, 189, 248, 0.45),
-    0 0 90px -30px rgba(139, 92, 246, 0.5);
+[data-theme='dark'] .header { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22); }
+[data-theme='dark'] .search-btn:hover { background: rgba(255, 255, 255, 0.06); box-shadow: 0 0 0 3px rgba(85, 181, 235, 0.12); }
+[data-theme='dark'] .nav-link:hover { background: #1a3044; }
+[data-theme='dark'] .admin-btn:hover { background: #1a3044; }
+
+@media (max-width: 1120px) {
+  .top-nav { display: none; }
 }
-[data-theme='dark'] .search-btn {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 24px -10px rgba(56, 189, 248, 0.4);
-}
-[data-theme='dark'] .search-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12), 0 0 28px -6px rgba(56, 189, 248, 0.5);
-}
-[data-theme='dark'] .admin-btn:hover { box-shadow: 0 0 18px -4px rgba(56, 189, 248, 0.55); }
 
 @media (max-width: 860px) {
-  .header { --pill-x: 0.75rem; } /* di mobile tidak ada sidebar tetap */
+  .header { padding: 0 15px; gap: 12px; }
+  .header-left { width: auto; flex: 1; }
   .hamburger { display: flex; }
   .search-btn .label, .search-btn kbd { display: none; }
 
   .search-btn {
-    position: static;
-    transform: none;
-    max-width: 40px;
+    width: 40px;
     padding: 0;
     justify-content: center;
     margin-left: auto;

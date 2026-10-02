@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 900" preserveAspectRatio="xMinYMin meet">
+  <defs>
+    <linearGradient id="a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8fb6f0"/><stop offset="1" stop-color="#d3e4fb"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a9c8f5"/><stop offset="1" stop-color="#e3eefc"/>
+    </linearGradient>
+    <pattern id="ln" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#ffffff" stroke-width="2.2" opacity=".85"/>
+    </pattern>
+    <clipPath id="sq"><rect x="-70" y="250" width="270" height="270" rx="64" transform="rotate(-22 65 385)"/></clipPath>
+  </defs>
+  <!-- blob besar kiri atas -->
+  <circle cx="-30" cy="105" r="175" fill="url(#a)" opacity=".85"/>
+  <rect x="50" y="-60" width="130" height="120" rx="38" fill="#cfe1fa" opacity=".55" transform="rotate(14 115 0)"/>
+  <!-- kotak membulat bergaris diagonal -->
+  <rect x="-70" y="250" width="270" height="270" rx="64" fill="url(#b)" opacity=".7" transform="rotate(-22 65 385)"/>
+  <rect x="-70" y="250" width="270" height="270" fill="url(#ln)" clip-path="url(#sq)" opacity=".75"/>
+  <!-- bentuk bawah -->
+  <rect x="-110" y="640" width="300" height="300" rx="80" fill="url(#a)" opacity=".5" transform="rotate(16 40 790)"/>
+  <circle cx="30" cy="860" r="90" fill="#d9e8fb" opacity=".6"/>
+</svg>

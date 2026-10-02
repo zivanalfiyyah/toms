@@ -34,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <li class="page-item">
+  <li class="page-item" :data-focus-key="`p-${page.id}`">
     <div class="page-row" :style="{ paddingLeft: `${depth * 1.1}rem` }">
       <span class="page-title">
         <span class="level-badge" :class="`level-${depth}`">{{ levelLabel }}</span>

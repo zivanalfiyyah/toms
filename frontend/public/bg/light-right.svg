@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 720" preserveAspectRatio="xMaxYMax meet">
+  <defs>
+    <linearGradient id="s1" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#cfe2fa" stop-opacity=".0"/>
+      <stop offset=".55" stop-color="#cfe2fa" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#b7d2f6" stop-opacity=".75"/>
+    </linearGradient>
+  </defs>
+  <!-- lengkung besar pucat -->
+  <path d="M120,720 C170,520 330,360 520,320 C680,285 800,200 880,90 L880,720 Z" fill="url(#s1)"/>
+  <path d="M60,720 C120,560 270,420 450,372 C640,322 780,240 880,150" fill="none" stroke="#b5d0f4" stroke-width="2" opacity=".7"/>
+  <path d="M200,720 C240,590 380,470 540,430 C690,392 800,330 880,250" fill="none" stroke="#c4daf7" stroke-width="1.5" opacity=".7"/>
+  <!-- garis diagonal tipis -->
+  <g stroke="#a9c6ee" stroke-width="1.4" opacity=".75">
+    <line x1="10" y1="620" x2="190" y2="440"/><line x1="26" y1="640" x2="206" y2="460"/>
+    <line x1="42" y1="660" x2="222" y2="480"/><line x1="58" y1="680" x2="238" y2="500"/>
+    <line x1="74" y1="700" x2="254" y2="520"/>
+  </g>
+</svg>

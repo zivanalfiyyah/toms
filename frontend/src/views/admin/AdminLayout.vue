@@ -1,7 +1,9 @@
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { icons } from '../../icons'
+import AdminSearchModal from '../../components/admin/AdminSearchModal.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -15,6 +17,21 @@ const menu = [
 ]
 
 const visibleMenu = menu.filter((item) => !item.adminOnly || auth.roleNames.includes('admin'))
+
+// Pencarian panel admin (Ctrl/Cmd + K). Ditangkap di fase capture supaya handler
+// global App.vue (pencarian dokumentasi) tidak ikut aktif dan menandai modalnya
+// terbuka sebelum Anda kembali ke halaman dokumentasi.
+const searchOpen = ref(false)
+
+function onSearchShortcut(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    searchOpen.value = true
+  }
+}
+onMounted(() => window.addEventListener('keydown', onSearchShortcut, true))
+onBeforeUnmount(() => window.removeEventListener('keydown', onSearchShortcut, true))
 
 async function handleLogout() {
   await auth.logout()
@@ -46,6 +63,11 @@ async function handleLogout() {
     <div class="admin-content">
       <header class="admin-topbar">
         <h1>Panel Admin</h1>
+        <button type="button" class="admin-search-btn" aria-label="Cari di panel admin" @click="searchOpen = true">
+          <span v-html="icons.search" class="admin-search-icon"></span>
+          <span class="admin-search-label">Cari di panel admin…</span>
+          <kbd>Ctrl K</kbd>
+        </button>
         <div class="admin-topbar-right">
           <span class="admin-user">{{ auth.user?.name || auth.user?.email }}</span>
           <button type="button" class="logout-btn" @click="handleLogout">Logout</button>
@@ -55,6 +77,8 @@ async function handleLogout() {
         <router-view />
       </main>
     </div>
+
+    <AdminSearchModal v-if="searchOpen" :menu="visibleMenu" @close="searchOpen = false" />
   </div>
 </template>
 
@@ -149,6 +173,40 @@ async function handleLogout() {
 }
 .admin-topbar h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; font-family: var(--font-display); }
 .admin-topbar-right { display: flex; align-items: center; gap: 0.9rem; }
+
+/* Tombol pencarian: pil kaca seperti pencarian di navbar dokumentasi */
+.admin-search-btn {
+  flex: 1;
+  max-width: 380px;
+  margin: 0 1.25rem;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.45rem 0 0.9rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.admin-search-btn:hover {
+  border-color: var(--color-accent-border);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-accent-soft), 0 10px 24px -12px rgba(2, 132, 199, 0.45);
+}
+.admin-search-icon { width: 16px; height: 16px; flex-shrink: 0; display: block; }
+.admin-search-icon :deep(svg) { width: 100%; height: 100%; }
+.admin-search-btn:hover .admin-search-icon { color: var(--color-accent); }
+.admin-search-label { flex: 1; text-align: left; font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-search-btn kbd {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  color: var(--color-accent); background: var(--color-accent-soft); border: 1px solid var(--color-accent-border);
+}
+[data-theme='dark'] .admin-search-btn { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 24px -10px rgba(56, 189, 248, 0.4); }
+[data-theme='dark'] .admin-search-btn:hover { background: rgba(255, 255, 255, 0.06); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12), 0 0 28px -6px rgba(56, 189, 248, 0.5); }
 .admin-user { font-size: 0.82rem; font-weight: 500; color: var(--color-ink-soft); }
 .logout-btn {
   padding: 0.5rem 1.1rem;
@@ -169,5 +227,8 @@ async function handleLogout() {
   .admin-shell { padding: 0.75rem; }
   .admin-sidebar { display: none; }
   .admin-topbar { top: 0.75rem; }
+  /* Mobile: tombol pencarian jadi ikon bulat */
+  .admin-search-btn { flex: none; width: 38px; max-width: 38px; margin: 0 0.6rem 0 auto; padding: 0; justify-content: center; }
+  .admin-search-label, .admin-search-btn kbd { display: none; }
 }
 </style>

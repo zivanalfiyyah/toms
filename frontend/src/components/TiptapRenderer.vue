@@ -1,6 +1,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { extractHeadings } from '../utils/headings'
+import { markCallouts } from '../utils/callouts'
 
 const props = defineProps({
   content: { 
@@ -73,7 +74,8 @@ const parsed = computed(() => {
   }
 })
 
-const html = computed(() => parsed.value.html)
+// Kotak biru hanya untuk kutipan yang bertanda ("Catatan:", "Penting:", dst); lihat utils/callouts.js
+const html = computed(() => markCallouts(parsed.value.html))
 
 // Beritahu parent setiap kali daftar heading berubah (ganti halaman,
 // konten baru disimpan, dsb).
@@ -98,9 +100,42 @@ watch(
 .tiptap-content :deep(h6) {
   scroll-margin-top: 5.5rem;
 }
-.tiptap-content :deep(h2) { font-size: 1.4rem; margin-top: 2rem; }
+/* Desktop: judul tujuan scroll berada di dalam kartu, jadi tidak perlu jarak setinggi navbar. */
+@media (min-width: 861px) {
+  .tiptap-content :deep(h1),
+  .tiptap-content :deep(h2),
+  .tiptap-content :deep(h3),
+  .tiptap-content :deep(h4),
+  .tiptap-content :deep(h5),
+  .tiptap-content :deep(h6) {
+    scroll-margin-top: 1rem;
+  }
+}
+.tiptap-content :deep(h2) {
+  font-size: 22px; letter-spacing: -0.45px; margin: 2.6rem 0 17px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--color-border);
+}
+.tiptap-content :deep(h2:first-child) { margin-top: 0; }
 .tiptap-content :deep(h3) { font-size: 1.15rem; margin-top: 1.5rem; }
-.tiptap-content :deep(p) { line-height: 1.7; margin: 0.9rem 0; color: var(--color-ink); }
+.tiptap-content :deep(p) { font-size: 14px; line-height: 1.92; margin: 0 0 16px; color: var(--color-text); }
+.tiptap-content :deep(li) { font-size: 14px; line-height: 1.8; color: var(--color-text); }
+
+/* Kutipan biasa: netral (garis abu di kiri), BUKAN kotak biru */
+.tiptap-content :deep(blockquote) {
+  margin: 22px 0; padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-ink-soft);
+}
+.tiptap-content :deep(blockquote p) { margin: 0 0 8px; font-size: 14px; line-height: 1.8; color: inherit; }
+.tiptap-content :deep(blockquote p:last-child) { margin-bottom: 0; }
+
+/* Kotak biru (callout): hanya kutipan yang diawali tanda "Catatan:", "Penting:", dst */
+.tiptap-content :deep(blockquote.callout) {
+  margin: 24px 0; padding: 15px 17px;
+  border-left: 3px solid #168fd2; border-radius: 0 9px 9px 0;
+  background: var(--color-accent-soft); color: var(--color-text);
+}
+.tiptap-content :deep(blockquote.callout p) { font-size: 13px; line-height: 1.75; }
 
 .tiptap-content :deep(table) {
   width: 100%;
@@ -119,7 +154,7 @@ watch(
 }
 
 .tiptap-content :deep(th) {
-  background-color: rgba(128, 128, 128, 0.15);
+  background-color: var(--color-accent-soft);
   font-weight: bold;
 }
 
