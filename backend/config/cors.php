@@ -19,12 +19,15 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    // FRONTEND_URL (alamat publik frontend) otomatis diizinkan, supaya halaman
+    // aktivasi akun dari link email bisa memanggil API di domain produksi.
+    'allowed_origins' => array_values(array_unique(array_filter([
         'http://localhost:5173',
         'http://localhost:3000',
         'http://127.0.0.1:5173',
         'https://comfortable-spirit-production-efef.up.railway.app',
-    ],
+        rtrim((string) env('FRONTEND_URL', ''), '/'),
+    ]))),
 
     'allowed_origins_patterns' => [],
 

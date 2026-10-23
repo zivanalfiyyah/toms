@@ -42,6 +42,10 @@ class Page extends Model
 
     public function children()
     {
-        return $this->hasMany(Page::class, 'parent_id');
+        // Urut berdasarkan `order` (id sebagai pemisah kalau sama), supaya
+        // penempatan sub halaman di level manapun tampil sesuai pilihan admin.
+        return $this->hasMany(Page::class, 'parent_id')
+            ->orderBy('order')
+            ->orderBy('id');
     }
 }

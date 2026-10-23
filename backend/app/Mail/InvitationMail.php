@@ -17,8 +17,7 @@ class InvitationMail extends Mailable
 
     public function build()
     {
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
-        $acceptUrl = rtrim($frontendUrl, '/') . '/accept-invite/' . $this->invitation->token;
+        $acceptUrl = rtrim(config('app.frontend_url'), '/') . '/accept-invite/' . $this->invitation->token;
 
         return $this->subject('Undangan bergabung ke TOMS')
             ->view('emails.invitation')

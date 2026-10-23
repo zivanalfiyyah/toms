@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdminStore } from '../../stores/admin'
 import { revealByKey } from '../../utils/focusReveal'
@@ -107,9 +107,25 @@ const showPageForm = ref(false)
 const editingPage = ref(null)
 const activeCategoryForPage = ref(null)
 const activeParentForPage = ref(null)
-const pageForm = reactive({ title: '', slug: '', description: '' })
+const pageForm = reactive({ title: '', slug: '', description: '', insertBeforeId: '' })
 const pageSaving = ref(false)
 const pageError = ref('')
+
+// Parent dari halaman yang sedang dibuat/diedit (null = halaman level atas).
+// Pilihan penempatan hanya menampilkan saudara selevel di bawah parent yang
+// sama, jadi otomatis berlaku untuk halaman, sub halaman, sub-sub halaman, dst.
+const pageParentId = computed(() =>
+  editingPage.value
+    ? (editingPage.value.parent_id ?? null)
+    : (activeParentForPage.value?.id ?? null)
+)
+const pageSiblingOptions = computed(() => {
+  const cat = activeCategoryForPage.value
+  if (!cat) return []
+  return admin
+    .siblingPagesOf(cat.id, pageParentId.value)
+    .filter((p) => p.id !== editingPage.value?.id)
+})
 
 function openCreatePage(cat) {
   activeCategoryForPage.value = cat
@@ -118,6 +134,7 @@ function openCreatePage(cat) {
   pageForm.title = ''
   pageForm.slug = ''
   pageForm.description = ''
+  pageForm.insertBeforeId = ''
   pageError.value = ''
   showPageForm.value = true
 }
@@ -129,6 +146,7 @@ function openCreateChildPage(cat, page) {
   pageForm.title = ''
   pageForm.slug = ''
   pageForm.description = ''
+  pageForm.insertBeforeId = ''
   pageError.value = ''
   showPageForm.value = true
 }
@@ -140,6 +158,7 @@ function openEditPage(cat, page) {
   pageForm.title = page.title || ''
   pageForm.slug = page.slug || ''
   pageForm.description = page.description || ''
+  pageForm.insertBeforeId = ''
   pageError.value = ''
   showPageForm.value = true
 }
@@ -148,13 +167,18 @@ async function submitPage() {
   pageSaving.value = true
   pageError.value = ''
   try {
+    const { insertBeforeId, ...fields } = pageForm
     if (editingPage.value) {
-      await admin.updatePage(editingPage.value.id, { ...pageForm })
+      await admin.updatePage(editingPage.value.id, fields)
+      if (insertBeforeId) {
+        await admin.movePageTo(editingPage.value.id, insertBeforeId)
+      }
     } else {
-      await admin.createPage(activeCategoryForPage.value.id, {
-        ...pageForm,
-        parent_id: activeParentForPage.value?.id ?? null,
-      })
+      await admin.createPage(
+        activeCategoryForPage.value.id,
+        { ...fields, parent_id: activeParentForPage.value?.id ?? null },
+        insertBeforeId || null
+      )
     }
     showPageForm.value = false
   } catch (err) {
@@ -272,6 +296,16 @@ async function removePage(page) {
           <input v-model="pageForm.slug" type="text" required />
           <label>Deskripsi (opsional)</label>
           <input v-model="pageForm.description" type="text" />
+          <label>{{ editingPage ? 'Pindahkan sebelum (opsional)' : 'Sisipkan sebelum (opsional)' }}</label>
+          <select v-model="pageForm.insertBeforeId">
+            <option value="">{{ editingPage ? 'Tidak — biarkan posisi sekarang' : 'Tidak — taruh di paling bawah' }}</option>
+            <option v-if="editingPage && pageSiblingOptions.length" value="end">Paling bawah</option>
+            <option
+              v-for="p in pageSiblingOptions"
+              :key="p.id"
+              :value="p.id"
+            >{{ p.title }}</option>
+          </select>
           <p v-if="pageError" class="error">{{ pageError }}</p>
           <div class="modal-actions">
             <button type="button" class="btn-secondary" @click="showPageForm = false">Batal</button>

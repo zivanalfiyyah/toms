@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | Alamat aplikasi frontend (Vue) yang bisa dibuka oleh penerima email.
+    | Dipakai untuk membuat link di email undangan (/accept-invite/{token}).
+    | Dibaca lewat config (bukan env() langsung) supaya tetap benar saat
+    | konfigurasi di-cache dengan `php artisan config:cache`.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

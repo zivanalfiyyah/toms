@@ -34,13 +34,26 @@ class InvitationController extends Controller
             'expires_at'        => now()->addDays(3),
         ]);
 
+        // Kirim email langsung (bukan lewat antrean) supaya admin tahu
+        // seketika kalau email gagal terkirim, dan undangan tidak tercatat
+        // "terkirim" padahal tidak pernah sampai ke alamat penerima.
+        try {
+            Mail::to($invitation->email)->send(new InvitationMail($invitation));
+        } catch (\Throwable $e) {
+            report($e);
+            $invitation->delete();
+
+            return response()->json([
+                'message' => 'Email undangan gagal dikirim ke ' . $invitation->email
+                    . '. Periksa pengaturan email server (SMTP) lalu coba lagi.',
+            ], 502);
+        }
+
         $accessRequest->update([
             'status'      => 'invited',
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
         ]);
-
-        Mail::to($invitation->email)->queue(new InvitationMail($invitation));
 
         return response()->json($invitation, 201);
     }

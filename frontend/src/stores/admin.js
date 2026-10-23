@@ -29,6 +29,44 @@ function removePageDeep(pages, id) {
   return false
 }
 
+// Urutan tampil = `order`, id sebagai pemisah. Sama persis dengan urutan di
+// backend (orderBy order, id), jadi tampilan lokal konsisten dengan server.
+function byOrder(a, b) {
+  return (a.order ?? 0) - (b.order ?? 0) || a.id - b.id
+}
+
+// Cari array saudara (siblings) yang memuat page dengan id tertentu, di level
+// manapun: bisa cat.pages (level atas) atau children dari page lain.
+function findSiblingList(pages, id) {
+  if (!pages) return null
+  if (pages.some((p) => p.id === id)) return pages
+  for (const p of pages) {
+    const found = findSiblingList(p.children, id)
+    if (found) return found
+  }
+  return null
+}
+
+// Terapkan urutan baru ke daftar saudara: tiap item diberi order 1..n sesuai
+// posisinya, dan hanya yang order-nya benar-benar berubah yang dikirim ke
+// server (cukup field `order`, judul/slug tidak disentuh). Item tanpa id
+// (placeholder untuk halaman yang belum dibuat) dilewati.
+async function applySiblingOrder(finalList) {
+  const jobs = []
+  finalList.forEach((p, i) => {
+    const newOrder = i + 1
+    if (p.id === undefined) return
+    if ((p.order ?? 0) !== newOrder) {
+      jobs.push(
+        api.put(`/pages/${p.id}`, { order: newOrder }).then(() => {
+          p.order = newOrder
+        })
+      )
+    }
+  })
+  await Promise.all(jobs)
+}
+
 export const useAdminStore = defineStore('admin', {
   state: () => ({
     stats: null,
@@ -47,6 +85,18 @@ export const useAdminStore = defineStore('admin', {
 
     error: null,
   }),
+
+  getters: {
+    // Daftar halaman selevel (saudara) di bawah parent tertentu, terurut.
+    // parentId null = halaman level atas dalam kategori tsb. Dipakai untuk
+    // opsi "sisipkan sebelum" di form halaman / sub halaman level berapapun.
+    siblingPagesOf: (state) => (categoryId, parentId = null) => {
+      const cat = state.categories.find((c) => c.id === categoryId)
+      if (!cat) return []
+      const list = parentId ? findPageDeep(cat.pages, parentId)?.children : cat.pages
+      return [...(list || [])].sort(byOrder)
+    },
+  },
 
   actions: {
     async fetchStats() {
@@ -244,34 +294,93 @@ export const useAdminStore = defineStore('admin', {
       this.categories = this.categories.filter((c) => c.id !== id)
     },
 
-    async createPage(categoryId, payload) {
+    // insertBeforeId opsional: kalau diisi, halaman baru disisipkan tepat
+    // sebelum halaman saudara (selevel, parent sama) dengan id tsb, dan
+    // saudara dari posisi itu ke bawah digeser. Berlaku untuk halaman
+    // maupun sub halaman di level manapun. Kalau tidak diisi, halaman baru
+    // ditaruh di paling bawah.
+    async createPage(categoryId, payload, insertBeforeId = null) {
+      const parentId = payload.parent_id ?? null
+      const cat = this.categories.find((c) => c.id === categoryId)
+
+      // Ambil daftar saudara tempat halaman baru akan berada. Parent dicari
+      // di level manapun (bukan cuma cat.pages langsung), supaya bisa nambah
+      // sub halaman ke page yang sudah nested (mis. "Standar Pool" yang
+      // sendirinya child).
+      let siblings = []
+      if (cat) {
+        if (parentId) {
+          const parent = findPageDeep(cat.pages, parentId)
+          if (parent) {
+            await this.loadPageChildren(parent)
+            parent.children = parent.children || []
+            siblings = parent.children
+          }
+        } else {
+          cat.pages = cat.pages || []
+          siblings = cat.pages
+        }
+      }
+
+      const sorted = [...siblings].sort(byOrder)
+      const targetIdx = insertBeforeId ? sorted.findIndex((p) => p.id === insertBeforeId) : -1
+
+      let order
+      if (targetIdx !== -1) {
+        // Beri ruang di posisi target: geser saudara dari target ke bawah.
+        const finalList = [...sorted]
+        finalList.splice(targetIdx, 0, {})
+        await applySiblingOrder(finalList)
+        order = targetIdx + 1
+      } else {
+        order = sorted.length ? Math.max(...sorted.map((p) => p.order ?? 0)) + 1 : 1
+      }
+
       const emptyDoc = { type: 'doc', content: [{ type: 'paragraph' }] }
       const res = await api.post('/pages', {
         ...payload,
         category_id: categoryId,
-        parent_id: payload.parent_id ?? null,
+        parent_id: parentId,
+        order,
         content: emptyDoc,
         content_html: '<p></p>',
         content_text: '',
         status: 'draft',
       })
-      const cat = this.categories.find((c) => c.id === categoryId)
-      if (cat) {
-        if (payload.parent_id) {
-          // Cari parent-nya di level manapun (bukan cuma cat.pages
-          // langsung), supaya bisa nambah sub halaman ke page yang
-          // sudah nested (mis. "Standar Pool" yang sendirinya child).
-          const parent = findPageDeep(cat.pages, payload.parent_id)
-          if (parent) {
-            parent.children = parent.children || []
-            parent.children.push(res.data)
-          }
-        } else {
-          cat.pages = cat.pages || []
-          cat.pages.push(res.data)
-        }
-      }
+
+      siblings.push(res.data)
+      siblings.sort(byOrder)
       return res.data
+    },
+
+    // Pindahkan halaman/sub halaman yang sudah ada ke posisi tepat sebelum
+    // saudaranya (selevel) yang lain, atau ke paling bawah kalau beforeId
+    // = 'end'. Daftar saudara dicari di level manapun.
+    async movePageTo(id, beforeId) {
+      if (!beforeId || beforeId === id) return
+
+      let list = null
+      for (const cat of this.categories) {
+        list = findSiblingList(cat.pages, id)
+        if (list) break
+      }
+      if (!list) return
+
+      const sorted = [...list].sort(byOrder)
+      const moving = sorted.find((p) => p.id === id)
+      const rest = sorted.filter((p) => p.id !== id)
+      if (!moving) return
+
+      if (beforeId === 'end') {
+        rest.push(moving)
+      } else {
+        const targetIdx = rest.findIndex((p) => p.id === beforeId)
+        if (targetIdx === -1) return
+        rest.splice(targetIdx, 0, moving)
+      }
+
+      await applySiblingOrder(rest)
+      list.sort(byOrder)
     },
 
     async updatePage(id, payload) {

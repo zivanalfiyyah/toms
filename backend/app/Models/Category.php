@@ -36,6 +36,10 @@ class Category extends Model
 
     public function pages()
     {
-        return $this->hasMany(Page::class)->whereNull('parent_id');
+        // Halaman level atas, diurutkan sesuai `order` (id sebagai pemisah).
+        return $this->hasMany(Page::class)
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->orderBy('id');
     }
 }
