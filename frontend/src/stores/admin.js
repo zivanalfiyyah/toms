@@ -80,9 +80,6 @@ export const useAdminStore = defineStore('admin', {
 
     importSubmitting: false,
 
-    accessRequests: [],
-    accessRequestsLoading: false,
-
     error: null,
   }),
 
@@ -465,36 +462,6 @@ export const useAdminStore = defineStore('admin', {
         const idx = this.categories.findIndex((c) => c.id === categoryId)
         if (idx !== -1) this.categories[idx] = { ...this.categories[idx], ...res.data }
         return res.data
-      } finally {
-        this.importSubmitting = false
-      }
-    },
-
-    async fetchAccessRequests() {
-      this.accessRequestsLoading = true
-      this.error = null
-      try {
-        const res = await api.get('/access-requests')
-        this.accessRequests = res.data
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Gagal memuat permintaan akses.'
-      } finally {
-        this.accessRequestsLoading = false
-      }
-    },
-
-    async rejectAccessRequest(id) {
-      await api.post(`/access-requests/${id}/reject`)
-      const idx = this.accessRequests.findIndex((r) => r.id === id)
-      if (idx !== -1) this.accessRequests[idx].status = 'rejected'
-    },
-
-    async inviteFromAccessRequest(id, role) {
-      this.importSubmitting = true
-      try {
-        await api.post(`/access-requests/${id}/invite`, { role })
-        const idx = this.accessRequests.findIndex((r) => r.id === id)
-        if (idx !== -1) this.accessRequests[idx].status = 'invited'
       } finally {
         this.importSubmitting = false
       }

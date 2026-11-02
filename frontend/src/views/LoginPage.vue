@@ -78,13 +78,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
   padding: 0.65rem 0.85rem;
   margin-bottom: 1.1rem;
 }
-.request-access-link {
-  text-align: center;
-  font-size: 0.82rem;
-  color: var(--color-ink-soft);
-  margin: 1.4rem 0 0;
-}
-.request-access-link a { color: var(--color-accent); font-weight: 700; }
 </style>
 
 <template>
@@ -107,9 +100,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
         </button>
       </form>
 
-      <p class="request-access-link">
-        Belum punya akses? <router-link to="/request-access">Minta akses di sini</router-link>
-      </p>
     </div>
   </div>
 </template>

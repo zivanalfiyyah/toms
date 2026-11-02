@@ -1,12 +1,11 @@
-// Indeks pencarian untuk panel admin: menu, pengguna, permintaan akses,
+// Indeks pencarian untuk panel admin: menu, pengguna,
 // kategori, dan halaman di level berapa pun. Murni fungsi (tanpa jaringan).
 import { tokenize } from './searchIndex'
 
-export const GROUP_ORDER = ['Menu', 'Pengguna', 'Permintaan Akses', 'Kategori', 'Halaman']
+export const GROUP_ORDER = ['Menu', 'Pengguna', 'Kategori', 'Halaman']
 export const PER_GROUP = 8
 
 const LEVEL_LABELS = ['Halaman', 'Sub Halaman', 'Sub-sub Halaman']
-const STATUS_LABELS = { pending: 'Menunggu', invited: 'Sudah Diundang', rejected: 'Ditolak' }
 
 // Kategori & halaman dibuka di panel admin (Kategori & Halaman), lalu digulir dan disorot.
 const focusTarget = (key) => ({ path: '/admin/categories', query: { focus: key } })
@@ -27,7 +26,7 @@ function entry(group, key, title, subtitle, badge, to, hayParts) {
   }
 }
 
-export function buildAdminIndex({ menu = [], users = [], requests = [], tree = [] } = {}) {
+export function buildAdminIndex({ menu = [], users = [], tree = [] } = {}) {
   const out = []
 
   for (const m of menu) {
@@ -37,21 +36,6 @@ export function buildAdminIndex({ menu = [], users = [], requests = [], tree = [
   for (const u of users) {
     const roles = roleNames(u)
     out.push(entry('Pengguna', `u-${u.id}`, u.name || u.email, u.email, roles.join(', '), '/admin/users', [u.email, ...roles]))
-  }
-
-  for (const r of requests) {
-    const status = STATUS_LABELS[r.status] || r.status
-    out.push(
-      entry(
-        'Permintaan Akses',
-        `r-${r.id}`,
-        r.name,
-        [r.email, r.division].filter(Boolean).join(' · '),
-        status,
-        '/admin/access-requests',
-        [r.email, r.division, r.reason, status]
-      )
-    )
   }
 
   for (const cat of tree) {

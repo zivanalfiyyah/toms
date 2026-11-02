@@ -13,7 +13,6 @@ const menu = [
   { to: '/admin/users', label: 'Pengguna', icon: 'hbif', adminOnly: true },
   { to: '/admin/categories', label: 'Kategori & Halaman', icon: 'folder' },
   { to: '/admin/import', label: 'Import Word', icon: 'upload' },
-  { to: '/admin/access-requests', label: 'Permintaan Akses', icon: 'inbox', adminOnly: true },
 ]
 
 const visibleMenu = menu.filter((item) => !item.adminOnly || auth.roleNames.includes('admin'))

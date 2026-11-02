@@ -35,7 +35,7 @@ function reload() {
 }
 
 const index = computed(() =>
-  buildAdminIndex({ menu: props.menu, users: store.users, requests: store.requests, tree: toc.tree })
+  buildAdminIndex({ menu: props.menu, users: store.users, tree: toc.tree })
 )
 
 const groups = computed(() =>
@@ -85,7 +85,7 @@ watch(selected, async () => {
             ref="inputEl"
             v-model="query"
             type="text"
-            placeholder="Cari menu, pengguna, permintaan akses, kategori, halaman..."
+            placeholder="Cari menu, pengguna, kategori, halaman..."
             @keydown.enter="onEnter"
             @keydown.down.prevent="onArrowDown"
             @keydown.up.prevent="onArrowUp"
