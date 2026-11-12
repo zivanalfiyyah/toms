@@ -1,0 +1,27 @@
+/* Dokumen Terbaru (Beranda & halaman daftar) */
+.dz .ld-list{ list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.dz .ld-row{ display: flex; align-items: stretch; gap: 10px; }
+.dz .ld-main{ flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); font: inherit; text-align: left; cursor: pointer; color: var(--ink); transition: transform .2s, border-color .2s; }
+.dz .ld-main:hover{ transform: translateY(-1px); border-color: var(--gold); }
+.dz .ld-ico{ flex: 0 0 auto; position: relative; width: 46px; height: 52px; border-radius: 12px; display: grid; place-items: center; background: #fdecea; color: #c0392b; }
+.dz .ld-ico em{ position: absolute; bottom: 4px; font-size: 8px; font-style: normal; font-weight: 900; letter-spacing: .06em; }
+.dz .ld-ico svg{ margin-top: -8px; }
+.dz .ld-body{ flex: 1; min-width: 0; display: grid; gap: 6px; }
+.dz .ld-body b{ font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz .ld-body small{ display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; color: var(--muted); font-size: 12.5px; }
+.dz .ld-chip{ font-style: normal; font-weight: 800; font-size: 11px; padding: 2px 9px; border-radius: 99px; background: var(--soft); color: var(--sky); }
+.dz .ld-chip.sop{ background: #e6efff; color: #1d4a9a; }
+.dz .ld-chip.kpi{ background: #e4f6ec; color: #1b7a4b; }
+.dz .ld-chip.guide{ background: var(--gold-soft); color: var(--gold-ink); }
+.dz .ld-chip.form{ background: #f1e9fb; color: #6b3fa0; }
+.dz .ld-chip.pol{ background: #fdecea; color: #b3261e; }
+.dz .ld-rev{ flex: 0 0 auto; padding: 5px 12px; border-radius: 99px; border: 1px solid rgba(200, 152, 64, .5); background: var(--gold-soft); color: var(--gold-ink); font-size: 12px; font-weight: 800; }
+.dz .ld-dl{ flex: 0 0 auto; display: flex; align-items: center; gap: 7px; padding: 0 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: var(--shadow); }
+.dz .ld-dl:hover:not(:disabled){ background: var(--gold); border-color: var(--gold); color: #04122e; }
+.dz .ld-empty{ padding: 26px; text-align: center; color: var(--muted); }
+.dz .ld-toast{ margin: 12px 0 0; color: #b3261e; font-size: 13px; }
+.dz .ld-pager{ display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 22px; color: var(--muted); font-size: 13px; }
+.dz .ld-pager button{ padding: 8px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+.dz .ld-pager button:disabled{ opacity: .45; cursor: default; }
+.dz .ld-home-head{ display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+@media (width <= 720px){ .dz .ld-row{ flex-wrap: wrap; } .dz .ld-main{ flex-basis: 100%; } .dz .ld-dl{ padding: 10px 18px; } .dz .ld-rev{ display: none; } }
