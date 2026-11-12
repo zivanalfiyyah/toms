@@ -1,0 +1,70 @@
+/* Panel admin: mengikuti desain portal-toms (.adm*). */
+.adm { display: grid; grid-template-columns: 250px minmax(0px, 1fr); gap: 20px; min-height: 100vh; padding: 16px; background: var(--bg); }
+.adm-side { position: sticky; top: 16px; display: flex; flex-direction: column; align-self: start; height: calc(-32px + 100vh); padding: 18px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); }
+.adm-brand { margin: 0px 8px 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); color: var(--ink); font-size: 20px; }
+.adm-side nav { display: flex; flex: 1 1 0%; flex-direction: column; gap: 4px; }
+.adm-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1px solid transparent; border-radius: 12px; background: none; color: var(--muted); font-size: 14px; font-weight: 700; text-align: left; cursor: pointer; }
+.adm-nav.on { background: var(--gold-soft); border-color: rgba(200, 152, 64, 0.4); color: var(--ink); }
+.adm-nav em { min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--gold); color: rgb(4, 18, 46); font-size: 11px; font-style: normal; font-weight: 800; text-align: center; }
+.adm-back { padding: 14px 10px 4px; border-right: 0px; border-bottom: 0px; border-left: 0px; border-image: none; border-top: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; text-align: left; cursor: pointer; }
+.adm-top { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 14px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+.adm-top h1 { margin: 0px; color: var(--ink); font-size: 18px; font-weight: 800; }
+.adm-search { position: relative; flex: 1 1 0%; min-width: 200px; max-width: 520px; margin: 0px auto; }
+.adm-search input { width: 100%; height: 42px; padding: 0px 70px 0px 16px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--text); font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; font-size: 13.5px; }
+.adm-search kbd { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 3px 8px; border-radius: 999px; background: var(--gold-soft); color: var(--gold-ink); font-size: 11px; font-weight: 800; }
+.adm-user { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+.adm-body { padding-top: 4px; }
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+.adm-stat { padding: 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+.adm-stat small { color: var(--muted); font-size: 13px; font-weight: 600; }
+.adm-stat b { display: block; margin-top: 10px; color: var(--ink); font-size: clamp(28px, 3vw, 38px); font-weight: 800; }
+.adm-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.adm-note p, .adm-help { margin: 4px 0px 0px; color: var(--muted); font-size: 13.5px; }
+.adm-nav:hover { background: var(--soft); color: var(--ink); }
+.adm-scroll { overflow-x: auto; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.adm-table th { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; text-align: left; }
+.adm-table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+.adm-table small, .adm-req small { display: block; color: var(--muted); font-size: 12px; }
+.adm-select { width: 100%; }
+.adm-select.sm { width: auto; padding: 7px 10px; font-size: 13px; }
+.adm-badge { display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 11px; font-weight: 800; }
+.adm-badge.active { background: rgba(34, 160, 90, 0.14); color: rgb(28, 138, 77); }
+.adm-badge.pending { background: var(--gold-soft); color: var(--gold-ink); }
+.adm-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.adm-card .adm-select, .adm-file { margin-bottom: 12px; }
+.adm-req { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0px; border-bottom: 1px solid var(--border); }
+.adm-req:last-child { border: 0px; }
+.adm-card.adm-note p { margin: 4px 0 0; }
+.adm-nav { width: 100%; }
+.adm-main { min-width: 0; }
+.adm-body > * + .adm-card { margin-top: 18px; }
+.adm-body { display: block; }
+.adm-card .adm-select, .adm-card .adm-file { display: block; }
+
+/* Halaman admin lain (Kategori, Import, Informasi, dst.) ikut gaya desain */
+.adm .error { color: rgb(192, 57, 43); font-size: 13.5px; }
+.adm .btn-primary { background: var(--gold); color: #04122e; border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 800; box-shadow: var(--btn-glow); cursor: pointer; }
+.adm .btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 999px; padding: 10px 18px; font-weight: 700; cursor: pointer; }
+.adm .btn-link { background: none; border: 0; padding: 0; color: var(--gold-ink); font-weight: 700; cursor: pointer; }
+.adm .btn-link.danger { color: rgb(192, 57, 43); }
+.adm .page-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 0; }
+.adm .page-head h2 { margin: 0; color: var(--ink); font-size: 18px; }
+.adm input:not([type=checkbox]):not([type=radio]), .adm select, .adm textarea { border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); }
+.adm .table-wrap { margin-top: 18px; padding: 8px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); overflow-x: auto; }
+.adm .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; color: var(--text); }
+
+/* tombol & kartu bersama (dari gaya akun) */
+.adm .text-btn, .adm .outline-btn, .adm .primary-btn{ cursor: pointer; white-space: nowrap; border: 0px; justify-content: center; align-items: center; gap: 9px; font-weight: 700; display: flex; }
+.adm .outline-btn{ border: 1px solid var(--border); background: var(--surface); padding: 12px 17px; }
+.adm .outline-btn{ border-radius: 999px; color: var(--ink); padding: 12px 20px; transition: border-color 0.2s; }
+.adm .annex-link{ display: inline-flex; align-items: center; gap: 8px; padding: 0px 0px 6px; border-top: 0px; border-right: 0px; border-left: 0px; border-image: none; border-bottom: 2px solid var(--gold); background: none; color: var(--ink); font-size: clamp(13px, 1.1vw, 15px); font-weight: 800; cursor: pointer; }
+.adm .acct-btns{ display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
+.adm-card{ margin-top: 18px; padding: clamp(18px, 2.4vw, 28px); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+.adm .link-btn{ padding: 0px; border: 0px; background: none; color: var(--gold-ink); font-style: inherit; font-variant: inherit; font-stretch: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.adm .link-btn.danger{ color: rgb(192, 57, 43); }
+.adm .link-btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+.adm-select, .adm-file{ padding: 11px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text); font-style: inherit; font-variant: inherit; font-stretch: inherit; font-size: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; font-weight: 500; }
+a.adm-nav, a.adm-back { text-decoration: none; line-height: 1.2; box-sizing: border-box; }
+.adm-body > .adm-card:first-child { margin-top: 18px; }
+.adm-table th { background: none; text-transform: none; letter-spacing: 0; font-weight: 700; }

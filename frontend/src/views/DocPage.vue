@@ -1,12 +1,16 @@
 <script setup>
 import { computed, onMounted, watch, ref } from 'vue'
 import { useDocsStore } from '../stores/docs'
-import Breadcrumb from '../components/Breadcrumb.vue'
+import DocsShell from '../components/DocsShell.vue'
+import { useRouter } from 'vue-router'
 import TiptapRenderer from '../components/TiptapRenderer.vue'
 import TableOfContents from '../components/TableOfContents.vue'
 import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
 import { useAuthStore } from '../stores/auth'
+import { useLikesStore } from '../stores/likes'
+import { useUiStore } from '../stores/ui'
+import { downloadPdf } from '../utils/downloadPdf'
 
 const props = defineProps({
   category: { type: String, required: true },
@@ -14,8 +18,35 @@ const props = defineProps({
 })
 
 const docsStore = useDocsStore()
+const router = useRouter()
+const catName = computed(() => docsStore.categoryBySlug(props.category)?.name || props.category)
+function goPage(p) { router.push(`/docs/${p.categorySlug}/${p.fullPath}`) }
 const auth = useAuthStore()
-const copied = ref(false)
+const likes = useLikesStore()
+const liking = ref(false)
+const liked = computed(() => (likes.loaded ? likes.ids.has(docData.value?.id) : !!docData.value?.liked))
+
+const ui = useUiStore()
+const likeCount = computed(() => Math.max(0, (docData.value?.likes_count ?? 0) + (liked.value ? 1 : 0) - (docData.value?.liked ? 1 : 0)))
+const dl = ref({ busy: false, msg: '' })
+async function doDownload() {
+  if (!docData.value || dl.value.busy) return
+  dl.value = { busy: true, msg: '' }
+  const r = await downloadPdf('page', docData.value.id, docData.value.slug)
+  dl.value = { busy: false, msg: r.ok || r.reason === 'login' ? '' : r.message }
+  if (dl.value.msg) setTimeout(() => { dl.value.msg = '' }, 5000)
+}
+const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '')
+
+async function toggleLike() {
+  if (!auth.isLoggedIn) { ui.promptLogin(window.location.pathname); return }
+  if (!docData.value || liking.value) return
+  liking.value = true
+  try {
+    if (liked.value) await likes.unlike(docData.value.id)
+    else await likes.like(docData.value.id)
+  } catch (e) { /* abaikan */ } finally { liking.value = false }
+}
 // Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js),
 // bukan lagi dibaca ulang dari docData.content — supaya TOC selalu sinkron
 // dengan apa yang sebenarnya dirender.
@@ -66,176 +97,72 @@ function extractText(node) {
   return text.trim()
 }
 
-async function copyPage() {
-  if (!docData.value) return
-  const text = `${docData.value.title}\n\n${extractText(docData.value.content)}`
-  await navigator.clipboard.writeText(text)
-  copied.value = true
-  setTimeout(() => (copied.value = false), 1500)
-}
 </script>
-
 <template>
-  <div class="doc-page">
-    <div ref="contentEl" class="doc-content" tabindex="-1">
-      <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
-      <div v-else-if="docsStore.loading">Memuat...</div>
-      <template v-else-if="docData">
-        <Breadcrumb :segments="[category, ...slugs]" />
+  <div class="dz">
+    <DocsShell :no-toc="!pageHeadings.length" :title="catName">
+      <div class="docs-main">
+        <div ref="contentEl" class="docs-body" tabindex="-1">
+          <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
+          <p v-else-if="docsStore.loading" class="state">Memuat...</p>
+          <template v-else-if="docData">
+            <div class="breadcrumb">
+              <button type="button" @click="router.push('/')">Beranda</button>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><button type="button" @click="router.push('/daftar-isi')">Dokumentasi</button></span>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><button type="button" @click="router.push(`/docs/${category}`)">{{ catName }}</button></span>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><b>{{ docData.title }}</b></span>
+            </div>
 
-        <div class="title-row">
-          <h1>{{ docData.title }}</h1>
-          <button class="copy-btn" @click="copyPage">
-            <span v-html="copied ? icons.check : icons.copy"></span>
-            {{ copied ? 'Tersalin' : 'Salin Halaman' }}
-          </button>
+            <div class="docs-title-row">
+              <div>
+                <h1>{{ docData.title }}</h1>
+                <p class="docs-meta">{{ catName }} • {{ docData.children?.length ? `${docData.children.length} sub-bab` : 'Halaman akhir' }}<template v-if="docData.revision"> • <span class="docs-rev">{{ docData.revision_label }}</span> • Diperbarui {{ fmtDate(docData.updated_at) }}</template></p>
+                <p v-if="dl.msg" class="docs-dl-err" role="alert">{{ dl.msg }}</p>
+              </div>
+              <div class="docs-actions">
+                <button type="button" class="docs-copy docs-like" :class="{ on: liked }" :disabled="liking" @click="toggleLike">
+                  <svg width="15" height="15" viewBox="0 0 24 24" :fill="liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6.6 5.2 5.2 0 0 1 21.3 12C19 16.6 12 21 12 21z"></path></svg>{{ liked ? 'Disukai' : 'Suka' }}<b class="docs-count">{{ likeCount }}</b>
+                </button>
+                <button type="button" class="docs-copy docs-dl" :disabled="dl.busy" @click="doDownload">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>{{ dl.busy ? 'Menyiapkan…' : 'Unduh PDF' }}
+                </button>
+              </div>
+            </div>
+
+            <TiptapRenderer v-if="docData.content_html" :content="docData.content_html" @headings="pageHeadings = $event" />
+
+            <EditPageLink v-if="auth.canEdit" :to="`${basePath}/edit`" />
+
+            <template v-if="docData.children && docData.children.length > 0">
+              <h2 class="docs-sub-title">Sub-bab</h2>
+              <ul class="docs-sub-list">
+                <li v-for="(c, i) in docData.children" :key="c.id">
+                  <button type="button" @click="router.push(`${basePath}/${c.slug}`)"><i>{{ String(i + 1).padStart(2, '0') }}</i>{{ c.title }}</button>
+                  <span>{{ c.description || '' }}</span>
+                </li>
+              </ul>
+            </template>
+
+            <div class="pager">
+              <button v-if="prevPage" type="button" @click="goPage(prevPage)">
+                <small>← Sebelumnya</small><b>{{ prevPage.title }}</b><span>{{ prevPage.categoryName || catName }}</span>
+              </button>
+              <button v-if="nextPage" type="button" class="next" @click="goPage(nextPage)">
+                <small>Berikutnya →</small><b>{{ nextPage.title }}</b><span>{{ nextPage.categoryName || catName }}</span>
+              </button>
+            </div>
+          </template>
+          <p v-else class="state">Halaman tidak ditemukan.</p>
         </div>
+      </div>
 
-        <TiptapRenderer
-          v-if="docData.content_html"
-          :content="docData.content_html"
-          @headings="pageHeadings = $event"
-        />
-
-        <EditPageLink :to="`${basePath}/edit`" />
-
-        <!-- Subbab: works at ANY depth now, not just level 2 or 3 -->
-        <template v-if="docData.children && docData.children.length > 0">
-          <h2 class="subbab-title">Subbab</h2>
-          <ul class="subbab-list">
-            <li v-for="c in docData.children" :key="c.id">
-              <router-link :to="`${basePath}/${c.slug}`">{{ c.title }}</router-link>
-              <span v-if="c.description"> — {{ c.description }}</span>
-              <router-link
-                :to="`${basePath}/${c.slug}/edit`"
-                class="edit-item-link"
-                title="Ubah halaman ini"
-              >
-                <span v-html="icons.edit"></span>
-              </router-link>
-            </li>
-          </ul>
-        </template>
-
-        <nav class="pager">
-          <router-link
-            v-if="prevPage"
-            :to="`/docs/${prevPage.categorySlug}/${prevPage.fullPath}`"
-            class="pager-card prev"
-          >
-            <span class="pager-label">&larr; Sebelumnya</span>
-            <span class="pager-title">{{ prevPage.title }}</span>
-          </router-link>
-          <span v-else></span>
-
-          <router-link
-            v-if="nextPage"
-            :to="`/docs/${nextPage.categorySlug}/${nextPage.fullPath}`"
-            class="pager-card next"
-          >
-            <span class="pager-label">Selanjutnya &rarr;</span>
-            <span class="pager-title">{{ nextPage.title }}</span>
-          </router-link>
-        </nav>
-      </template>
-      <p v-else>Halaman tidak ditemukan.</p>
-    </div>
-
-    <TableOfContents v-if="docData" :headings="pageHeadings" />
+      <TableOfContents v-if="docData" :headings="pageHeadings" />
+    </DocsShell>
   </div>
 </template>
 
-<style scoped>
-.doc-page { display: flex; gap: 25px; align-items: flex-start; }
-.doc-content:focus { outline: none; }
-
-/* Desktop: kartu isi tetap di tempat seperti sidebar; hanya teks di dalamnya yang bergulir.
-   Mobile (<= 860px) tidak berubah: seluruh halaman bergulir. */
-@media (min-width: 861px) {
-  .doc-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
-  .doc-content {
-    position: sticky;
-    top: calc(var(--header-h) + 1.5rem);
-    max-height: calc(100vh - var(--header-h) - 3rem);
-    overflow-y: auto;
-    scroll-behavior: smooth;
-  }
-}
-.doc-content {
-  flex: 1;
-  min-width: 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  padding: 29px clamp(1.25rem, 3vw, 2.5rem) 58px;
-  box-shadow: var(--shadow-card);
-}
-.doc-content h1 { font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; margin: 0; color: var(--color-ink); }
-.doc-content h2 { font-weight: 700; }
-
-/* Kepala artikel: breadcrumb di atas, judul besar, garis pemisah ke isi */
-.title-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  padding-bottom: 1.5rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--color-border);
-}
-.title-row h1 { margin: 0 !important; }
-.copy-btn {
-  display: flex; align-items: center; gap: 0.4rem;
-  background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: 10px; padding: 0.5rem 0.9rem;
-  font-size: 11px; font-weight: 700; color: var(--color-ink-soft); cursor: pointer; flex-shrink: 0;
-  transition: 0.18s ease;
-}
-.copy-btn:hover { border-color: #a8d7f3; background: var(--color-bg); color: var(--color-accent); }
-.copy-btn span { width: 14px; height: 14px; display: block; }
-.copy-btn :deep(svg) { width: 100%; height: 100%; }
-
-.subbab-title { font-size: 22px; letter-spacing: -0.45px; margin: 0 0 17px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
-.subbab-list { list-style: none; padding: 0; margin: 0 0 2rem; }
-.subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
-.subbab-list a { font-weight: 600; }
-.edit-item-link {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.5rem;
-  width: 13px; height: 13px;
-  color: var(--color-ink-soft);
-  vertical-align: middle;
-}
-.edit-item-link:hover { color: var(--color-accent); }
-.edit-item-link :deep(svg) { width: 100%; height: 100%; }
-
-.pager {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-.pager-card {
-  display: flex; flex-direction: column; gap: 0.3rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: var(--color-surface);
-  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-}
-.pager-card:hover { border-color: #a8d8f3; text-decoration: none; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(30, 73, 106, 0.08); }
-.pager-card.next { text-align: right; align-items: flex-end; }
-.pager-label { font-size: 0.75rem; color: var(--color-ink-soft); }
-.pager-title { font-family: var(--font-display); font-weight: 600; color: var(--color-ink); }
-
-.fetch-error {
-  padding: 1rem 1.2rem;
-  border: 1px solid #d33;
-  border-radius: var(--radius);
-  color: #d33;
-  background: rgba(211, 51, 51, 0.06);
-}
-
-/* Desktop: tujuan scroll berada di dalam kartu, jadi jaraknya tidak perlu setinggi navbar. */
-@media (min-width: 861px) {
-  .subbab-list li { scroll-margin-top: 1rem; }
-}
-</style>
+<style>
+.dz .docs-body { margin: 0; }
+.dz .state { color: var(--muted); }
+.dz .fetch-error { padding: 14px 18px; border: 1px solid #d33; border-radius: 12px; color: #d33; }
+</style>

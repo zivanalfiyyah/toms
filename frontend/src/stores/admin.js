@@ -122,6 +122,18 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
+    async approveUser(id, role) {
+      const res = await api.post(`/users/${id}/approve`, role ? { role } : {})
+      const idx = this.users.findIndex((u) => u.id === id)
+      if (idx !== -1) this.users[idx] = res.data
+    },
+
+    async rejectUser(id) {
+      const res = await api.post(`/users/${id}/reject`)
+      const idx = this.users.findIndex((u) => u.id === id)
+      if (idx !== -1) this.users[idx] = res.data
+    },
+
     async createUser(payload) {
       const res = await api.post('/users', payload)
       this.users.unshift(res.data)

@@ -7,6 +7,7 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const loading = ref(false)
+const showPass = ref(false)
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -30,76 +31,36 @@ async function handleSubmit() {
   }
 }
 </script>
-
-<style scoped>
-.login-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent; /* glow latar dari main.css tampil */
-  padding: 1.5rem;
-}
-.login-wrap {
-  width: 100%;
-  max-width: 400px;
-  padding: 2.25rem 2rem 2rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-}
-[data-theme='dark'] .login-wrap { border-color: var(--color-accent-border); }
-h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; text-align: center; margin: 0 0 1.6rem; }
-label { display: block; font-size: 0.78rem; font-weight: 600; margin: 0 0 0.35rem; color: var(--color-ink-soft); }
-input {
-  width: 100%; padding: 0.7rem 0.9rem; margin-bottom: 1rem;
-  border: 1px solid var(--color-border); border-radius: var(--radius);
-  background: var(--input-bg); color: var(--color-ink); font-size: 0.9rem; font-family: inherit;
-}
-input:focus { outline: none; border-color: var(--color-accent-border); box-shadow: 0 0 0 3px var(--color-accent-soft); }
-button {
-  width: 100%; padding: 0.75rem; background: linear-gradient(90deg, #0284c7, #0ea5e9); color: #fff; border: none; border-radius: var(--radius);
-  box-shadow: var(--btn-glow); font-weight: 700; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; font-size: 0.88rem; margin-top: 0.25rem;
-}
-button:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
-button:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-.error {
-  color: #ef4444; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.4);
-  border-radius: var(--radius); padding: 0.6rem 0.8rem; font-size: 0.82rem; margin-bottom: 1rem;
-}
-.notice {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  border: 1px solid var(--color-accent-border);
-  border-radius: var(--radius);
-  font-size: 0.82rem;
-  padding: 0.65rem 0.85rem;
-  margin-bottom: 1.1rem;
-}
-</style>
-
 <template>
-  <div class="login-page">
-    <div class="login-wrap">
-      <img src="/toms-logo-header.png" alt="TOMS" class="auth-logo" />
-      <h1>Login TOMS</h1>
-      <p v-if="noticeMessage" class="notice">{{ noticeMessage }}</p>
-      <form @submit.prevent="handleSubmit">
-        <label for="email">Email</label>
-        <input id="email" v-model="email" type="email" required autocomplete="username" />
-
-        <label for="password">Password</label>
-        <input id="password" v-model="password" type="password" required autocomplete="current-password" />
-
-        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Memproses...' : 'Masuk' }}
-        </button>
-      </form>
-
-    </div>
+  <div class="dz">
+    <main class="login-page">
+      <div class="login-card">
+        <span class="eyebrow">AKSES PENGGUNA</span>
+        <h1>Masuk ke TOMS</h1>
+        <p>Gunakan akun TOMS Anda untuk mengakses fitur sesuai peran.</p>
+        <p v-if="noticeMessage" class="login-notice">{{ noticeMessage }}</p>
+        <form @submit.prevent="handleSubmit">
+          <label>Email
+            <input v-model="email" type="email" required autocomplete="username" />
+          </label>
+          <label>Password
+            <span class="login-pass">
+              <input v-model="password" :type="showPass ? 'text' : 'password'" required autocomplete="current-password" />
+              <button type="button" @click="showPass = !showPass">{{ showPass ? 'Sembunyikan' : 'Tampilkan' }}</button>
+            </span>
+          </label>
+          <p v-if="errorMessage" class="login-error">{{ errorMessage }}</p>
+          <button type="submit" class="login-submit" :disabled="loading">{{ loading ? 'Memproses...' : 'Masuk' }}</button>
+        </form>
+        <p class="login-alt">Belum punya akun? <button type="button" class="link-btn" @click="router.push('/daftar')">Daftar</button></p>
+      </div>
+    </main>
   </div>
 </template>
+
+<style>
+.dz .login-notice { margin: 0 0 16px !important; padding: 10px 14px; border-radius: 12px; background: var(--gold-soft); color: var(--gold-ink) !important; font-size: 13px !important; }
+.dz .login-error { margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, .4); background: rgba(239, 68, 68, .08); color: #dc2626; font-size: 13px; }
+.dz .login-submit:hover:not(:disabled) { background: var(--gold-2); }
+.dz .login-submit:disabled { opacity: .6; cursor: not-allowed; }
+</style>

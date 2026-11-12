@@ -6,14 +6,55 @@ import { icons } from '../icons'
 import EditPageLink from '../components/EditPageLink.vue'
 import TiptapRenderer from '../components/TiptapRenderer.vue'
 import TableOfContents from '../components/TableOfContents.vue'
+import DocsShell from '../components/DocsShell.vue'
+import { useRouter } from 'vue-router'
+import api from '../api'
+import { useUiStore } from '../stores/ui'
+import { downloadPdf } from '../utils/downloadPdf'
 
 const props = defineProps({
   category: { type: String, required: true }
 })
 
 const docsStore = useDocsStore()
+const router = useRouter()
+
+function countPages(pages) {
+  let n = 0
+  for (const p of pages || []) n += 1 + countPages(p.children)
+  return n
+}
+const totalTopics = computed(() => countPages(cat.value?.pages))
+const catNumber = computed(() => String(currentCategoryIndex.value + 1).padStart(2, '0'))
 const auth = useAuthStore()
 const cat = computed(() => docsStore.categoryBySlug(props.category))
+
+// Suka & Unduh PDF untuk kategori
+const ui = useUiStore()
+const like = ref({ liked: false, count: 0, busy: false })
+const dl = ref({ busy: false, msg: '' })
+async function loadLike() {
+  if (!cat.value || !auth.isLoggedIn) return
+  try { const { data } = await api.get(`/categories/${cat.value.id}/like`); like.value = { liked: data.liked, count: data.likes_count, busy: false } } catch { /* abaikan */ }
+}
+watch(() => cat.value?.id, loadLike, { immediate: true })
+async function toggleLike() {
+  if (!auth.isLoggedIn) { ui.promptLogin(window.location.pathname); return }
+  if (!cat.value || like.value.busy) return
+  like.value.busy = true
+  try {
+    const { data } = like.value.liked ? await api.delete(`/categories/${cat.value.id}/like`) : await api.post(`/categories/${cat.value.id}/like`)
+    like.value = { liked: data.liked, count: data.likes_count, busy: false }
+  } catch { like.value.busy = false }
+}
+async function doDownload() {
+  if (!cat.value || dl.value.busy) return
+  dl.value = { busy: true, msg: '' }
+  const r = await downloadPdf('category', cat.value.id, cat.value.slug)
+  dl.value = { busy: false, msg: r.ok || r.reason === 'login' ? '' : r.message }
+  if (dl.value.msg) setTimeout(() => { dl.value.msg = '' }, 5000)
+}
+const fmtDate = (d) => (d ? new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '')
 
 // Diisi via event @headings dari TiptapRenderer (lihat src/utils/headings.js).
 // Sebelumnya sidebar "Pada halaman ini" di sini selalu tampil kosong untuk
@@ -76,260 +117,93 @@ function slugify(text) {
   return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 </script>
-
-<style scoped>
-.breadcrumb { font-family: var(--font-body); font-size: 11px; color: var(--color-ink-soft); margin: 0 0 1.5rem; }
-.breadcrumb a { color: var(--color-ink-soft); }
-.breadcrumb a:hover { color: var(--color-accent); }
-.breadcrumb .sep { margin: 0 0.5rem; color: var(--color-ink-soft); opacity: 0.6; }
-.breadcrumb .current { color: var(--color-accent); font-weight: 700; }
-.lead { color: var(--color-ink-soft); font-size: 13px; line-height: 1.7; margin: 0 0 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
-.subbab-title { font-size: 22px; letter-spacing: -0.45px; margin: 0 0 17px; padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
-.subbab-list { list-style: none; padding: 0; margin: 0; }
-.subbab-list li { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--color-ink-soft); scroll-margin-top: 5rem; }
-.subbab-list a { font-weight: 600; }
-.broken-link { font-weight: 600; color: #d33; cursor: not-allowed; }
-.edit-item-link {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 0.5rem;
-  width: 13px; height: 13px;
-  color: var(--color-ink-soft);
-  vertical-align: middle;
-}
-.edit-item-link:hover { color: var(--color-accent); }
-.edit-item-link :deep(svg) { width: 100%; height: 100%; }
-.subbab-sublist { list-style: none; padding-left: 1.5rem; margin: 0.4rem 0 0; border-left: 2px solid var(--color-border); }
-.subbab-sublist li { margin-bottom: 0.4rem; font-size: 0.9rem; }
-.single-page-content { line-height: 1.7; }
-.single-page-content :deep(h2) { margin-top: 2rem; }
-.single-page-content :deep(table) { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-.single-page-content :deep(td), .single-page-content :deep(th) { border: 1px solid var(--color-border); padding: 0.4rem 0.6rem; }
-
-.category-page {
-  display: flex;
-  gap: 25px;
-  align-items: flex-start;
-}
-.category-content {
-  flex: 1;
-  min-width: 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  padding: 29px clamp(1.25rem, 3vw, 2.5rem) 58px;
-  box-shadow: var(--shadow-card);
-}
-.category-content h1 { font-size: clamp(1.7rem, 3vw, 2.45rem); font-weight: 800; letter-spacing: -0.045em; line-height: 1.1; margin: 0 0 0.75rem; color: var(--color-ink); }
-.category-content h2 { font-weight: 700; }
-
-
-.toc {
-  width: 225px;
-  flex-shrink: 0;
-  padding: 16px 15px;
-  position: sticky;
-  top: calc(var(--header-h) + 1.5rem);
-  align-self: flex-start;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 17px;
-  box-shadow: var(--shadow-b);
-}
-.toc-title {
-  font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-ink);
-  margin: 0 0 0.75rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--color-border); }
-.toc li { margin-bottom: 0.35rem; }
-.toc a {
-  display: block;
-  padding: 0.1rem 0 0.1rem 0.75rem;
-  margin-left: -2px;
-  border-left: 2px solid transparent;
-  font-size: 0.85rem;
-  color: var(--color-ink-soft);
-}
-.toc a:hover { color: var(--color-accent); border-left-color: var(--color-accent); text-decoration: none; }
-.toc li ul a { padding-left: 1rem; font-size: 0.8rem; }
-.toc li ul ul a { padding-left: 1.4rem; font-size: 0.75rem; opacity: 0.85; }
-
-@media (max-width: 1100px) { .toc { display: none; } }
-
-.category-content:focus { outline: none; }
-
-/* Desktop: kartu isi tetap di tempat seperti sidebar; hanya teks di dalamnya yang bergulir.
-   Mobile (<= 860px) tidak berubah: seluruh halaman bergulir. */
-@media (min-width: 861px) {
-  .category-page { margin-bottom: -1.5rem; } /* cegah scroll jendela sisa 24px */
-  .category-content {
-    position: sticky;
-    top: calc(var(--header-h) + 1.5rem);
-    max-height: calc(100vh - var(--header-h) - 3rem);
-    overflow-y: auto;
-    scroll-behavior: smooth;
-  }
-  .subbab-list li { scroll-margin-top: 1rem; }
-}
-
-.pager {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-.pager-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: var(--color-surface);
-  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-}
-.pager-card:hover {
-  border-color: #a8d8f3;
-  text-decoration: none;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(30, 73, 106, 0.08);
-}
-.pager-card.next {
-  text-align: right;
-  align-items: flex-end;
-}
-.pager-label {
-  font-size: 0.75rem;
-  color: var(--color-ink-soft);
-}
-.pager-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.fetch-error {
-  padding: 1rem 1.2rem;
-  border: 1px solid #d33;
-  border-radius: var(--radius);
-  color: #d33;
-  background: rgba(211, 51, 51, 0.06);
-}
-</style>
-
 <template>
-  <div class="category-page">
-    <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
-    <div v-else-if="!cat">Kategori tidak ditemukan.</div>
-    <template v-else>
-      <div ref="contentEl" class="category-content" tabindex="-1">
-        <p class="breadcrumb">
-          <router-link to="/">docs</router-link>
-          <span class="sep">/</span>
-          <span class="current">{{ cat.slug }}</span>
-        </p>
-        <h1>{{ cat.name }}</h1>
-        <p class="lead">{{ cat.description }}</p>
+  <div class="dz">
+    <section v-if="cat" class="page-hero">
+      <div class="shell">
+        <div>
+          <span class="eyebrow light">BAB {{ catNumber }} • KATEGORI DOKUMENTASI</span>
+          <h1>{{ cat.name }}</h1>
+          <p v-if="cat.pages?.length">{{ cat.pages.length }} sub-bab yang memuat total {{ totalTopics }} topik dalam panduan TOMS.</p>
+          <p v-else-if="cat.description">{{ cat.description }}</p>
+        </div>
+      </div>
+    </section>
+    <section v-else class="page-hero"><div class="shell"><div><span class="eyebrow light">KATEGORI DOKUMENTASI</span><h1>Dokumentasi</h1></div></div></section>
 
-        <TiptapRenderer
-          v-if="cat.content_html && cat.content_html.trim() !== ''"
-          :content="cat.content_html"
-          class="single-page-content"
-          @headings="pageHeadings = $event"
-        />
+    <DocsShell :no-toc="!(pageHeadings.length || cat?.pages?.length)" :title="cat?.name || 'Daftar Isi'">
+      <div class="docs-main">
+        <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
+        <p v-else-if="!cat" class="state">{{ docsStore.loading ? 'Memuat…' : 'Kategori tidak ditemukan.' }}</p>
+        <template v-else>
+          <div class="breadcrumb">
+            <button type="button" @click="router.push('/')">Beranda</button>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><button type="button" @click="router.push('/daftar-isi')">Dokumentasi</button></span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg><b>{{ cat.name }}</b></span>
+          </div>
 
+          <div class="cat-bar">
+            <p class="docs-meta">{{ cat.pages?.length ? `${cat.pages.length} sub-bab` : 'Kategori' }}<template v-if="cat.revision"> • <span class="docs-rev">{{ cat.revision_label }}</span> • Diperbarui {{ fmtDate(cat.updated_at) }}</template></p>
+            <div class="docs-actions">
+              <button type="button" class="docs-copy docs-like" :class="{ on: like.liked }" :disabled="like.busy" @click="toggleLike">
+                <svg width="15" height="15" viewBox="0 0 24 24" :fill="like.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5.2 5.2 0 0 1 12 6.6 5.2 5.2 0 0 1 21.3 12C19 16.6 12 21 12 21z"></path></svg>{{ like.liked ? 'Disukai' : 'Suka' }}<b class="docs-count">{{ like.count }}</b>
+              </button>
+              <button type="button" class="docs-copy docs-dl" :disabled="dl.busy" @click="doDownload">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>{{ dl.busy ? 'Menyiapkan…' : 'Unduh PDF' }}
+              </button>
+            </div>
+          </div>
+          <p v-if="dl.msg" class="docs-dl-err" role="alert">{{ dl.msg }}</p>
 
-      <!-- DAFTAR SUBBAB (Tampil meskipun cuma ada 1 subbab) -->
-      <template v-if="cat.pages?.length">
-        <h2 class="subbab-title">Subbab</h2>
-        <ul class="subbab-list">
-          <li v-for="page in cat.pages" :key="page.id" :id="slugify(page.title)">
-            <router-link
-              v-if="page.slug"
-              :to="`/docs/${cat.slug}/${page.slug}`"
-            >{{ page.title }}</router-link>
-            <span
-              v-else
-              class="broken-link"
-              title="Slug halaman ini kosong di data — perbaiki dulu di backend/admin"
-            >{{ page.title }} ⚠️</span>
-            <span v-if="page.description"> — {{ page.description }}</span>
-            <router-link
-              v-if="page.slug"
-              :to="`/docs/${cat.slug}/${page.slug}/edit`"
-              class="edit-item-link"
-              title="Ubah halaman ini"
-            >
-              <span v-html="icons.edit"></span>
-            </router-link>
-          </li>
-        </ul>
-      </template>
+          <div ref="contentEl" class="docs-body" tabindex="-1">
+            <p v-if="cat.description" class="docs-lead">{{ cat.description }}</p>
+            <TiptapRenderer
+              v-if="cat.content_html && cat.content_html.trim() !== ''"
+              :content="cat.content_html"
+              class="single-page-content"
+              @headings="pageHeadings = $event"
+            />
 
-        <EditPageLink :to="`/docs/${cat.slug}/edit`" />
+            <template v-if="cat.pages?.length">
+              <h2 class="docs-sub-title">Sub-bab</h2>
+              <ul class="docs-sub-list">
+                <li v-for="(page, i) in cat.pages" :key="page.id" :id="`sub-${slugify(page.title)}`">
+                  <button v-if="page.slug" type="button" @click="router.push(`/docs/${cat.slug}/${page.slug}`)"><i>{{ String(i + 1).padStart(2, '0') }}</i>{{ page.title }}</button>
+                  <button v-else type="button" disabled title="Slug halaman ini kosong di data"><i>{{ String(i + 1).padStart(2, '0') }}</i>{{ page.title }} ⚠️</button>
+                  <span>{{ page.children?.length ? `${page.children.length} topik di dalamnya` : '' }}</span>
+                </li>
+              </ul>
+            </template>
 
-        <!-- <EditPageLink 
-          v-if="cat.pages?.length" 
-          :to="`/docs/${cat.slug}/${cat.pages[0].slug}/edit`" 
-        /> -->
+            <EditPageLink v-if="auth.canEdit" :to="`/docs/${cat.slug}/edit`" />
+          </div>
 
-        <nav class="pager">
-          <router-link
-            v-if="prevCategory"
-            :to="`/docs/${prevCategory.slug}`"
-            class="pager-card prev"
-          >
-            <span class="pager-label">&larr; Sebelumnya</span>
-            <span class="pager-title">{{ prevCategory.name }}</span>
-          </router-link>
-          <span v-else></span>
-
-          <router-link
-            v-if="nextCategory"
-            :to="`/docs/${nextCategory.slug}`"
-            class="pager-card next"
-          >
-            <span class="pager-label">Selanjutnya &rarr;</span>
-            <span class="pager-title">{{ nextCategory.name}}</span>
-          </router-link>
-        </nav>
+          <div class="pager">
+            <button v-if="prevCategory" type="button" @click="router.push(`/docs/${prevCategory.slug}`)">
+              <small>← Sebelumnya</small><b>{{ prevCategory.name }}</b><span>BAB {{ String(currentCategoryIndex).padStart(2, '0') }}</span>
+            </button>
+            <button v-if="nextCategory" type="button" class="next" @click="router.push(`/docs/${nextCategory.slug}`)">
+              <small>Berikutnya →</small><b>{{ nextCategory.name }}</b><span>BAB {{ String(currentCategoryIndex + 2).padStart(2, '0') }}</span>
+            </button>
+          </div>
+        </template>
       </div>
 
-      <!--
-        Dulu bagian ini SELALU tampil (judul hardcoded, tanpa v-if) dan cuma
-        me-list cat.pages (subbab) — tidak pernah membaca heading H1-H6 di
-        cat.content_html. Makanya untuk kategori yang isinya 1 dokumen
-        panjang tanpa subbab (mis. ODM, Ruang Lingkup, TOMS Dictionary),
-        judul "Pada halaman ini" muncul tapi daftarnya selalu kosong.
-
-        Sekarang: kalau ada heading asli di kontennya, pakai komponen
-        TableOfContents yang sama dengan halaman dokumen biasa (DocPage) —
-        supaya tampilan, indentasi H1/H2/H3, status "aktif" saat scroll,
-        dan panel yang bisa di-scroll saat heading-nya banyak, semuanya
-        SAMA PERSIS antara halaman kategori dan halaman dokumen, tidak ada
-        lagi 2 implementasi terpisah yang gampang tidak sinkron.
-        Kalau tidak ada heading tapi ada subbab, tetap tampilkan daftar
-        subbab seperti semula (data & kebutuhannya beda, bukan heading).
-        Kalau dua-duanya kosong, aside disembunyikan sepenuhnya.
-      -->
-      <TableOfContents v-if="pageHeadings.length" :headings="pageHeadings" />
-      <aside v-else-if="cat.pages?.length" class="toc">
-        <p class="toc-title">Pada halaman ini</p>
+      <TableOfContents v-if="cat && pageHeadings.length" :headings="pageHeadings" />
+      <aside v-else-if="cat?.pages?.length" class="docs-toc" aria-label="Pada halaman ini">
+        <p class="docs-toc-title">Pada halaman ini</p>
         <ul>
-          <li v-for="page in cat.pages" :key="page.id">
-            <a :href="`#${slugify(page.title)}`">{{ page.title }}</a>
-          </li>
+          <li v-for="page in cat.pages" :key="page.id"><a :href="`#sub-${slugify(page.title)}`" class="dt-link" :title="page.title">{{ page.title }}</a></li>
         </ul>
       </aside>
-    </template>
+    </DocsShell>
   </div>
 </template>
+
+<style>
+.dz .docs-body { margin: 0; }
+.dz .docs-lead { color: var(--muted); font-size: 15px; line-height: 1.7; margin: 0 0 22px; }
+.dz .state { color: var(--muted); }
+.dz .fetch-error { padding: 14px 18px; border: 1px solid #d33; border-radius: 12px; color: #d33; }
+.dz .docs-sub-list button:disabled { cursor: not-allowed; opacity: .7; }
+</style>

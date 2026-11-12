@@ -1,0 +1,22 @@
+/* Daftar Isi: baris & kartu sub-bab (mengikuti gaya kartu bab) */
+.dz .bab-body { list-style: none; margin: 0; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); border-top: 1px solid var(--border); }
+.dz .bab-body ul, .dz .toc-kids { list-style: none; margin: 0; padding: 0; }
+.dz .toc-node { list-style: none; }
+.dz .toc-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.dz .toc-row:hover { background: var(--soft); }
+.dz .toc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex: 0 0 auto; margin-left: 4px; }
+.dz .toc-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.dz .toc-link { background: none; border: 0; padding: 0; text-align: left; font: inherit; font-size: 14px; color: var(--ink); cursor: pointer; }
+.dz .toc-open { flex: 0 0 auto; background: var(--gold-soft); color: var(--gold-ink); border: 1px solid var(--gold-line, var(--border)); border-radius: 999px; padding: 6px 12px; font-size: 11px; font-weight: 800; cursor: pointer; }
+.dz .toc-row.card { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; border-radius: 16px; gap: 14px; }
+.dz .toc-row.card:hover { background: var(--soft); }
+.dz .toc-node.is-open > .toc-row.card { border-color: var(--gold); background: var(--soft); }
+.dz .toc-row.card .toc-link { font-weight: 700; font-size: 14px; }
+.dz .toc-row.card small { color: var(--gold-ink); letter-spacing: 0.12em; font-size: 9px; font-weight: 800; }
+.dz .toc-row.card .badge { font-size: 11px; padding: 5px 11px; border-radius: 999px; background: var(--soft); color: var(--ink); font-weight: 700; flex: 0 0 auto; }
+.dz .toc-node.is-open > .toc-row.card .badge { background: var(--surface); }
+.dz .toc-ico { width: 38px; height: 38px; border-radius: 12px; background: var(--soft); color: var(--ink); display: grid; place-items: center; flex: 0 0 auto; }
+.dz .toc-node.is-open > .toc-row.card .toc-ico { background: var(--surface); }
+.dz .toc-kids { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px 18px; padding-left: 14px; border-left: 2px solid var(--border); }
+[data-theme="dark"] .dz .toc-open { color: var(--gold); }
+.dz .toc-ico svg { width: 20px; height: 20px; }

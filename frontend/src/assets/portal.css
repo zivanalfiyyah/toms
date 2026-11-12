@@ -1,0 +1,41 @@
+/* Tema portal TOMS (navy + emas), mengikuti desain portal-toms.
+   Dimuat setelah main.css: menimpa token warna lama sehingga semua halaman ikut. */
+:root {
+  --navy: #04122e; --navy-2: #020a1c; --blue: #0b2a63; --gold: #c89840; --gold-2: #e2b866;
+  --gold-ink: #8a6416; --gold-soft: #fbf3e1;
+  --color-bg: #f4f6fa; --color-surface: #fff; --color-ink: #04122e; --color-ink-soft: #5a687f;
+  --color-text: #1d2c47; --color-border: #dfe4ed;
+  --color-accent: #0b2a63; --color-accent-strong: #c89840;
+  --color-accent-soft: #eef2f8; --color-accent-border: #cdd7e8;
+  --glass-bg: #fff; --glass-border: #dfe4ed; --nav-bg: #fff;
+  --shadow-card: 0 10px 30px rgba(4, 18, 46, 0.08);
+  --shadow-a: var(--shadow-card); --shadow-b: var(--shadow-card); --shadow-c: var(--shadow-card);
+  --input-bg: #fff; --btn-glow: 0 9px 20px rgba(200, 152, 64, 0.28); --well-bg: #f4f6fa;
+  --header-h: 78px; --shell: min(1240px, 100% - 48px);
+  --ink: #04122e; --muted: #5a687f; --text: #0a1a37; --border: #dfe4ed; --surface: #fff; --bg: #f4f6fa;
+  --soft: #eef2f8; --line: #0b2a63; --r: 16px; --yellow: #c89840; --sky: #1d4a9a;
+  --shadow: 0 10px 30px rgba(4, 18, 46, 0.10); --shadow-lg: 0 18px 48px rgba(4, 18, 46, 0.16);
+  --scene: url('/bg/hero-fallback.svg');
+}
+:root[data-theme='dark'] {
+  --navy: #0d2150; --gold-ink: #e2b866; --gold-soft: rgba(200, 152, 64, 0.16);
+  --color-bg: #040c1d; --color-surface: #0a1630; --color-ink: #fff; --color-ink-soft: #9fb0cc;
+  --color-text: #d6e0f2; --color-border: #1b2c50;
+  --color-accent: #e2b866; --color-accent-strong: #e2b866;
+  --color-accent-soft: rgba(200, 152, 64, 0.16); --color-accent-border: rgba(226, 184, 102, 0.38);
+  --glass-bg: #0a1630; --glass-border: #1b2c50; --nav-bg: rgba(4, 12, 29, 0.94);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --input-bg: rgba(255, 255, 255, 0.04); --btn-glow: 0 9px 20px rgba(0, 0, 0, 0.4); --well-bg: #0f1f3f;
+  --ink: #fff; --muted: #9fb0cc; --text: #eef2fa; --border: #1b2c50; --surface: #0a1630; --bg: #040c1d;
+  --soft: #0f1f3f; --line: #e6ecf8; --blue: #e2b866; --sky: #e2b866;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4); --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.5);
+}
+/* Latar polos seperti desain: matikan ornamen bus & garis dari tema lama */
+body::before, body::after { display: none !important; }
+::selection { background: var(--gold); color: var(--navy); }
+
+/* Hero & hero halaman naik ke bawah header transparan */
+.hero, .page-hero { margin-top: 0; }
+
+
+.shell { width: min(1240px, 100% - 48px); margin: 0 auto; }

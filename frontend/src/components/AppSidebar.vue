@@ -29,10 +29,13 @@ function scrollActiveIntoView() {
     // and sits earlier in the DOM, so a plain `.is-active` query would match
     // it first and stop there (it's usually already visible), skipping the
     // actual active page further down.
-    const el =
-      sidebarEl.value?.querySelector('.link.is-active') ||
-      sidebarEl.value?.querySelector('.category-link.is-active')
-    el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    const box = sidebarEl.value
+    const el = box?.querySelector('.ds-link.active') || box?.querySelector('.ds-cat.active')
+    if (!box || !el) return
+    // Hanya menggeser panel sidebar itu sendiri, bukan halaman utama.
+    const b = box.getBoundingClientRect()
+    const r = el.getBoundingClientRect()
+    box.scrollTo({ top: box.scrollTop + (r.top - b.top) - box.clientHeight / 2 + r.height / 2, behavior: 'smooth' })
   })
 }
 
@@ -44,138 +47,20 @@ watch(
 </script>
 
 <template>
-  <aside class="sidebar" ref="sidebarEl">
+  <aside class="docs-side" ref="sidebarEl" aria-label="Navigasi dokumentasi">
     <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
-    <ul class="category-nav">
-      <li class="category-item toc-item">
-        <router-link
-          to="/daftar-isi"
-          class="category-link"
-          :class="{ 'is-active': route.name === 'toc' }"
-          @click="$emit('navigate')"
-        >
-          <span class="category-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
-          </span>
-          Daftar Isi
+    <ul class="ds-cats">
+      <li>
+        <router-link to="/daftar-isi" class="ds-cat ds-toc" :class="{ active: route.name === 'toc' }" @click="$emit('navigate')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>Daftar Isi
         </router-link>
       </li>
-      <li v-for="cat in docsStore.categories" :key="cat.id" class="category-item">
-        <router-link
-          :to="`/docs/${cat.slug}`"
-          class="category-link"
-          :class="{ 'is-active': activeCategory?.id === cat.id }"
-          @click="$emit('navigate')"
-        >
-          <span v-if="icons[cat.icon]" v-html="icons[cat.icon]" class="category-icon"></span>
-          {{ cat.name }}
-        </router-link>
-
-        <ul v-if="activeCategory?.id === cat.id" class="page-list">
-          <SidebarPageItem
-            v-for="page in activeCategory.pages"
-            :key="page.id"
-            :category="activeCategory"
-            :page="page"
-            @navigate="$emit('navigate')"
-          />
+      <li v-for="cat in docsStore.categories" :key="cat.id">
+        <router-link :to="`/docs/${cat.slug}`" class="ds-cat" :class="{ active: activeCategory?.id === cat.id }" @click="$emit('navigate')">{{ cat.name }}</router-link>
+        <ul v-if="activeCategory?.id === cat.id && activeCategory.pages?.length" class="ds-pages">
+          <SidebarPageItem v-for="page in activeCategory.pages" :key="page.id" :category="activeCategory" :page="page" @navigate="$emit('navigate')" />
         </ul>
       </li>
     </ul>
   </aside>
 </template>
-
-<style scoped>
-.sidebar {
-  width: 255px; flex-shrink: 0; padding: 10px 9px 12px;
-  margin: 1.5rem 0 1.5rem 1.5rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 17px;
-  box-shadow: var(--shadow-a);
-  position: sticky; top: calc(var(--header-h) + 1.5rem); align-self: flex-start;
-  height: calc(100vh - var(--header-h) - 3rem); overflow-y: auto;
-}
-
-.category-nav { list-style: none; margin: 0 0 1.25rem; padding: 0; }
-.category-item { margin-bottom: 0.15rem; }
-.toc-item { padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--color-border); }
-.category-link {
-  display: flex; align-items: center; gap: 0.6rem;
-  min-height: 41px;
-  padding: 9px 12px;
-  border-radius: 9px;
-  border: 1px solid transparent;
-  color: var(--color-ink-soft);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.45;
-  text-decoration: none;
-}
-.category-link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
-.category-link.is-active {
-  color: var(--color-accent); font-weight: 750;
-  background: var(--color-accent-soft); border-color: var(--color-accent-border);
-}
-
-.category-icon { width: 15px; height: 15px; flex-shrink: 0; }
-.category-icon :deep(svg) { width: 100%; height: 100%; }
-
-
-.page-list {
-  list-style: none;
-  margin: 0.2rem 0 0.5rem 1rem;
-  padding: 0 0 0 0.4rem;
-  border-left: 1px solid var(--color-border);
-}
-.page-item { margin-bottom: 0.1rem; }
-.page-row { display: flex; align-items: center; }
-.link { display: block; padding: 0.4rem 0.6rem 0.4rem 1.2rem; border-radius: 9px; color: var(--color-ink-soft); font-size: 12px; line-height: 1.45; flex: 1; min-width: 0; }
-.link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
-.link.is-active {
-  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700;
-  border-left: 3px solid var(--color-accent); padding-left: calc(1.2rem - 3px);
-}
-
-.toggle-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; flex-shrink: 0;
-  background: none; border: none; cursor: pointer;
-  color: var(--color-ink-soft); border-radius: var(--radius);
-}
-.toggle-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); }
-.toggle-btn span { width: 12px; height: 12px; display: block; transition: transform 0.15s ease; }
-.toggle-btn :deep(svg) { width: 100%; height: 100%; }
-.toggle-btn.is-expanded span { transform: rotate(90deg); }
-
-.child-list { list-style: none; margin: 0.1rem 0 0.3rem; padding: 0; }
-.child-link {
-  display: block; padding: 0.32rem 0.6rem 0.32rem 2.1rem;
-  border-radius: var(--radius); color: var(--color-ink-soft); font-size: 0.78rem;
-}
-.child-link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
-.child-link.is-active {
-  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 600;
-  border-left: 3px solid var(--color-accent); padding-left: calc(2.1rem - 3px);
-}
-
-@media (max-width: 860px) {
-  .sidebar {
-    position: fixed; top: var(--header-h); left: 0; bottom: 0; width: 260px; z-index: 30;
-    height: auto; margin: 0; align-self: auto; border-radius: 0;
-    background: var(--color-surface); border: none; border-right: 1px solid var(--glass-border);
-    transform: translateX(-100%); transition: transform 0.2s ease; overflow-y: auto;
-  }
-  .sidebar.is-open { transform: translateX(0); }
-}
-
-.fetch-error {
-  margin: 0.5rem 0.75rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid #d33;
-  border-radius: var(--radius);
-  color: #d33;
-  font-size: 0.8rem;
-  background: rgba(211, 51, 51, 0.06);
-}
-</style>

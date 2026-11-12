@@ -1,210 +1,131 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocsStore } from '../stores/docs'
-import { icons } from '../icons'
+import { kpiAreas } from '../data/sample'
+import { storeToRefs } from 'pinia'
+import { usePortalStore } from '../stores/portal'
+import api from '../api'
+import HeroSearch from '../components/HeroSearch.vue'
+import LatestDocs from '../components/LatestDocs.vue'
+import { useAuthStore } from '../stores/auth'
 
-const docsStore = useDocsStore()
+const auth = useAuthStore()
+const portal = usePortalStore()
+portal.load()
+const { babTopics } = storeToRefs(portal)
+
 const router = useRouter()
+const docsStore = useDocsStore()
+const openIdx = ref(0)
 
 onMounted(() => {
   if (!docsStore.categories.length) docsStore.fetchCategories()
 })
 
-function goToFirstPage() {
-  const first = docsStore.categories[0]
-  if (first) router.push(`/docs/${first.slug}`)
+const cats = computed(() => docsStore.categories)
+const go = (to) => router.push(to)
+
+// Pencarian global dibuka lewat Ctrl/Cmd + K (didengar di App.vue)
+function openSearch() {
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))
 }
 
-function formatIndex(i) {
-  return String(i + 1).padStart(2, '0')
+// Pencarian populer: buka halaman yang judulnya cocok; jika tidak ada, buka kotak pencarian
+const popularTerms = ['SOP Keberangkatan', 'Safety Campaign', 'KPI dan SLA']
+function goPopular(term) {
+  const p = docsStore.flatPages.find((x) => (x.title || '').toLowerCase().includes(term.toLowerCase()))
+  if (p) router.push(`/docs/${p.categorySlug}/${p.fullPath}`)
+  else openSearch()
 }
+
+// Bab lampiran: bab yang namanya memuat formulir/lampiran; jika tidak ada, bab terakhir
+const annexCat = computed(() => cats.value.find((c) => /lampiran|formulir/i.test(c.name)) || cats.value[cats.value.length - 1] || null)
+const annexPages = computed(() => annexCat.value?.pages || [])
+const annexTo = computed(() => (annexCat.value ? `/docs/${annexCat.value.slug}` : '/daftar-isi'))
+
+// Topik pada panel bab: bisa string biasa atau { t, to } (tautan ke halaman relevan).
+const topicText = (t) => (typeof t === 'string' ? t : t.t)
+const topicTo = (t) => (typeof t === 'string' ? null : t.to || null)
+
+// Angka resmi dari server: bab, dan topik = bab + seluruh halaman (sama dengan Daftar Isi).
+const pub = ref(null)
+onMounted(() => {
+  api.get('/public-stats').then((r) => { pub.value = r.data }).catch(() => {})
+})
+
+const stats = computed(() => [
+  [pub.value?.categories_count ?? cats.value.length, 'Bab dokumentasi'],
+  [pub.value?.topics_count ?? docsStore.flatPages.length, 'Topik terdata'],
+  [annexPages.value.length, 'SOP & formulir lampiran'],
+  [kpiAreas.length, 'Area dashboard'],
+])
 </script>
 
-<style scoped>
-/* Hero selebar layar (full-bleed) di bawah navbar */
-.hero {
-  margin: -1.5rem calc(50% - 50vw) 0;
-  min-height: 440px;
-  display: flex; align-items: center; justify-content: center;
-  text-align: center;
-  padding: 60px 25px 35px;
-  background:
-    radial-gradient(circle at 15% 38%, rgba(62, 181, 244, 0.14), transparent 28%),
-    radial-gradient(circle at 85% 25%, rgba(62, 181, 244, 0.10), transparent 30%),
-    linear-gradient(180deg, #e7f6fd 0%, #f4faff 70%, #f8fbfd 100%);
-  border-bottom: 1px solid #e2edf4;
-}
-.hero-inner { max-width: 850px; }
-.pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 15px; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7); border: 1px solid #9bd5f5;
-  color: var(--color-accent); font-size: 11px; font-weight: 800;
-}
-.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #51b8ed; animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-.hero h1 {
-  font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -0.055em;
-  line-height: 1; margin: 25px 0 12px; color: var(--color-ink);
-}
-.gradient { color: var(--color-accent-strong); }
-.subtitle { color: #70849a; font-size: 15px; line-height: 1.75; max-width: 670px; margin: 0 auto; }
-
-.cta-group { display: flex; justify-content: center; gap: 11px; flex-wrap: wrap; margin-top: 29px; }
-.cta {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  height: 48px; padding: 0 23px; border-radius: 12px;
-  background: linear-gradient(135deg, #078bdc, #0879c2); color: #fff;
-  border: 1px solid #087fc7;
-  font-size: 13px; font-weight: 800; cursor: pointer;
-  box-shadow: var(--btn-glow);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-.cta:hover { transform: translateY(-1px); text-decoration: none; }
-.cta svg { width: 16px; height: 16px; }
-.cta-secondary {
-  background: var(--color-surface); color: #263a53;
-  border: 1px solid #d8e4ed; box-shadow: none;
-}
-.cta-secondary:hover { background: #f8fbfd; color: #263a53; }
-
-/* Daftar bab */
-.topics { max-width: 1110px; margin: 0 auto; padding: 48px 20px 30px; }
-.topic-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 25px; }
-.kicker { margin: 0 0 5px; color: var(--color-accent-strong); font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
-.topic-heading h2 { margin: 0; color: var(--color-ink); font-size: 29px; letter-spacing: -1px; }
-.topic-heading p { margin: 7px 0 0; color: var(--color-ink-soft); font-size: 13px; }
-.outline-btn {
-  border: 1px solid #d5e2eb; background: var(--color-surface); color: #177fbe;
-  padding: 10px 15px; border-radius: 10px; font-size: 11px; font-weight: 800; white-space: nowrap;
-}
-.outline-btn:hover { background: var(--color-bg); text-decoration: none; }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin: 0 auto;
-  max-width: 1110px;
-  padding: 0 20px;
-}
-.card {
-  display: flex; flex-direction: column; align-items: stretch;
-  min-height: 190px; padding: 21px; border-radius: 14px;
-  background: var(--color-surface); border: 1px solid var(--color-border);
-  box-shadow: 0 6px 18px rgba(30, 73, 106, 0.045);
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card:hover { text-decoration: none; border-color: #a8d8f3; transform: translateY(-2px); box-shadow: 0 13px 28px rgba(30, 73, 106, 0.09); }
-.card-top { display: flex; justify-content: space-between; align-items: center; }
-.card-eyebrow {
-  font-family: var(--font-body); font-size: 9px; font-weight: 900; letter-spacing: 1px;
-  padding: 5px 10px; border-radius: 7px;
-  color: #0582ce; background: #ebf7ff; border: 1px solid #bfe2f7;
-}
-.card-icon {
-  width: 34px; height: 34px; display: grid; place-items: center;
-  border-radius: 10px; background: #edf7ff; color: #087fc8;
-}
-.card-icon :deep(svg) { width: 17px; height: 17px; }
-.card-title { margin: 19px 0 7px; font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--color-ink); }
-.card-desc { font-size: 12px; color: var(--color-ink-soft); line-height: 1.7; }
-.card-footer {
-  display: flex; justify-content: flex-end; align-items: center;
-  margin-top: auto; padding-top: 13px; border-top: 1px solid #edf1f5;
-  font-size: 10px;
-}
-.card-desc + .card-footer, .card-title + .card-footer { margin-top: 18px; }
-.open-link { color: #087fc8; font-weight: 900; }
-
-/* Mode gelap */
-[data-theme='dark'] .hero {
-  background:
-    radial-gradient(circle at 20% 35%, rgba(0, 126, 210, 0.18), transparent 28%),
-    linear-gradient(180deg, #12283b, #0e1926);
-  border-bottom-color: #2a4054;
-}
-[data-theme='dark'] .pill { background: rgba(20, 37, 54, 0.7); border-color: #28536d; }
-[data-theme='dark'] .subtitle { color: #94a9bd; }
-[data-theme='dark'] .cta-secondary { background: #142536; border-color: #2b4054; color: #e9f3fd; }
-[data-theme='dark'] .cta-secondary:hover { background: #1a3044; color: #e9f3fd; }
-[data-theme='dark'] .outline-btn { background: #142536; border-color: #2b4054; color: #55b5eb; }
-[data-theme='dark'] .outline-btn:hover { background: #1a3044; }
-[data-theme='dark'] .card { box-shadow: none; }
-[data-theme='dark'] .card:hover { border-color: #3a6783; box-shadow: 0 13px 28px rgba(0, 0, 0, 0.3); }
-[data-theme='dark'] .card-eyebrow { color: #55b5eb; background: #17374f; border-color: #28536d; }
-[data-theme='dark'] .card-icon { background: #17374f; color: #55b5eb; }
-[data-theme='dark'] .card-footer { border-top-color: #2a4054; }
-[data-theme='dark'] .open-link { color: #55b5eb; }
-
-@media (max-width: 860px) {
-  .grid { grid-template-columns: 1fr; padding: 0 4px; }
-  .topics { padding: 36px 4px 24px; }
-  .topic-heading { display: block; }
-  .outline-btn { display: inline-block; margin-top: 13px; }
-}
-
-.fetch-error {
-  max-width: 620px;
-  margin: 1.5rem auto;
-  padding: 1rem 1.2rem;
-  border: 1px solid #d33;
-  border-radius: var(--radius);
-  color: #d33;
-  background: rgba(211, 51, 51, 0.06);
-}
-</style>
-
 <template>
-  <div class="home">
+  <div class="dz">
     <section class="hero">
-      <div class="hero-inner">
-        <div class="pill"><span class="dot"></span>Pusat Informasi &amp; Standard Operational Procedure</div>
-        <h1>Panduan <span class="gradient">TOMS</span></h1>
-        <p class="subtitle">
-          Semua yang perlu kamu tahu untuk menjalankan, mengelola, dan memelihara sistem TOMS —
-          disusun dalam satu tempat yang mudah ditelusuri.
-        </p>
-        <div class="cta-group">
-          <button class="cta" @click="goToFirstPage">
-            Mulai Membaca
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-          </button>
-          <router-link to="/daftar-isi" class="cta cta-secondary">Daftar Isi</router-link>
+      <div class="hero-shade"></div>
+      <div class="shell hero-content">
+        <div class="hero-copy">
+          <span class="hero-label"><i></i> TOMS KNOWLEDGE CENTER</span>
+          <h1>Panduan TOMS</h1>
+          <p>Pusat informasi SOP, kebijakan, KPI, SLA, dan standar operasional untuk mendukung layanan transportasi yang aman, profesional, dan terpercaya.</p>
+          <div class="search-wrap">
+            <HeroSearch />
+          </div>
+          <div class="hero-links"><span>Pencarian populer:</span><button v-for="t in popularTerms" :key="t" @click="goPopular(t)">{{ t }}</button></div>
+        </div>
+        <div class="hero-status"><span>STATUS OPERASIONAL</span><div><b>98.7%</b><p>Ketepatan jadwal<br><strong>Hari ini</strong></p></div><hr><small><i></i> Data contoh, belum terhubung</small></div>
+      </div>
+    </section>
+
+    <section class="stats-strip">
+      <div class="shell">
+        <div v-for="(s, i) in stats" :key="s[1]"><span>0{{ i + 1 }}</span><b>{{ s[0] }}</b><p>{{ s[1] }}</p></div>
+      </div>
+    </section>
+
+    <section class="section shell">
+      <div class="section-head"><div><h2>Topik Dokumentasi</h2><p>Pilih bab yang ingin kamu pelajari. Setiap bab berisi panduan lengkap.</p></div><button class="text-btn" @click="go('/daftar-isi')">Lihat Semua Bab <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button></div>
+      <div class="bab-acc">
+        <div v-for="(bab, i) in babTopics" :key="bab.title" class="bab-acc-item" :class="{ open: openIdx === i }">
+          <button class="bab-acc-head" :id="`bab-h-${i}`" :aria-expanded="openIdx === i" :aria-controls="`bab-p-${i}`" @click="openIdx = openIdx === i ? -1 : i"><span class="bab-acc-no">{{ String(i + 1).padStart(2, '0') }}</span><span class="bab-acc-title">{{ bab.title }}</span><span class="bab-acc-act"><span class="bab-acc-lbl">{{ openIdx === i ? 'Tutup' : 'Lihat Detail' }}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></span></button>
+          <div class="bab-acc-panel" :id="`bab-p-${i}`" role="region" :aria-labelledby="`bab-h-${i}`"><div class="bab-acc-inner"><div class="bab-acc-card">
+            <p class="bab-acc-goal"><strong>Tujuan: </strong>{{ bab.goal }}</p>
+            <ul><li v-for="(t, k) in bab.topics" :key="k"><router-link v-if="topicTo(t)" :to="topicTo(t)">{{ topicText(t) }}</router-link><template v-else>{{ topicText(t) }}</template></li></ul>
+            <small>{{ bab.topics.length }} topik dalam bab ini</small>
+          </div></div></div>
         </div>
       </div>
     </section>
 
-    <div class="topics">
-      <div class="topic-heading">
-        <div>
-          <p class="kicker">Daftar Bab</p>
-          <h2>Topik Dokumentasi</h2>
-          <p>Pilih bab yang ingin kamu pelajari. Setiap bab berisi panduan lengkap.</p>
-        </div>
-        <router-link to="/daftar-isi" class="outline-btn">Lihat Semua Bab &rarr;</router-link>
+    <section v-if="auth.isLoggedIn" class="section shell latest-docs">
+      <div class="section-head"><div><span class="eyebrow">AUDIT DOKUMEN</span><h2>Dokumen Terbaru</h2><p>Kategori dan halaman yang baru ditambahkan atau diperbarui, lengkap dengan nomor revisi.</p></div><button class="text-btn" @click="go('/dokumen-terbaru')">Lihat Semua <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button></div>
+      <LatestDocs :limit="6" />
+    </section>
+
+    <section v-if="annexCat" class="section latest-section">
+      <div class="shell"><div class="annex">
+        <div class="annex-side"><span class="eyebrow">LAMPIRAN</span><h2>{{ annexCat.name }}</h2><p>{{ annexCat.description || 'Dokumen pendukung operasional.' }}</p><div class="annex-count"><b>{{ annexPages.length }}</b><span>dokumen</span></div><button class="annex-link" @click="go(`/docs/${annexCat.slug}`)">Lihat semua lampiran<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button></div>
+        <ol class="annex-list">
+          <li v-for="(p, i) in annexPages.slice(0, 7)" :key="p.id"><button class="annex-row" @click="go(`/docs/${annexCat.slug}/${p.slug}`)"><i>{{ String(i + 1).padStart(2, '0') }}</i><span>{{ p.title }}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button></li>
+          <li v-if="annexPages.length > 7"><button class="annex-row more" @click="go(`/docs/${annexCat.slug}`)"><i>+</i><span>{{ annexPages.length - 7 }} dokumen lainnya</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button></li>
+        </ol>
+      </div></div>
+    </section>
+
+    <section class="section shell quick-layout">
+      <div>
+        <div class="section-head"><div><span class="eyebrow">AKSES LANGSUNG</span><h2>Akses Cepat</h2><p>Jalur singkat menuju layanan yang paling sering digunakan.</p></div></div>
+        <div class="quick-grid"><button @click="go('/daftar-isi')"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h8l4 4v16H6z"></path><path d="M14 2v5h5M9 12h6M9 16h6"></path></svg></span><span><b>Daftar Isi</b><small>Telusuri seluruh bab</small></span></button><button @click="go('/dashboard')"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10m6 10V4m6 16v-7m5 7H2"></path></svg></span><span><b>Dashboard Kinerja</b><small>Pantau KPI &amp; SLA</small></span></button><button @click="go(annexTo)"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l1 3h3v16H5V6h3z"></path><path d="m8 13 2 2 5-5M9 3v3h6V3"></path></svg></span><span><b>SOP Lampiran</b><small>Formulir &amp; checklist</small></span></button><button @click="go('/informasi')"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span><span><b>Informasi</b><small>Pengumuman &amp; revisi</small></span></button><button @click="go('/faq')"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.5 2.5 0 1 1 3.8 2.1c-1 .6-1.5 1.1-1.5 2.4M12 17h.01"></path></svg></span><span><b>Pusat Bantuan</b><small>Temukan jawaban cepat</small></span></button><button @click="go('/bantuan')"><span class="cat-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 21h20L12 3Z"></path><path d="M12 9v5m0 3h.01"></path></svg></span><span><b>Laporkan Kendala</b><small>Hubungi tim dukungan</small></span></button></div>
       </div>
-    </div>
-
-    <div v-if="docsStore.error" class="fetch-error">{{ docsStore.error }}</div>
-
-    <div class="grid">
-      <router-link
-        v-for="(cat, i) in docsStore.categories"
-        :key="cat.id"
-        :to="`/docs/${cat.slug}`"
-        class="card"
-        :class="`tone-${i % 3}`"
-      >
-        <div class="card-top">
-          <span class="card-eyebrow">BAB {{ formatIndex(i) }}</span>
-          <span v-if="icons[cat.icon]" class="card-icon" v-html="icons[cat.icon]"></span>
-        </div>
-        <span class="card-title">{{ cat.name }}</span>
-        <span v-if="cat.description" class="card-desc">{{ cat.description }}</span>
-        <div class="card-footer"><span class="open-link">Buka Bab &rarr;</span></div>
-      </router-link>
-    </div>
+      <aside class="notice-card"><span class="eyebrow light">PENGUMUMAN UTAMA</span><h3>Safety Campaign<br>“Zero Preventable Accident”</h3><p>Perkuat budaya keselamatan melalui inspeksi harian, defensive driving, dan pelaporan proaktif.</p><button @click="go('/informasi')">Baca pengumuman <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"></path></svg></button><div class="road-lines"></div></aside>
+    </section>
   </div>
 </template>
+
+<style>
+.dz .fetch-error { margin: 0 0 1rem; padding: 1rem 1.2rem; border: 1px solid #d33; border-radius: 12px; color: #d33; background: rgba(211, 51, 51, 0.06); }
+.dz .bab-open { font-weight: 800; color: var(--gold-2); }
+</style>

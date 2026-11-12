@@ -5,27 +5,21 @@ import { icons } from '../icons'
 const themeStore = useThemeStore()
 </script>
 
+<template>
+  <button class="toggle" @click="themeStore.toggle()" :aria-label="themeStore.dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'">
+    <span class="ic" v-html="themeStore.dark ? icons.sun : icons.moon"></span>
+    <span class="lbl">{{ themeStore.dark ? 'Light' : 'Dark' }}</span>
+  </button>
+</template>
 
 <style scoped>
 .toggle {
-  display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--color-ink-soft);
-  transition: 0.18s ease;
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px;
+  border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 999px;
+  cursor: pointer; color: var(--color-ink); font: inherit; font-size: 12px; font-weight: 700; transition: 0.18s ease;
 }
-.toggle:hover { color: var(--color-accent); border-color: #a8d7f3; background: var(--color-bg); }
-[data-theme='dark'] .toggle { color: var(--color-accent); border-color: var(--color-accent-border); }
-[data-theme='dark'] .toggle:hover { background: #1a3044; }
-.toggle span { width: 18px; height: 18px; display: block; }
-.toggle :deep(svg) { width: 100%; height: 100%; }
+.toggle:hover { border-color: var(--gold); }
+.ic { width: 17px; height: 17px; display: block; }
+.ic :deep(svg) { width: 100%; height: 100%; }
+@media (max-width: 760px) { .lbl { display: none; } .toggle { padding: 0 10px; } }
 </style>
-
-<template>
-    <button class="toggle" @click="themeStore.toggle()" :aria-label="themeStore.dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'">
-        <span v-html="themeStore.dark ? icons.sun : icons.moon"></span>
-    </button>
-</template>

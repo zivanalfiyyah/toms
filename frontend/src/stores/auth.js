@@ -12,6 +12,8 @@ export const useAuthStore = defineStore('auth', {
 
     roleNames: (state) => (state.user?.roles || []).map((r) => r.name ?? r),
 
+    isAdmin: (state) => (state.user?.roles || []).map((r) => r.name ?? r).includes('admin'),
+
     canEdit: (state) => {
       const roles = (state.user?.roles || []).map((r) => r.name ?? r)
       return roles.includes('admin') || roles.includes('editor')
@@ -24,14 +26,26 @@ export const useAuthStore = defineStore('auth', {
       const user = res.data.user
       const roles = (user?.roles || []).map((r) => r.name ?? r)
 
-      if (!roles.includes('admin') && !roles.includes('editor')) {
-        throw { response: { data: { message: 'Akun ini tidak memiliki akses untuk masuk ke sistem.' } } }
-      }
-
       this.token = res.data.token
       this.user = user
       localStorage.setItem('token', this.token)
       localStorage.setItem('user', JSON.stringify(this.user))
+    },
+
+    // Daftar akun baru: berstatus menunggu sampai disetujui admin (tanpa verifikasi email).
+    async register({ name, email, company_code, password, password_confirmation }) {
+      const res = await api.post('/register', { name, email, company_code, password, password_confirmation })
+      return res.data
+    },
+
+    async updateProfile(name) {
+      const res = await api.put('/me', { name })
+      this.user = res.data
+      localStorage.setItem('user', JSON.stringify(this.user))
+    },
+
+    async updatePassword(current_password, password, password_confirmation) {
+      await api.put('/me/password', { current_password, password, password_confirmation })
     },
 
     async fetchMe() {

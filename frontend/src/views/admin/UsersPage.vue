@@ -1,8 +1,10 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useAdminStore } from '../../stores/admin'
+import { useAuthStore } from '../../stores/auth'
 
 const admin = useAdminStore()
+const auth = useAuthStore()
 
 const ROLE_OPTIONS = ['admin', 'editor', 'viewer']
 
@@ -75,6 +77,23 @@ async function removeUser(user) {
   }
 }
 
+const STATUS = { approved: 'Aktif', pending: 'Menunggu', rejected: 'Ditolak' }
+function statusLabel(s) { return STATUS[s || 'approved'] || s }
+async function approve(u) {
+  try { await admin.approveUser(u.id) } catch (e) { admin.error = e.response?.data?.message || 'Gagal menyetujui akun.' }
+}
+async function reject(u) {
+  if (!confirm(`Tolak pendaftaran ${u.email}?`)) return
+  try { await admin.rejectUser(u.id) } catch (e) { admin.error = e.response?.data?.message || 'Gagal menolak akun.' }
+}
+
+function currentRole(u) { return (u.roles || []).map((r) => r.name ?? r)[0] || 'viewer' }
+function badgeClass(u) { const st = u.status || 'approved'; return st === 'approved' ? 'active' : st === 'pending' ? 'pending' : '' }
+async function changeRole(u, role) {
+  try { await admin.updateUser(u.id, { name: u.name, email: u.email, role }) }
+  catch (e) { admin.error = e.response?.data?.message || 'Gagal mengubah peran.' }
+}
+
 function roleLabel(user) {
   return (user.roles || []).map((r) => r.name ?? r).join(', ') || '-'
 }
@@ -89,30 +108,36 @@ function roleLabel(user) {
 
     <p v-if="admin.error" class="error">{{ admin.error }}</p>
 
-    <div class="table-wrap">
-      <table v-if="admin.users.length">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="u in admin.users" :key="u.id">
-            <td>{{ u.name }}</td>
-            <td>{{ u.email }}</td>
-            <td><span class="badge">{{ roleLabel(u) }}</span></td>
-            <td class="actions">
-              <button class="btn-link" @click="openEdit(u)">Edit</button>
-              <button class="btn-link danger" @click="removeUser(u)">Hapus</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-else-if="admin.usersLoading">Memuat...</p>
-      <p v-else class="empty">Belum ada pengguna.</p>
+    <div class="adm-card">
+      <div class="adm-scroll">
+        <table v-if="admin.users.length" class="adm-table">
+          <thead>
+            <tr><th>Pengguna</th><th>Email</th><th>Peran</th><th>Status</th><th>Aksi</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="u in admin.users" :key="u.id">
+              <td><b>{{ u.name }}</b><small v-if="u.created_at">daftar {{ String(u.created_at).slice(0, 10) }}</small></td>
+              <td>{{ u.email }}</td>
+              <td>
+                <select class="adm-select sm" :value="currentRole(u)" :disabled="u.id === auth.user?.id" @change="changeRole(u, $event.target.value)">
+                  <option v-for="r in ROLE_OPTIONS" :key="r" :value="r">{{ r.charAt(0).toUpperCase() + r.slice(1) }}</option>
+                </select>
+              </td>
+              <td><span class="adm-badge" :class="badgeClass(u)">{{ statusLabel(u.status) }}</span></td>
+              <td>
+                <div class="adm-acts">
+                  <button v-if="u.status === 'approved' || !u.status" class="link-btn" :disabled="u.id === auth.user?.id" @click="reject(u)">Nonaktifkan</button>
+                  <button v-else-if="u.status === 'rejected'" class="link-btn" @click="approve(u)">Aktifkan</button>
+                  <button class="link-btn" @click="openEdit(u)">Edit</button>
+                  <button class="link-btn danger" :disabled="u.id === auth.user?.id" @click="removeUser(u)">Hapus</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p v-else-if="admin.usersLoading" class="adm-help">Memuat...</p>
+        <p v-else class="adm-help">Belum ada pengguna.</p>
+      </div>
     </div>
 
     <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
@@ -192,6 +217,8 @@ tr:last-child td { border-bottom: none; }
   padding: 0.15rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700;
 }
 
+.badge.st-pending { background: rgba(245, 158, 11, .12); color: #b45309; border-color: rgba(245, 158, 11, .4); }
+.badge.st-rejected { background: rgba(239, 68, 68, .1); color: #dc2626; border-color: rgba(239, 68, 68, .4); }
 .empty { padding: 1.5rem; color: var(--color-ink-soft); font-size: 0.85rem; }
 
 .modal-overlay {

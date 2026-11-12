@@ -54,30 +54,21 @@ function toggle() {
 </script>
 
 <template>
-  <li class="page-item">
-    <div class="page-row">
-      <router-link
-        :to="to"
-        class="link"
-        :class="{ 'is-active': isActive }"
-        :style="{ paddingLeft: `${1.2 + depth * 0.9}rem` }"
-        @click="$emit('navigate')"
-      >
-        {{ page.title }}
-      </router-link>
+  <li class="ds-item">
+    <div class="ds-row">
+      <router-link :to="to" class="ds-link" :class="{ active: isActive }" :style="{ paddingLeft: `${10 + depth * 14}px` }" @click="$emit('navigate')">{{ page.title }}</router-link>
       <button
         v-if="page.children?.length"
         type="button"
-        class="toggle-btn"
-        :class="{ 'is-expanded': state.expanded }"
+        class="ds-toggle"
         :aria-expanded="state.expanded"
         :aria-label="state.expanded ? 'Tutup subbab' : 'Buka subbab'"
         @click="toggle"
       >
-        <span v-html="icons.chevron"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="{ transform: state.expanded ? 'rotate(90deg)' : 'none' }"><path d="m9 18 6-6-6-6"></path></svg>
       </button>
     </div>
-    <ul v-if="page.children?.length && state.expanded" class="child-list">
+    <ul v-if="page.children?.length && state.expanded" class="ds-children">
       <SidebarPageItem
         v-for="child in page.children"
         :key="child.id"
@@ -90,30 +81,3 @@ function toggle() {
     </ul>
   </li>
 </template>
-
-<style scoped>
-.page-item { margin-bottom: 0.1rem; }
-.page-row { display: flex; align-items: center; }
-.link {
-  display: block; padding: 0.35rem 0.6rem 0.35rem 1.2rem; border-radius: 9px;
-  color: var(--color-ink-soft); font-size: 12px; line-height: 1.45; flex: 1; min-width: 0;
-}
-.link:hover { background: var(--color-accent-soft); color: var(--color-accent); text-decoration: none; }
-.link.is-active {
-  background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700;
-  border-left: 3px solid var(--color-accent);
-}
-
-.toggle-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; flex-shrink: 0;
-  background: none; border: none; cursor: pointer;
-  color: var(--color-ink-soft); border-radius: var(--radius);
-}
-.toggle-btn:hover { background: var(--color-accent-soft); color: var(--color-accent); }
-.toggle-btn span { width: 12px; height: 12px; display: block; transition: transform 0.15s ease; }
-.toggle-btn :deep(svg) { width: 100%; height: 100%; }
-.toggle-btn.is-expanded span { transform: rotate(90deg); }
-
-.child-list { list-style: none; margin: 0.1rem 0 0.3rem; padding: 0; }
-</style>

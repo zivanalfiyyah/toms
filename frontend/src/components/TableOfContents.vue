@@ -1,15 +1,15 @@
 <template>
-  <aside v-if="props.headings.length" class="toc">
-    <p class="toc-title">Pada halaman ini</p>
+  <aside v-if="props.headings.length" class="docs-toc" aria-label="Pada halaman ini">
+    <p class="docs-toc-title">Pada halaman ini</p>
     <ul class="toc-tree" ref="tocTreeEl">
       <li v-for="h in props.headings" :key="h.id">
-        <a :href="`#${h.id}`" :title="h.text" :class="{ active: activeId === h.id }" @click="scrollToHeading(h.id, $event)">{{ h.text }}</a>
-        <ul v-if="h.children.length" class="sub">
+        <a :href="`#${h.id}`" :title="h.text" class="dt-link" :class="{ active: activeId === h.id }" @click="scrollToHeading(h.id, $event)">{{ h.text }}</a>
+        <ul v-if="h.children.length" class="dt-sub">
           <li v-for="c in h.children" :key="c.id">
-            <a :href="`#${c.id}`" :title="c.text" :class="{ active: activeId === c.id }" @click="scrollToHeading(c.id, $event)">{{ c.text }}</a>
-            <ul v-if="c.children.length" class="sub-sub">
+            <a :href="`#${c.id}`" :title="c.text" class="dt-link" :class="{ active: activeId === c.id }" @click="scrollToHeading(c.id, $event)">{{ c.text }}</a>
+            <ul v-if="c.children.length" class="dt-sub">
               <li v-for="g in c.children" :key="g.id">
-                <a :href="`#${g.id}`" :title="g.text" :class="{ active: activeId === g.id }" @click="scrollToHeading(g.id, $event)">{{ g.text }}</a>
+                <a :href="`#${g.id}`" :title="g.text" class="dt-link" :class="{ active: activeId === g.id }" @click="scrollToHeading(g.id, $event)">{{ g.text }}</a>
               </li>
             </ul>
           </li>
@@ -165,155 +165,9 @@ watch(
 )
 </script>
 
-<style scoped>
-.toc {
-  width: 225px;
-  flex-shrink: 0;
-  padding: 16px 15px;
-  position: sticky;
-  top: calc(var(--header-h) + 1.5rem);
-  align-self: flex-start;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 17px;
-  box-shadow: var(--shadow-b);
-  font-family: var(--font-body);
-  /* Batasi tinggi TOC ke sisa ruang viewport (dikurangi offset sticky-nya
-     dan sedikit padding bawah) supaya kalau heading-nya sangat banyak,
-     TOC tidak mendorong/melewati batas layar — cukup list-nya sendiri
-     yang scroll (lihat .toc-tree di bawah), judul tetap diam di atas. */
-  max-height: calc(100vh - var(--header-h) - 3rem);
-  display: flex;
-  flex-direction: column;
-}
-
-/* 1. Judul + Garis Pembatas Atas */
-.toc-title {
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.15px;
-  color: var(--color-ink);
-  margin: 0 0 0.5rem 0;
-  padding: 3px 0 14px;
-  border-bottom: 1px solid var(--color-border);
-  flex-shrink: 0; /* Judul tidak boleh ikut mengecil/kepotong saat list di bawahnya scroll */
-}
-
-/* 2. Daftar Menu + Garis Vertikal Lurus Sebelah Kiri */
-.toc-tree, 
-.toc-tree .sub,
-.toc-tree .sub-sub {
-  list-style: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.toc-tree {
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0; /* Perlu supaya flex child ini benar-benar mau menyusut & scroll, bukan memaksa .toc melebihi max-height-nya */
-
-  /* Scrollbar tipis & halus (Firefox) */
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
-
-/* Scrollbar tipis & halus (Chrome/Edge/Safari) */
-.toc-tree::-webkit-scrollbar {
-  width: 5px;
-}
-.toc-tree::-webkit-scrollbar-track {
-  background: transparent;
-}
-.toc-tree::-webkit-scrollbar-thumb {
-  background-color: var(--color-border);
-  border-radius: 3px;
-}
-.toc-tree::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-ink-soft);
-}
-
-.toc-tree li {
-  margin: 0 !important;
-  padding: 0 !important;
-  list-style-type: none !important;
-}
-
-/* 3. Link Menu Utama */
-.toc-tree a {
-  --indent: 0px;
-  position: relative;
-  display: block;
-  padding: 8px 0 8px calc(18px + var(--indent));
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-ink-soft);
-  text-decoration: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color 0.15s ease;
-  background: transparent;
-}
-
-/* Titik penanda di kiri tiap judul; terisi saat judul sedang aktif */
-.toc-tree a::before {
-  content: '';
-  position: absolute;
-  left: var(--indent);
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  transform: translateY(-50%);
-  border: 2px solid #cfdbe5;
-  border-radius: 50%;
-}
-[data-theme='dark'] .toc-tree a::before { border-color: #3a566d; }
-
-.toc-tree a:hover {
-  color: var(--color-accent);
-}
-
-.toc-tree a.active {
-  color: var(--color-accent);
-  font-weight: 800;
-}
-.toc-tree a.active::before {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  box-shadow: inset 0 0 0 2px var(--color-surface);
-}
-
-/* 4. Sub Menu / Anak Menu (H2 di bawah H1) */
-.toc-tree .sub a {
-  --indent: 12px; /* menjorok ke dalam */
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-ink-soft);
-}
-
-.toc-tree .sub a.active {
-  color: var(--color-accent);
-  font-weight: 700;
-}
-
-/* 5. Sub-sub Menu (H3 di bawah H2) — menjorok sedikit lebih dalam lagi,
-   TAPI tidak sedrastis sebelumnya (2.35rem) supaya sisa ruang teks di
-   sidebar yang sempit tidak terlalu terpotong */
-.toc-tree .sub-sub a {
-  --indent: 24px;
-  font-size: 10.5px;
-  font-weight: 400;
-  color: var(--color-ink-soft);
-}
-
-.toc-tree .sub-sub a.active {
-  color: var(--color-accent);
-  font-weight: 600;
-}
-
-@media (max-width: 1100px) {
-  .toc { display: none; }
-}
+<style>
+.dz .dt-link { text-decoration: none; }
+.dz .dt-link:hover { background: var(--soft); color: var(--ink); }
+.dz .dt-link.active { background: var(--gold-soft); color: var(--ink); font-weight: 800; }
+.dz .dt-sub { list-style: none; margin: 0; padding: 0 0 0 12px; }
 </style>
