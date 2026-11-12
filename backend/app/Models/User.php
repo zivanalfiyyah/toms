@@ -25,6 +25,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
+        'approved_at',
+        'approved_by',
     ];
 
     /**
@@ -42,10 +45,21 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function isApproved(): bool
+    {
+        return ($this->status ?? 'approved') === 'approved';
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'approved_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

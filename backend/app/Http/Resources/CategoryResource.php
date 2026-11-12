@@ -14,16 +14,21 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $authed = $request->user('sanctum') !== null;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'icon' => $this->icon,
             'slug' => $this->slug,
-            'content' => $this->content,
-            'content_html' => $this->content_html,
+            'content' => $authed ? $this->content : null,
+            'content_html' => $authed ? $this->content_html : null,
             'parent_id' => $this->parent_id,
             'order' => $this->order,
+            'revision' => (int) ($this->revision ?: 1),
+            'revision_label' => 'Rev. 1.'.max(0, ((int) ($this->revision ?: 1)) - 1),
+            'updated_at' => $this->updated_at,
             'children' => CategoryResource::collection($this->whenLoaded('children')),
             'pages' => PageResource::collection($this->whenLoaded('pages')),
         ];

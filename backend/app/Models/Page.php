@@ -20,6 +20,11 @@ class Page extends Model
 
     ];
 
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

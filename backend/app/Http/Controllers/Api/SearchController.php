@@ -26,7 +26,9 @@ class SearchController extends Controller
             ->limit(20)
             ->get();
 
-        $results = $pages->map(function ($page) {
+        $authed = $request->user('sanctum') !== null;
+
+        $results = $pages->map(function ($page) use ($authed) {
             $categorySlug = $page->category ? $page->category->slug : '';
 
             if ($page->parent_id && $page->parent) {
@@ -40,7 +42,7 @@ class SearchController extends Controller
             return [
                 'id' => $page->id,
                 'title' => $page->title,
-                'snippet' => Str::limit($page->content_text ?? '', 100),
+                'snippet' => $authed ? Str::limit($page->content_text ?? '', 100) : '',
                 'path' => $path, 
                 'status' => $page->status,
             ];

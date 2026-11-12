@@ -54,9 +54,14 @@ class PageController extends Controller
         return new PageResource($page, 201);
     }
 
-    public function show(Page $page)
+    public function show(Request $request, Page $page)
     {
-        return new PageResource($page->load('category', 'creator', 'updater', 'children'));
+        $page->load('category', 'creator', 'updater', 'children')->loadCount('likes');
+        // Rute ini publik; token opsional dipakai untuk menandai halaman yang sudah disukai.
+        $user = $request->user('sanctum');
+        $page->liked = $user ? $page->likes()->where('user_id', $user->id)->exists() : false;
+
+        return new PageResource($page);
     }
 
     public function update(Request $request, Page $page)

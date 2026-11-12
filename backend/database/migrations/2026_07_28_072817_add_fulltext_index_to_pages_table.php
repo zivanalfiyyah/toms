@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Fulltext hanya didukung MySQL/MariaDB/PostgreSQL (SQLite dipakai untuk tes).
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('pages', function (Blueprint $table) {
             $table->fullText(['title', 'content_text']);
         });
@@ -21,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
+
         Schema::table('pages', function (Blueprint $table) {
             $table->dropFullText(['title', 'content_text']);
         });

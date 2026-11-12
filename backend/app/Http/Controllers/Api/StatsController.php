@@ -19,4 +19,20 @@ class StatsController extends Controller
             'children_count' => Page::whereNotNull('parent_id')->count(),
         ]);
     }
+
+    /**
+     * Angka ringkas untuk Beranda (publik). "Topik terdata" memakai hitungan yang
+     * sama dengan Daftar Isi: setiap bab + seluruh halaman di semua level (sama dengan data /categories).
+     */
+    public function publicStats()
+    {
+        $categories = Category::count();
+        $pages = Page::count();
+
+        return response()->json([
+            'categories_count' => $categories,
+            'pages_count' => $pages,
+            'topics_count' => $categories + $pages,
+        ]);
+    }
 }
